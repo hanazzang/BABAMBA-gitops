@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-root-app # 클러스터를 구분하기 위해 이름을 명확히 함
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yoooooungwoon/gitops
+    targetRevision: HEAD
+    path: applicationsets # ApplicationSet 파일들이 모여있는 곳
+  destination:
+    server: https://kubernetes.default.svc # 현재 클러스터 자기 자신
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

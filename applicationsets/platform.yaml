@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-infrastructure
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list: # [1] 클러스터 목록 (고정)
+              - cluster: onprem-dev
+                url: https://kubernetes.default.svc
+                base_path: clusters/onprem/dev/platform
+              - cluster: onprem-prod
+                url: https://kubernetes.default.svc
+                base_path: clusters/onprem/prod/platform
+              - cluster: cloud-prod
+                url: https://kubernetes.default.svc
+                base_path: clusters/cloud/prod/platform
+          - git: # [2] 해당 클러스터의 platform 폴더 내부만 스캔
+              repoURL: https://github.com/yoooooungwoon/gitops
+              revision: HEAD
+              directories:
+                # {{base_path}} 변수를 사용하여 다른 클러스터나 apps 폴더 침범 차단
+                - path: '{{base_path}}/*' 
+  template:
+    metadata:
+      name: '{{cluster}}-{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/yoooooungwoon/gitops
+        targetRevision: HEAD
+        path: 'platform/{{path.basename}}'
+        helm:
+          valueFiles:
+            - '{{path}}/values.yaml'
+      destination:
+        server: '{{url}}'
+        namespace: '{{path.basename}}' 
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        createNamespace: true

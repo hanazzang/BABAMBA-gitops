@@ -1,0 +1,7 @@
+apiVersion: v2
+name: envoygateway-deployment
+version: 1.0.0
+dependencies:
+  - name: envoygateway-wrapper
+    version: 1.0.0
+    repository: "file://../../charts/envoygateway" # 상대 경로로 charts 참조
