@@ -1,0 +1,41 @@
+# 1. DB 정보를 읽을 수 있는 '역할' 정의 (Role)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: db-access-role
+rules:
+- apiGroups: [""] # Core API 그룹
+  resources: ["secrets", "configmaps"]
+  resourceNames: ["db-credentials", "db-config"] # 딱 이 이름의 자원만 허용
+  verbs: ["get", "list", "watch"]
+---
+# 2. Auth 서버에 DB 권한 부여 (RoleBinding)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: auth-db-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: auth-sa # 1단계에서 만든 이름
+  namespace: default
+roleRef:
+  kind: Role
+  name: db-access-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# 3. Employee 서버에 DB 권한 부여 (RoleBinding)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: employee-db-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: employee-sa # 1단계에서 만든 이름
+  namespace: default
+roleRef:
+  kind: Role
+  name: db-access-role
+  apiGroup: rbac.authorization.k8s.io
