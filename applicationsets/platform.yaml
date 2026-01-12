@@ -29,18 +29,27 @@ spec:
       name: '{{cluster}}-{{path.basename}}'
     spec:
       project: default
-      source:
-        repoURL: https://github.com/yoooooungwoon/gitops
-        targetRevision: HEAD
-        path: 'platform/{{path.basename}}'
-        helm:
-          valueFiles:
-            - '{{path}}/values.yaml'
+      # 1️⃣ 단일 source 대신 sources(복수형)를 사용합니다.
+      sources:
+        # [A] 헬름 차트 엔진 (Stage 3 폴더 가리키기)
+        - repoURL: https://github.com/yoooooungwoon/gitops
+          targetRevision: HEAD
+          path: 'charts/{{path.basename}}' 
+          helm:
+            # 💡 핵심: $values-repo라는 별칭을 앞에 붙여서 헬름의 경로 제약을 뚫습니다.
+            valueFiles:
+              - '$values-repo/platform/{{path.basename}}/values.yaml' # Stage 2: 공통 설정
+              - '$values-repo/{{path}}/values.yaml'                  # Stage 4: 개별 설정
+        
+        # [B] 설정 데이터 참조용 가상 소스 (리포지토리 루트 가리키기)
+        - repoURL: https://github.com/yoooooungwoon/gitops
+          targetRevision: HEAD
+          ref: values-repo # 👈 위에서 사용할 별칭 이름
+          
       destination:
         server: '{{url}}'
-        namespace: '{{path.basename}}' 
+        namespace: '{{path.basename}}'
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-        createNamespace: true
