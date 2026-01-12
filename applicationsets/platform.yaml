@@ -8,6 +8,7 @@ spec:
     - matrix:
         generators:
           - list: # [1] 클러스터 목록 (고정)
+              elements:
               - cluster: onprem-dev
                 url: https://kubernetes.default.svc
                 base_path: clusters/onprem/dev/platform
