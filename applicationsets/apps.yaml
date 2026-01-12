@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: business-applications
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list: # [1] 클러스터 목록
+              - cluster: onprem-dev
+                url: https://kubernetes.default.svc
+                base_path: clusters/onprem/dev/apps
+              #- cluster: onprem-prod
+              #  url: https://kubernetes.default.svc
+              #  base_path: clusters/onprem/prod/apps
+              #- cluster: cloud-prod
+              #  url: https://kubernetes.default.svc
+              #  base_path: clusters/cloud/prod/apps
+          - git: # [2] 해당 클러스터의 apps 폴더 내부만 스캔
+              repoURL: https://github.com/yoooooungwoon/gitops
+              revision: HEAD
+              directories:
+                - path: '{{base_path}}/*'
+  template:
+    metadata:
+      name: '{{cluster}}-{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/yoooooungwoon/gitops
+        targetRevision: HEAD
+        path: 'charts/{{path.basename}}' # 비즈니스 앱은 charts/ 폴더 참조
+        helm:
+          valueFiles:
+            - '{{path}}/values.yaml'
+      destination:
+        server: '{{url}}'
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        createNamespace: true
