@@ -1,0 +1,32 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: app-developer-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/portforward"] # 포트 포워딩 추가
+  verbs: ["get", "list", "watch", "create"] # create는 port-forward 실행 시 필요
+- apiGroups: [""]
+  resources: ["services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "patch"] # 앱 재배포 가능
+- apiGroups: ["monitoring.coreos.com"] # Prometheus 관련 설정 조회
+  resources: ["servicemonitors"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: app-developer-binding
+  namespace: default
+subjects:
+- kind: User
+  name: app-developer # 클러스터 사용자 이름
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: app-developer-role
+  apiGroup: rbac.authorization.k8s.io

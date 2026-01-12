@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: fastapi-monitor
+  namespace: monitoring        # 프로메테우스가 설치된 네임스페이스
+  labels:
+    app.kubernetes.io/instance: monitoring
+    release: monitoring  # 중요: 설치된 Prometheus 릴리즈 이름과 일치해야 함
+spec:
+  selector:
+    matchLabels:
+      app: fastapi-app         # 아까 kubectl label로 붙인 서비스 라벨과 일치
+  namespaceSelector:
+    matchNames:
+      - default                # FastAPI 서비스들이 떠 있는 네임스페이스
+  endpoints:
+  - port: http                 # 서비스 YAML의 ports.name이 'http'여야 함 (없으면 아래 설명 참조)
+    path: /metrics             # FastAPI Instrumentator가 지표를 뱉는 경로
+    interval: 15s              # 15초마다 수집
+    honorLabels: true
+  - targetPort: 5000
+    path: /metrics
+    interval: 15s
+  - targetPort: 5001
+    path: /metrics
+    interval: 15s
+  - targetPort: 5002
+    path: /metrics
+    interval: 15s
+  - targetPort: 5003
+    path: /metrics
+    interval: 15s

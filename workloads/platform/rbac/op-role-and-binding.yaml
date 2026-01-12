@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-operator-role
+rules:
+# 1. 노드 및 스토리지 관리 (Proxmox 사이트 관리용)
+- apiGroups: [""]
+  resources: ["nodes", "persistentvolumes", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "patch", "update"] # 노드 라벨링(사이트 구분) 가능
+
+# 2. 모든 네임스페이스의 워크로드 관리
+- apiGroups: ["apps", "extensions"]
+  resources: ["deployments", "replicasets", "statefulsets"]
+  verbs: ["*"] # 모든 제어 가능
+
+# 3. 보안 및 설정 관리 (Secret, ConfigMap)
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["*"] # DB 비번 등 민감 정보 수정 가능
+
+# 4. 오토스케일링 및 정책 관리
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["*"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies", "ingresses"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: operator-global-binding
+subjects:
+- kind: User
+  name: "admin-user" # 운영자 유저 이름
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-operator-role
+  apiGroup: rbac.authorization.k8s.io
