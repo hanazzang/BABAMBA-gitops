@@ -12,13 +12,7 @@ spec:
               - cluster: onprem-dev
                 url: https://kubernetes.default.svc
                 base_path: clusters/onprem/dev/apps
-              #- cluster: onprem-prod
-              #  url: https://kubernetes.default.svc
-              #  base_path: clusters/onprem/prod/apps
-              #- cluster: cloud-prod
-              #  url: https://kubernetes.default.svc
-              #  base_path: clusters/cloud/prod/apps
-          - git: # [2] 해당 클러스터의 apps 폴더 내부만 스캔
+          - git: # [2] 해당 클러스터의 apps 폴더 내부 스캔
               repoURL: https://github.com/yoooooungwoon/gitops
               revision: HEAD
               directories:
@@ -28,13 +22,22 @@ spec:
       name: '{{cluster}}-{{path.basename}}'
     spec:
       project: default
-      source:
-        repoURL: https://github.com/yoooooungwoon/gitops
-        targetRevision: HEAD
-        path: 'charts/{{path.basename}}' # 비즈니스 앱은 charts/ 폴더 참조
-        helm:
-          valueFiles:
-            - '{{path}}/values.yaml'
+      # 1️⃣ 다중 소스 적용: 차트와 설정을 분리해서 가져옵니다.
+      sources:
+        # [A] 엔진: 비즈니스 앱 공통 차트 (charts/ 폴더)
+        - repoURL: https://github.com/yoooooungwoon/gitops
+          targetRevision: HEAD
+          path: 'charts/{{path.basename}}'
+          helm:
+            valueFiles:
+              # $values-repo 별칭을 사용하여 clusters 하위의 values.yaml을 참조합니다.
+              - '$values-repo/{{path}}/values.yaml'
+        
+        # [B] 설정: 리포지토리 루트 참조용 별칭 정의
+        - repoURL: https://github.com/yoooooungwoon/gitops
+          targetRevision: HEAD
+          ref: values-repo
+          
       destination:
         server: '{{url}}'
         namespace: '{{path.basename}}'
@@ -42,4 +45,5 @@ spec:
         automated:
           prune: true
           selfHeal: true
-        createNamespace: true
+        syncOptions: # 2️⃣ syncPolicy 하위의 syncOptions로 이동 (정석 문법)
+          - CreateNamespace=true
