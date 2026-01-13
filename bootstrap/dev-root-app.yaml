@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/yoooooungwoon/gitops
     targetRevision: HEAD
-    path: applicationsets # ApplicationSet 파일들이 모여있는 곳
+    path: . # repo 루트
   destination:
     server: https://kubernetes.default.svc # 현재 클러스터 자기 자신
     namespace: argocd
