@@ -1,3 +1,0 @@
-envoy-gateway:
-  # 하위 차트(공식 차트)의 설정값을 제어할 때 사용합니다.
-  enabled: true

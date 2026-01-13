@@ -1,9 +1,0 @@
-apiVersion: v2
-name: envoygateway-wrapper
-description: Envoy Gateway wrapper chart
-type: application
-version: 1.0.0
-dependencies:
-  - name: envoy-gateway
-    version: v1.6.1 # 설치하고 싶은 버전
-    repository: https://charts.envoyproxy.io/
