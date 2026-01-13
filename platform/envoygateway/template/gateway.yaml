@@ -1,7 +1,8 @@
+{{- range $name, $gw := .Values.gateways }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: api-gateway
+  name: {{ $name }}-gateway
   namespace: envoy-gateway-system
 spec:
   gatewayClassName: envoy-gateway-class
@@ -13,23 +14,6 @@ spec:
         namespaces:
           from: Selector
           selector:
-            matchLabels:
-              network-zone: backend # 이 라벨이 있는 NS의 Route만 허용
+{{ toYaml $gw.allowedNamespaces | indent 12 }}
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: admin-gateway
-  namespace: envoy-gateway-system
-spec:
-  gatewayClassName: envoy-gateway-class
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              network-zone: monitoring # 이 라벨이 있는 NS의 Route만 허용
+{{- end }}

@@ -1,0 +1,10 @@
+gateways:
+  api:
+    allowedNamespaces:
+      matchLabels:
+        network-zone: backend
+
+  admin:
+    allowedNamespaces:
+      matchLabels:
+        network-zone: monitoring
