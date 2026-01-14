@@ -1,0 +1,7 @@
+gateway:
+  namespace: gateway
+  gatewayClassName: envoy
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
