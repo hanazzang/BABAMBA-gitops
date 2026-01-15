@@ -15,7 +15,7 @@ spec:
       serviceAccountName: photo-sa
       containers:
       - name: photo-service
-        image: hyunhojang/photo_service:v2.02
+        image: ghcr.io/hanazzang/photo_service:sha-36c997e
         ports:
         - containerPort: 5003
         volumeMounts:
