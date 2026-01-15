@@ -1,16 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-root-app # 클러스터를 구분하기 위해 이름을 명확히 함
+  name: onprem-dev-root-app
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/yoooooungwoon/gitops
     targetRevision: HEAD
-    path: . # repo 루트
+    path: .
+    directory:
+      recurse: true
+      include: '{applications/onprem-dev/*.yaml,applicationsets/onprem-dev/*.yaml}'
   destination:
-    server: https://kubernetes.default.svc # 현재 클러스터 자기 자신
+    server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:
