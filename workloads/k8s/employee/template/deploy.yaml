@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: employee-server
+  template:
+    metadata:
+      labels:
+        app: employee-server
+    spec:
+      serviceAccountName: employee-sa
+      containers:
+      - name: employee-server
+        image: hyunhojang/employee_server:v2.02
+        ports:
+        - containerPort: 5002
+        envFrom:
+        - configMapRef:
+            name: db-config
+        - secretRef:
+            name: db-credentials
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
