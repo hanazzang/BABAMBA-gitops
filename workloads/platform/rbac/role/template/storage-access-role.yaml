@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: photo-storage-role
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  resourceNames: ["photo-pvc"] # photo-pvc에 대해서만 권한 부여
+  verbs: ["get", "list", "watch"]

@@ -16,17 +16,3 @@ rules:
 - apiGroups: ["monitoring.coreos.com"] # Prometheus 관련 설정 조회
   resources: ["servicemonitors"]
   verbs: ["get", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: app-developer-binding
-  namespace: default
-subjects:
-- kind: User
-  name: app-developer # 클러스터 사용자 이름
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: Role
-  name: app-developer-role
-  apiGroup: rbac.authorization.k8s.io
