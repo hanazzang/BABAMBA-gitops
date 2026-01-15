@@ -15,7 +15,7 @@ spec:
       serviceAccountName: auth-sa
       containers:
       - name: auth-server
-        image: ghcr.io/hanazzang/auth_server:sha-36c997e
+        image: ghcr.io/hanazzang/auth_server:sha-96f166a
         ports:
         - containerPort: 5001
         envFrom:
