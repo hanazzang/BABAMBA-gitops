@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-resources
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/yoooooungwoon/gitops
+        revision: HEAD
+        directories:
+          - path: clusters/onprem/dev/platform/*
+  template:
+    metadata:
+      name: 'onprem-dev-{{path.basename}}'
+    spec:
+      project: default
+      sources:
+        - repoURL: https://github.com/yoooooungwoon/gitops
+          targetRevision: HEAD
+          path: platform/{{path.basename}}
+          helm:
+            valueFiles:
+              - $values/platform/{{path.basename}}/values.yaml
+              - $values/{{path}}/values.yaml
+        - repoURL: https://github.com/yoooooungwoon/gitops
+          targetRevision: HEAD
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+          - CreateNamespace=true
