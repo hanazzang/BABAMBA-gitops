@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: onprem-dev-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: argos
+        directories:
+          - path: clusters/onprem/dev/apps/*
+  template:
+    metadata:
+      name: 'onprem-dev-{{path.basename}}'
+    spec:
+      project: default
+
+      sources:
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: argos
+          path: charts/{{path.basename}}
+          helm:
+            valueFiles:
+              - $values/{{path}}/values.yaml
+
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: argos
+          ref: values
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{path.basename}}
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+          - CreateNamespace=true
