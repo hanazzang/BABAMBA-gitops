@@ -1,3 +1,4 @@
+<pre>
 gitops/
 ├── README.md
 │
@@ -108,3 +109,4 @@ gitops/
         └── prod/
             ├── apps/
             └── platform/
+</pre>
