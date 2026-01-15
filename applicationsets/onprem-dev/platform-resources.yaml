@@ -6,7 +6,7 @@ metadata:
 spec:
   generators:
     - git:
-        repoURL: https://github.com/yoooooungwoon/gitops
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: HEAD
         directories:
           - path: clusters/onprem/dev/platform/*
@@ -16,14 +16,14 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: https://github.com/yoooooungwoon/gitops
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: HEAD
           path: platform/{{path.basename}}
           helm:
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
-        - repoURL: https://github.com/yoooooungwoon/gitops
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: HEAD
           ref: values
       destination:
