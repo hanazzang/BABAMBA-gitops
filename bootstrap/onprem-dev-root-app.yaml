@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/yoooooungwoon/gitops
-    targetRevision: HEAD
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: argos
     path: .
     directory:
       recurse: true
