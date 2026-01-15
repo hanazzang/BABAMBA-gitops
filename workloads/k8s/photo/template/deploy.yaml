@@ -32,16 +32,3 @@ spec:
       - name: photo-storage
         persistentVolumeClaim:
           claimName: photo-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: photo-service
-  labels:
-    app: fastapi-app
-spec:
-  ports:
-    - name: http
-      port: 5003
-  selector:
-    app: photo-service
