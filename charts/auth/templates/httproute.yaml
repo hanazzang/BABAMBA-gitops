@@ -5,7 +5,7 @@ metadata:
   namespace: auth
 spec:
   parentRefs:
-    - name: main-gateway
+    - name: service-gateway
       namespace: gateway
   rules:
     - matches:

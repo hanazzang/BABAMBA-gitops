@@ -1,0 +1,15 @@
+{{- range .Values.namespaces }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .name | quote }}
+{{- if .annotations }}
+  annotations:
+{{ toYaml .annotations | nindent 4 }}
+{{- end }}
+{{- if .labels }}
+  labels:
+{{ toYaml .labels | nindent 4 }}
+{{- end }}
+---
+{{- end }}
