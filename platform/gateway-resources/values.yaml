@@ -1,5 +1,5 @@
 gateway:
-  name: main-gateway
+  name: service-gateway
   namespace: gateway
   gatewayClassName: envoy
 
@@ -7,12 +7,9 @@ gateway:
     - name: http
       port: 80
       protocol: HTTP
-      hostname: null
-
-    - name: https
-      port: 443
-      protocol: HTTPS
-      hostname: null
-      tls:
-        mode: Terminate
-        secretName: wildcard-tls   # dev에서는 없어도 됨(HTTPS listener를 끄거나 secret 만들면 됨)
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: user
