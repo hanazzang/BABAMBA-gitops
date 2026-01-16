@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos
+    targetRevision: jw-dev
     path: .
     directory:
       recurse: true
