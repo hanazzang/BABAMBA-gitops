@@ -1,32 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-server
+  name: {{ include "auth-server.fullname" . }}
+  labels:
+    {{- include "auth-server.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: auth-server
+      app: {{ include "auth-server.fullname" . }}
   template:
     metadata:
       labels:
-        app: auth-server
+        app: {{ include "auth-server.fullname" . }}
+        {{- include "auth-server.labels" . | nindent 8 }}
     spec:
-      serviceAccountName: auth-sa
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       containers:
-      - name: auth-server
-        image: ghcr.io/hanazzang/auth_server:sha-758193e
-        ports:
-        - containerPort: 5001
-        envFrom:
-        - configMapRef:
-            name: db-config
-        - secretRef:
-            name: db-credentials
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "200m"
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
+        - name: {{ include "auth-server.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.envFrom.configMapRef.name }}
+            - secretRef:
+                name: {{ .Values.envFrom.secretRef.name }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
