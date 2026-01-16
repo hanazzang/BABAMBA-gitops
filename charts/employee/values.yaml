@@ -1,0 +1,19 @@
+# values.yaml
+replicaCount: 1
+
+image:
+  repository: jaewoozzang/employee_server
+  pullPolicy: Always
+  tag: "v1.0"
+
+service:
+  type: ClusterIP
+  port: 5002
+
+containerPort: 5002
+
+# 참조할 ConfigMap과 Secret 이름
+configs:
+  dbConfig: db-config
+  redisConfig: redis-config
+  dbCredentials: db-credentials

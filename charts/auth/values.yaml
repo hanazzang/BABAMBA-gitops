@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: hyunhojang/auth_server
+  repository: ghcr.io hyunhojang/auth_server
   tag: v2.02
   pullPolicy: IfNotPresent
 
