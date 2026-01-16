@@ -1,0 +1,35 @@
+replicaCount: 1
+
+image:
+  repository: hyunhojang/auth_server
+  tag: v2.02
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  name: auth-sa
+
+service:
+  port: 5001
+  targetPort: 5001
+
+envFrom:
+  configMapRef:
+    name: db-config
+  secretRef:
+    name: db-credentials
+
+resources:
+  limits:
+    memory: "512Mi"
+    cpu: "200m"
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 3
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70
