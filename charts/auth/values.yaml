@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: hyunhojang/auth_server
-  tag: v2.02
+  repository: ghcr.io/hanazzang/auth_server
+  tag: "sha-96f166a"
   pullPolicy: IfNotPresent
 
 serviceAccount:

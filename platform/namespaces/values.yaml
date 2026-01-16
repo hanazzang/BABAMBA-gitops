@@ -1,0 +1,25 @@
+namespaces:
+  - name: gateway
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+      argocd.argoproj.io/sync-options: Prune=false
+    labels:
+      purpose: gateway
+
+  - name: auth
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      gateway: user
+
+  - name: employee
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      gateway: user
+
+  - name: photo
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      gateway: user
