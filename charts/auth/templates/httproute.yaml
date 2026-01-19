@@ -5,7 +5,9 @@ metadata:
   namespace: auth
 spec:
   parentRefs:
-    - name: service-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: service-gateway
       namespace: gateway
   rules:
     - matches:
@@ -13,5 +15,7 @@ spec:
             type: PathPrefix
             value: /auth
       backendRefs:
-        - name: auth-server
-          port: 5001
+          - group: ""
+            kind: Service
+            name: auth-server
+            port: 5001
