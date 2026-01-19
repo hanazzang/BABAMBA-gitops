@@ -5,6 +5,9 @@ image:
   tag: "sha-96f166a"
   pullPolicy: IfNotPresent
 
+imagePullSecrets:
+  - name: ghcr-pull
+
 serviceAccount:
   name: auth-sa
 
