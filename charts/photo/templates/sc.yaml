@@ -1,0 +1,18 @@
+# templates/sc.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: photo-ceph-sc
+provisioner: rbd.csi.ceph.com # Ceph CSI 드라이버 이름 확인 필요
+parameters:
+  clusterID: {{ .Values.ceph.clusterId }}
+  pool: {{ .Values.ceph.poolName }}
+  imageFormat: "2"
+  imageFeatures: layering
+  csi.storage.k8s.io/provisioner-secret-name: ceph-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: {{ .Release.Namespace }}
+  csi.storage.k8s.io/node-stage-secret-name: ceph-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: {{ .Release.Namespace }}
+  csi.storage.k8s.io/fstype: ext4
+reclaimPolicy: Retain
+allowVolumeExpansion: true

@@ -1,0 +1,12 @@
+# templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: photo-service
+spec:
+  ports:
+    - name: http
+      port: 5003
+      targetPort: 5003
+  selector:
+    app: photo-service
