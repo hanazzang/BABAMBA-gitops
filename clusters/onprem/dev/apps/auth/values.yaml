@@ -3,8 +3,8 @@ replicaCount: 1
 
 # ===== 이미지 (환경별 핵심 값) =====
 image:
-  repository: hyunhojang/auth_server
-  tag: v2.02
+  repository: ghcr.io/hanazzang/auth_server
+  tag: "sha-96f166a"
   pullPolicy: IfNotPresent
 
 # ===== 서비스 계정 =====
