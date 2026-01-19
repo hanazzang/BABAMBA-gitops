@@ -19,3 +19,4 @@ spec:
             kind: Service
             name: auth-server
             port: 5001
+            weight: 1
