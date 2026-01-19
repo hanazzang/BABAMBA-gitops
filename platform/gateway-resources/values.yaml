@@ -13,3 +13,15 @@ gateway:
           selector:
             matchLabels:
               gateway: user
+
+envoyProxy:
+  name: envoy-gw-infra
+  namespace: envoy-gateway-system
+
+  replicas: 2
+
+  service:
+    type: ClusterIP
+
+  podLabels:
+    app: envoy-gw-dataplane
