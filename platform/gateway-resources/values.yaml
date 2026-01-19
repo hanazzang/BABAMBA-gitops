@@ -17,11 +17,15 @@ gateway:
 envoyProxy:
   name: envoy-gw-infra
   namespace: envoy-gateway-system
-
   replicas: 2
-
   service:
     type: ClusterIP
-
   podLabels:
     app: envoy-gw-dataplane
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: proxy
