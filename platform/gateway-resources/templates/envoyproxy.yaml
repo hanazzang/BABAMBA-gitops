@@ -1,13 +1,37 @@
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyProxy
 metadata:
-  name: envoy-gw-infra
-  namespace: envoy-gateway-system
-  annotations:
-    argocd.argoproj.io/sync-wave: "-6"
+  name: {{ .Values.envoyProxy.name | quote }}
+  namespace: {{ .Values.envoyProxy.namespace | quote }}
 spec:
   provider:
     type: Kubernetes
     kubernetes:
+      replicas: {{ .Values.envoyProxy.replicas }}
+
       envoyService:
-        type: ClusterIP
+        type: {{ .Values.envoyProxy.service.type | quote }}
+
+      envoyDeployment:
+        podTemplate:
+          metadata:
+            labels:
+{{- toYaml .Values.envoyProxy.podLabels | nindent 14 }}
+          spec:
+            affinity:
+              podAntiAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    topologyKey: kubernetes.io/hostname
+                    labelSelector:
+                      matchLabels:
+{{- toYaml .Values.envoyProxy.podLabels | nindent 24 }}
+
+            topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
+              labelSelector:
+                matchLabels:
+{{- toYaml .Values.envoyProxy.podLabels | nindent 18 }}
