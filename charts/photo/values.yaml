@@ -1,0 +1,31 @@
+# values.yaml
+replicaCount: 1
+
+image:
+  repository: ghcr.io/hanazzang/photo_service
+  tag: "sha-36c997e"
+  pullPolicy: IfNotPresent
+
+ceph:
+  clusterId: "a269e86e-85ca-4b9c-a56d-a6a540a6a224"
+  poolName: "ceph-pool"
+  userId: "proxmox"
+  userKey: "AQB93m1pwxgEMRAADHaUzgK2HrZVkyZ4Du5l+Q=="
+  monitors:
+    - 10.10.10.101:6789 # 실제 Ceph Monitor IP로 수정 필요
+    - 10.10.10.103:6789
+    - 10.10.10.104:6789
+
+resources:
+  limits:
+    memory: "512Mi"
+    cpu: "200m"
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 3
+  cpuTarget: 70
+  memoryTarget: 50
