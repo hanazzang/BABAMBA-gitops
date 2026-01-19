@@ -11,13 +11,18 @@ spec:
   source:
     repoURL: https://argoproj.github.io/argo-helm
     chart: argo-rollouts
-    targetRevision: 2.40.5   # ← 네가 본 공식 차트 버전
+    targetRevision: 2.40.5
     helm:
       releaseName: argo-rollouts
       values: |
         installCRDs: true
         controller:
           replicas: 1
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /spec/preserveUnknownFields
   syncPolicy:
     automated:
       prune: true
