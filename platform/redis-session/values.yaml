@@ -1,0 +1,6 @@
+service:
+  name: redis-sentinel-service
+  port: 26379
+
+sentinels:
+  - ip: 192.168.90.84

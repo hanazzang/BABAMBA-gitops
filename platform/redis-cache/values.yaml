@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: redis
+  tag: "7"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 6379
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 100m
+  limits:
+    memory: 300Mi
+    cpu: 200m
+
+redis:
+  maxmemory: "256mb"
+  maxmemoryPolicy: "allkeys-lru"
