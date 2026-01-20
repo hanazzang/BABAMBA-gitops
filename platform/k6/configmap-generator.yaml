@@ -6,14 +6,6 @@ configMapGenerator:
   - name: k6-scenario-config
     files:
       - k6/photo-load-test.js
-  - name: locust-scenario-config
-    files:
-      - locust/locustfile.py
 
 # 생성된 ConfigMap이 배포될 기본 네임스페이스 설정
-namespace: platform-test-tools
-
-# ArgoCD가 리소스를 추적할 수 있도록 공통 레이블 추가
-commonLabels:
-  managed-by: kustomize
-  app: test-scenarios
+namespace: k6

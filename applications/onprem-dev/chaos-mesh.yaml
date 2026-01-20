@@ -13,6 +13,7 @@ spec:
       values: |
         chaosDaemon:
           runtime: containerd # 사용하는 런타임에 맞게 수정 (containerd/docker)
+          socketPath: /run/containerd/containerd.sock
   destination:
     server: https://kubernetes.default.svc
     namespace: chaos-mesh
