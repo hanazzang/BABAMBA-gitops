@@ -1,9 +1,9 @@
 replicaCount: 1
-
 image:
   repository: ghcr.io/hanazzang/auth_server
   tag: "sha-96f166a"
   pullPolicy: IfNotPresent
+
 
 imagePullSecrets:
   - name: ghcr-pull
@@ -36,3 +36,6 @@ autoscaling:
     averageUtilization: 50
   memory:
     averageUtilization: 70
+
+autoscaling:
+  enabled: true
