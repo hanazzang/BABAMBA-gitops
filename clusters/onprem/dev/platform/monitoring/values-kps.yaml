@@ -1,3 +1,6 @@
+crds:
+  enabled: false
+
 grafana:
   enabled: true
   service:
@@ -31,4 +34,4 @@ alertmanager:
   alertmanagerSpec:
     replicas: 1
 
-# kube-state-metrics / node-exporter 등은 기본 포함(보통 그대로 OK)
+# kube-state-metrics / node-exporter 등은 기본 포함
