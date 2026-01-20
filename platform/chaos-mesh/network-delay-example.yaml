@@ -4,12 +4,7 @@ metadata:
   name: photo-network-delay-schedule
   namespace: chaos-mesh
 spec:
-  # 1. 스케줄 설정 (매 분 실행)
   schedule: '@every 1m'
-  historyLimit: 2
-  concurrencyPolicy: "Forbid"
-  
-  # 2. 실행할 카오스 타입 설정
   type: 'NetworkChaos'
   networkChaos:
     action: delay
@@ -22,4 +17,4 @@ spec:
     delay:
       latency: '100ms'
       correlation: '100'
-    duration: '30s' # 한 번 실행 시 지속 시간
+    duration: '30s'
