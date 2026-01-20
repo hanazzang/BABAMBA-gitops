@@ -7,9 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   parentRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: service-gateway
+    - name: service-gateway
       namespace: gateway
   rules:
     - matches:
@@ -17,13 +15,9 @@ spec:
             type: PathPrefix
             value: /employee
       backendRefs:
-          - group: ""
-            kind: Service
-            name: employee-server-stable
-            port: 5002
-            weight: 100
-          - group: ""
-            kind: Service
-            name: employee-server-canary
-            port: 5002
-            weight: 0
+        - name: employee-server-stable
+          port: 5002
+          weight: 100
+        - name: employee-server-canary
+          port: 5002
+          weight: 0
