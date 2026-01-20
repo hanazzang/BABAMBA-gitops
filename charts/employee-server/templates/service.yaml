@@ -1,0 +1,16 @@
+# templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "employee-server.fullname" . }}
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.containerPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "employee-server.selectorLabels" . | nindent 4 }}
