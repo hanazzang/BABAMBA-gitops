@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos
+    targetRevision: hyunho
     path: .
     directory:
       recurse: true
