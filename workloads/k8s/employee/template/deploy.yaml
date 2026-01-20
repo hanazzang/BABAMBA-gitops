@@ -15,7 +15,7 @@ spec:
       serviceAccountName: employee-sa
       containers:
       - name: employee-server
-        image: ghcr.io/hanazzang/employee_server:sha-96f166a
+        image: ghcr.io/hanazzang/employee_server:sha-758193e
         ports:
         - containerPort: 5002
         envFrom:
