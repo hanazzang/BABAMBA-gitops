@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "employee-server.fullname" . }}-stable
   annotations:
-  argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "0"
   labels:
     {{- include "employee-server.labels" . | nindent 4 }}
 spec:
