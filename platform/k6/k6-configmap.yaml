@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-scenario-config
+  namespace: k6
+data:
+  photo-load-test.js: |
+    import http from 'k6/http';
+    import { sleep } from 'k6';
+
+    export default function () {
+      http.get('http://photo-service/photos');
+      sleep(1);
+    }
