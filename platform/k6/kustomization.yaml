@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# 시나리오 파일들을 ConfigMap으로 자동 변환
 configMapGenerator:
   - name: k6-scenario-config
     files:
@@ -10,5 +9,4 @@ configMapGenerator:
 generatorOptions:
   disableNameHash: true
 
-# 생성된 ConfigMap이 배포될 기본 네임스페이스 설정
 namespace: k6
