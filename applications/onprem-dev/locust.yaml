@@ -9,14 +9,6 @@ spec:
     - repoURL: https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/
       targetRevision: 0.32.12
       chart: locust
-      helm:
-        values: |
-          loadtest:
-            name: photo-service-test
-            locust_locustfile_configmap: locust-scenario-config
-            locust_locustfile: locustfile.py
-          worker:
-            replicaCount: 2
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
       targetRevision: stress
       path: platform/locust
