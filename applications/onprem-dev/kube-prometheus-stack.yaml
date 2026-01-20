@@ -15,7 +15,6 @@ spec:
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
       # 버전은 고정 추천
-      # 70.xx-73.xx버전이 안정화&최신 버전
       targetRevision: 80.13.3
       helm:
         valueFiles:
