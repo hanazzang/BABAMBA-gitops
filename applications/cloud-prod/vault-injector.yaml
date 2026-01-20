@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault-injector
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: vault
+    repoURL: https://helm.releases.hashicorp.com
+    targetRevision: 0.28.0
+    helm:
+      values: |
+        server:
+          enabled: false
+
+        injector:
+          enabled: true
+
+        global:
+          externalVaultAddr: "https://192.168.1.102:8200"  # 우선 IP로
+
+        # (테스트용) 셀프사인이라면: 이건 chart value로도 가능한데,
+        # 실제 secret fetch는 Pod annotation의 tls-skip-verify로 해결하는 게 일반적
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
