@@ -1,4 +1,3 @@
-# templates/deployment.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -31,7 +30,7 @@ spec:
             - secretRef:
                 name: {{ .Values.configs.dbCredentials }}
 
-    strategy:
+  strategy:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
       canaryService: {{ include "employee-server.fullname" . }}-canary
