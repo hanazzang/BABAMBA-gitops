@@ -17,6 +17,11 @@ spec:
       backendRefs:
           - group: ""
             kind: Service
-            name: auth-server
+            name: auth-server-stable
             port: 5001
-            weight: 1
+            weight: 100
+          - group: ""
+            kind: Service
+            name: auth-server-canary
+            port: 5001
+            weight: 0
