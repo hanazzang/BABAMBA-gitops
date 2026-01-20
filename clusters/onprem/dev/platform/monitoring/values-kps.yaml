@@ -7,6 +7,7 @@ grafana:
     type: NodePort
     nodePort: 32300
 
+  # 로그인 강제 + 계정 생성 금지
   grafana.ini:
     auth.anonymous:
       enabled: false
@@ -14,7 +15,13 @@ grafana:
       allow_sign_up: false
       allow_org_create: false
 
-  adminPassword: "admin123"   # dev니까 임시 OK(운영에선 Secret)
+  # admin 비번은 Secret에서만
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
+
+  # adminPassword: "admin123"   # dev니까 임시 OK(운영에선 Secret)
 
 prometheus:
   prometheusSpec:
