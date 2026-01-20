@@ -17,3 +17,6 @@ configs:
   dbConfig: db-config
   redisConfig: redis-config
   dbCredentials: db-credentials
+
+  imagePullSecrets:
+  - name: ghcr-pull
