@@ -19,11 +19,11 @@ spec:
       backendRefs:
           - group: ""
             kind: Service
-            name: employee-server-stable
-            port: 5002
+            name: {{ include "employee-server.fullname" . }}-stable
+            port: {{ .Values.service.port }}
             weight: 100
           - group: ""
             kind: Service
-            name: employee-server-canary
-            port: 5002
+            name: {{ include "employee-server.fullname" . }}-canary
+            port: {{ .Values.service.port }}
             weight: 0
