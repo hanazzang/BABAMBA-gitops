@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: locust
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/
+    targetRevision: 0.32.12
+    chart: locust
+    helm:
+      values: |
+        loadtest:
+          name: photo-service-test
+          locust_locustfile_configmap: locust-scenario-config
+          locust_locustfile: locustfile.py
+          users: 100
+        worker:
+          replicaCount: 2
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: locust
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

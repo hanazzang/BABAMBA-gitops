@@ -1,0 +1,19 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: photo-network-delay
+  namespace: chaos-mesh
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - photo
+    labelSelectors:
+      'app.kubernetes.io/name': 'photo-service'
+  delay:
+    latency: '100ms'
+    correlation: '100'
+  duration: '30s'
+  scheduler:
+    cron: '@every 1m'
