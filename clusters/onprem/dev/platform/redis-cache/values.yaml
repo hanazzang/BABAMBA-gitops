@@ -1,0 +1,13 @@
+# cluster-onprem/apps/redis-cache/values.yaml
+replicaCount: 1
+
+resources:
+  limits:
+    memory: 1Gi
+
+redis:
+  maxmemory: "768Mi"
+  maxmemory-policy: allkeys-lru
+  
+nodeSelector:
+  role: cache
