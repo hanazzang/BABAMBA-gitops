@@ -13,6 +13,12 @@ spec:
 {{- if .hostname }}
       hostname: {{ .hostname | quote }}
 {{- end }}
+
+{{- if .allowedRoutes }}
+      allowedRoutes:
+{{ toYaml .allowedRoutes | nindent 8 }}
+{{- end }}
+
 {{- if and .tls .tls.mode }}
       tls:
         mode: {{ .tls.mode | quote }}
