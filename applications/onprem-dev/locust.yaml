@@ -19,7 +19,7 @@ spec:
             replicaCount: 2
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
       targetRevision: stress
-      path: clusters/platform/locust
+      path: platform/locust
 
   destination:
     server: https://kubernetes.default.svc
