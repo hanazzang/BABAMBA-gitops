@@ -1,6 +1,6 @@
 # templates/deployment.yaml
-apiVersion: apps/v1
-kind: rollout
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
   labels:
