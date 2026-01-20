@@ -13,13 +13,12 @@ spec:
     namespace: monitoring  # CRD는 클러스터 스코프라 ns 의미는 거의 없음
 
   source:
-    repoURL: https://prometheus-community.github.io/helm-charts
-    chart: kube-prometheus-stack
-    targetRevision: 80.13.3
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: monitoring2
+    path: platform/kps-crds/crds
 
   syncPolicy:
     automated: {}
     syncOptions:
-      - ServerSideApply=true
       - ServerSideApply=true
       - Replace=true
