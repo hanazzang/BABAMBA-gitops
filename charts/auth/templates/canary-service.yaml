@@ -9,6 +9,7 @@ metadata:
 spec:
   ports:
     - name: http
+      protocol: TCP
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:

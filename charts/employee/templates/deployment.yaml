@@ -1,6 +1,6 @@
 # templates/deployment.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
   labels:
@@ -30,3 +30,23 @@ spec:
                 name: {{ .Values.configs.redisConfig }}
             - secretRef:
                 name: {{ .Values.configs.dbCredentials }}
+
+    strategy:
+    canary:
+      stableService: {{ include "employee-server.fullname" . }}-stable
+      canaryService: {{ include "employee-server.fullname" . }}-canary
+
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoute: employee-route
+            namespace: employee
+
+      steps:
+        - setWeight: 10
+        - pause: { duration: 30s }
+        - setWeight: 30
+        - pause: { duration: 30s }
+        - setWeight: 60
+        - pause: { duration: 30s }
+        - setWeight: 100
