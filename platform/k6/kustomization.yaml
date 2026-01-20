@@ -5,7 +5,10 @@ kind: Kustomization
 configMapGenerator:
   - name: k6-scenario-config
     files:
-      - k6/photo-load-test.js
+      - photo-load-test.js
+
+generatorOptions:
+  disableNameHash: true
 
 # 생성된 ConfigMap이 배포될 기본 네임스페이스 설정
 namespace: k6

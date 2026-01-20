@@ -7,5 +7,8 @@ configMapGenerator:
     files:
       - locustfile.py
 
+generatorOptions:
+  disableNameHash: true
+
 # 생성된 ConfigMap이 배포될 기본 네임스페이스 설정
 namespace: locust
