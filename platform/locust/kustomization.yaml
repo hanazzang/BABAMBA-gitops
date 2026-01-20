@@ -5,7 +5,7 @@ kind: Kustomization
 configMapGenerator:
   - name: locust-scenario-config
     files:
-      - locust/locustfile.py
+      - locustfile.py
 
 # 생성된 ConfigMap이 배포될 기본 네임스페이스 설정
 namespace: locust

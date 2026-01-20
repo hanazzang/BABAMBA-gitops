@@ -6,18 +6,22 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/
-    targetRevision: 0.32.12
-    chart: locust
-    helm:
-      values: |
-        loadtest:
-          name: photo-service-test
-          locust_locustfile_configmap: locust-scenario-config
-          locust_locustfile: locustfile.py
-          users: 100
-        worker:
-          replicaCount: 2
+    - repoURL: https://raw.githubusercontent.com/deliveryhero/helm-charts/refs/heads/master/
+      targetRevision: 0.32.12
+      chart: locust
+      helm:
+        values: |
+          loadtest:
+            name: photo-service-test
+            locust_locustfile_configmap: locust-scenario-config
+            locust_locustfile: locustfile.py
+            users: 100
+          worker:
+            replicaCount: 2
+    - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+      targetRevision: stress
+      path: clusters/platform/locust
+      
   destination:
     server: https://kubernetes.default.svc
     namespace: locust
