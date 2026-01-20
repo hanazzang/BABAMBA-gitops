@@ -2,6 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     {{- include "employee-server.labels" . | nindent 4 }}
 spec:
