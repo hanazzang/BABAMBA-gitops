@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chaos-mesh-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: stress
+    path: platform/chaos-mesh # Chaos Mesh 관련 YAML이 있는 경로
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: chaos-mesh # Chaos Mesh 리소스가 배포될 네임스페이스
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
