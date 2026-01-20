@@ -17,9 +17,13 @@ spec:
             type: PathPrefix
             value: /employee
       backendRefs:
-        - name: employee-server-stable
-          port: 5002
-          weight: 100
-        - name: employee-server-canary
-          port: 5002
-          weight: 0
+          - group: ""
+            kind: Service
+            name: employee-server-stable
+            port: 5002
+            weight: 100
+          - group: ""
+            kind: Service
+            name: employee-server-canary
+            port: 5002
+            weight: 0
