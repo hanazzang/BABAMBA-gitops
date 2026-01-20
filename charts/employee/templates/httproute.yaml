@@ -7,7 +7,9 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   parentRefs:
-    - name: service-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: service-gateway
       namespace: gateway
   rules:
     - matches:
