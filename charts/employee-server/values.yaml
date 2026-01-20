@@ -1,4 +1,4 @@
-# values.yaml
+# 수정된 values.yaml
 replicaCount: 1
 
 image:
@@ -6,17 +6,16 @@ image:
   pullPolicy: Always
   tag: "sha-96f166a"
 
+imagePullSecrets:
+  - name: ghcr-pull
+
 service:
   type: ClusterIP
   port: 5002
 
 containerPort: 5002
 
-# 참조할 ConfigMap과 Secret 이름
 configs:
   dbConfig: db-config
   redisConfig: redis-config
   dbCredentials: db-credentials
-
-  imagePullSecrets:
-  - name: ghcr-pull
