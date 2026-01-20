@@ -1,12 +1,13 @@
-# templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: photo-service
+  name: {{ include "photo-service.fullname" . }}
+  labels:
+    {{- include "photo-service.labels" . | nindent 4 }}
 spec:
   ports:
     - name: http
-      port: 5003
-      targetPort: 5003
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
   selector:
-    app: photo-service
+    app: {{ include "photo-service.fullname" . }}
