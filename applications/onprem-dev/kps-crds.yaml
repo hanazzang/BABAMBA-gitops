@@ -3,8 +3,7 @@ kind: Application
 metadata:
   name: onprem-dev-kps-crds
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-10"
+
 spec:
   project: default
 
@@ -22,3 +21,11 @@ spec:
     syncOptions:
       - ServerSideApply=true
       - Replace=true
+      - Prune=false   # CRD는 절대 자동 삭제 금지
+
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jqPathExpressions:
+        - .status
+        - .metadata.annotations
