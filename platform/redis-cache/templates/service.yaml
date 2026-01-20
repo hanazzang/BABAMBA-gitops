@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "redis-cache.fullname" . }}
+spec:
+  selector:
+    app: {{ include "redis-cache.name" . }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 6379
