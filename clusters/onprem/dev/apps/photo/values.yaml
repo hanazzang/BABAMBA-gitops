@@ -3,25 +3,25 @@ replicaCount: 1
 
 # ===== 이미지 (환경별 핵심 값) =====
 image:
-  repository: ghcr.io/hanazzang/auth_server
-  tag: "sha-96f166a"
+  repository: ghcr.io/hanazzang/photo_service
+  tag: "sha-36c997e"
   pullPolicy: IfNotPresent
 
 # ===== 서비스 계정 =====
 serviceAccount:
-  name: auth-sa
+  name: photo-sa
 
 # ===== 서비스 포트 =====
 service:
-  port: 5001
-  targetPort: 5001
+  port: 5003
+  targetPort: 5003
 
 # ===== 환경변수 주입 (사전 생성된 리소스) =====
-envFrom:
-  configMapRef:
-    name: db-config
-  secretRef:
-    name: db-credentials
+#envFrom:
+#  configMapRef:
+#    name: db-config
+#  secretRef:
+#    name: db-credentials
 
 # ===== 리소스 (dev 기준) =====
 resources:
