@@ -11,6 +11,13 @@ spec:
     chart: chaos-mesh
     helm:
       values: |
+        controllerManager:
+            nodeSelector:
+              node-role.kubernetes.io/control-plane: "" # 마스터 노드에 배치
+            tolerations:
+              - key: "node-role.kubernetes.io/control-plane"
+                operator: "Exists"
+                effect: "NoSchedule"
         chaosDaemon:
           runtime: containerd # 사용하는 런타임에 맞게 수정 (containerd/docker)
           socketPath: /run/containerd/containerd.sock
