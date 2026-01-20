@@ -1,1 +1,2 @@
-{}
+imagePullSecrets:
+  - name: ghcr-pull
