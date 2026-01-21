@@ -17,5 +17,5 @@ spec:
       backendRefs:
           - group: ""
             kind: Service
-            name: photo-service
+            name: photo-service-active
             port: 5003
