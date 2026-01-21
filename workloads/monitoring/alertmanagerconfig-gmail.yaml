@@ -8,7 +8,8 @@ metadata:
 spec:
   route:
     receiver: gmail
-    groupBy: ["alertname"]
+    # 알림 그룹화에 cluster 라벨 추가 (어느 환경인지 명확히 분리)
+    groupBy: ["alertname", "cluster", "pod"]
     groupWait: 10s
     groupInterval: 3m
     repeatInterval: 2h
@@ -25,12 +26,16 @@ spec:
       emailConfigs:
         # 알림 메일 받으실 분
         - to: "sieun6213@naver.com"
-        # 보내는 사람은 접니다.
+        # 보내는 사람
           from: "sieun6213@gmail.com"
           smarthost: "smtp.gmail.com:587"
           authUsername: "sieun6213@gmail.com"
           authPassword:
             name: alertmanager-gmail
             key: smtp_pass
+          # 메일 제목 커스텀
+          # 예: [FIRING:1] HighCpuUsage (onprem-dev / auth-pod)
+          headers:
+            subject: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.cluster }} / {{ .CommonLabels.pod }})'
           requireTLS: true
           sendResolved: true
