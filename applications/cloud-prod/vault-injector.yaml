@@ -18,7 +18,7 @@ spec:
           enabled: true
 
         global:
-          externalVaultAddr: "https://192.168.1.102:8200"  # 우선 IP로
+          externalVaultAddr: "https://vault.internal:8200"  
 
         # (테스트용) 셀프사인이라면: 이건 chart value로도 가능한데,
         # 실제 secret fetch는 Pod annotation의 tls-skip-verify로 해결하는 게 일반적
