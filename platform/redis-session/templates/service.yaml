@@ -17,7 +17,7 @@ metadata:
 subsets:
   - addresses:
 {{- range .Values.sentinels }}
-      - ip: {{ .ip | quote }}
+    - ip: {{ .ip | quote }}
 {{- end }}
     ports:
       - name: sentinel
