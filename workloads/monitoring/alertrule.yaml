@@ -9,12 +9,28 @@ spec:
   groups:
     - name: test.rules
       rules:
-        - alert: TestEmailAlert
-          expr: vector(1)
+        # 1. CPU 사용량 70% 이상 (1분 지속 시)
+        - alert: HighCpuUsage
+          expr: |
+            (sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod, namespace) 
+            / 
+            sum(kube_pod_container_resource_limits{resource="cpu"}) by (pod, namespace)) * 100 > 70
           for: 1m
           labels:
             severity: warning
-            namespace: monitoring
           annotations:
-            summary: "Test Alert"
-            description: "Alertmanager routing test (vector(1))."
+            summary: "High CPU Usage: {{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }}의 CPU 사용량이 70%를 초과했습니다. (현재값: {{ $value | printf \"%.2f\" }}%)"
+
+        # 2. 메모리 사용량 70% 이상 (1분 지속 시)
+        - alert: HighMemoryUsage
+          expr: |
+            (sum(container_memory_working_set_bytes{container!=""}) by (pod, namespace) 
+            / 
+            sum(kube_pod_container_resource_limits{resource="memory"}) by (pod, namespace)) * 100 > 70
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Memory Usage: {{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }}의 메모리 사용량이 70%를 초과했습니다. (현재값: {{ $value | printf \"%.2f\" }}%)"

@@ -21,7 +21,14 @@ grafana:
     userKey: admin-user
     passwordKey: admin-password
 
-  # adminPassword: "admin123"   # dev니까 임시 OK(운영에선 Secret)
+  # Grafana 대시보드와 사용자 설정 보존용 스토리지
+  persistence:
+    # 데모 버전 false설정, 실 테스트에선 true로 변경하고 아래 주석 풀기
+    enabled: false
+    # storageClassName: "ceph" # Ceph StorageClass
+    # size: 10Gi
+
+
 
 prometheus:
   prometheusSpec:
@@ -34,15 +41,19 @@ prometheus:
       limits:
         cpu: "1000m"
         memory: "2Gi"
-    # 스토리지 쓰려면 아래 주석 해제 + storageClassName만 환경에 맞게 수정
-    # storageSpec:
-    #   volumeClaimTemplate:
-    #     spec:
-    #       storageClassName: "nfs-client"   # <-- 네 storageClass로 변경
-    #       accessModes: ["ReadWriteOnce"]
-    #       resources:
-    #         requests:
-    #           storage: 30Gi
+    # 스토리지 쓰려면 아래 주석 해제
+    storageSpec:
+      # 데모용 임시 디렉터리 
+      emptyDir:
+        medium: ""
+      # ceph 스토리지
+      # volumeClaimTemplate:
+      #   spec:
+      #     storageClassName: "ceph"   # Ceph StorageClass
+      #     accessModes: ["ReadWriteOnce"]
+      #     resources:
+      #       requests:
+      #         storage: 30Gi
 
 alertmanager:
   enabled: true
