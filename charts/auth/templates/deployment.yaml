@@ -31,10 +31,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.envFrom.configMapRef.name }}
+                optional: true
             - configMapRef:
                 name: {{ .Values.envFrom.redisConfigMapRef.name }}    
+                optional: true
             - secretRef:
                 name: {{ .Values.envFrom.secretRef.name }}
+                optional: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 

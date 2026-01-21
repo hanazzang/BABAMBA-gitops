@@ -27,10 +27,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.configs.dbConfig }}
+                optional: true
             - configMapRef:
                 name: {{ .Values.configs.redisConfig }}
+                optional: true
             - secretRef:
                 name: {{ .Values.configs.dbCredentials }}
+                optional: true
 
   strategy:
     canary:
