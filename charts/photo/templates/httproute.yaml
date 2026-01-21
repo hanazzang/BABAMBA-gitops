@@ -19,4 +19,3 @@ spec:
             kind: Service
             name: photo-service
             port: 5003
-            weight: 1

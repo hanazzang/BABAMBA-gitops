@@ -1,6 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
   name: {{ include "photo-service.fullname" . }}
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
@@ -31,3 +30,13 @@ spec:
         - name: photo-storage
           persistentVolumeClaim:
             claimName: {{ include "photo-service.fullname" . }}-pvc
+  strategy:
+    blueGreen:
+      activeService: {{ include "photo-service.fullname" . }}-active
+      previewService: {{ include "photo-service.fullname" . }}-preview
+
+      # 새 버전(Preview) 올려놓고 확인 후 Promote로 스위치
+      autoPromotionEnabled: false
+
+      # 스위치 후 기존 ReplicaSet을 잠깐 유지(롤백 빠르게)
+      scaleDownDelaySeconds: 30
