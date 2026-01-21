@@ -20,4 +20,4 @@ redis:
   maxmemory: "384mb"
   maxmemoryPolicy: "allkeys-lru"
 
-  namespace: common
+  namespace: "common"
