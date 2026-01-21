@@ -1,2 +1,12 @@
 imagePullSecrets:
   - name: ghcr-pull
+
+# ===== HPA (dev 테스트용) =====
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70
