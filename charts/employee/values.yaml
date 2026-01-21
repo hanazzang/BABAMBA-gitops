@@ -19,3 +19,13 @@ configs:
   dbConfig: db-config
   redisConfig: redis-config
   dbCredentials: db-credentials
+
+# ===== HPA =====
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70

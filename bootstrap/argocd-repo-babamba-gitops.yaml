@@ -1,0 +1,24 @@
+#
+# ArgoCD가 GitHub 레포를 읽을 수 있도록 "Repository Secret"을 등록하는 예시입니다.
+# ⚠️ 토큰/비밀번호를 Git에 커밋하지 마세요. (이 파일은 예시용)
+#
+# 사용 방법(예):
+#   cp bootstrap/argocd-repo-babamba-gitops.example.yaml /tmp/argocd-repo.yaml
+#   vi /tmp/argocd-repo.yaml  # username/password 입력
+#   kubectl apply -n argocd -f /tmp/argocd-repo.yaml
+#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: repo-babamba-gitops
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
+  url: https://github.com/hanazzang/BABAMBA-gitops
+
+  username: hanazzang
+  password: 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
+
+

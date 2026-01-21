@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "auth-server.fullname" . }}-hpa
+  name: {{ include "employee-server.fullname" . }}-hpa
   labels:
-    {{- include "auth-server.labels" . | nindent 4 }}
+    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
-    name: {{ include "auth-server.fullname" . }}
+    name: {{ include "employee-server.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
