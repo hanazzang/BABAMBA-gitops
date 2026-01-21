@@ -7,7 +7,10 @@ metadata:
     release: onprem-dev-kube-prometheus-stack
 spec:
   route:
-    receiver: gmail
+    - receiver:  monitoring/gmail/gmail
+      matchers:
+      - severity="warning"
+      continue: true
     groupBy: ["alertname"]
     groupWait: 10s
     groupInterval: 3m
