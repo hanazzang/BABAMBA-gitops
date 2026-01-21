@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: gmail
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  route:
+    receiver: gmail
+    groupBy: ["alertname"]
+    groupWait: 10s
+    groupInterval: 3m
+    repeatInterval: 30m
+  receivers:
+    - name: gmail
+      emailConfigs:
+        # 알림 메일 받으실 분
+        - to: "sieun6213@naver.com"
+        # 보내는 사람은 접니다.
+          from: "sieun6213@gmail.com"
+          smarthost: "smtp.gmail.com:587"
+          authUsername:
+            name: alertmanager-gmail
+            key: smtp_user
+          authPassword:
+            name: alertmanager-gmail
+            key: smtp_pass
+          requireTLS: true
+          sendResolved: true
