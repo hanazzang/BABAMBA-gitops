@@ -4,7 +4,7 @@ namespaces:
       argocd.argoproj.io/sync-wave: "-10"
       argocd.argoproj.io/sync-options: Prune=false
     labels:
-      purpose: gateway
+      purpose: envoy-proxy
 
   - name: auth
     annotations:
@@ -23,3 +23,15 @@ namespaces:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       gateway: user
+
+  - name: argo-rollouts
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: infra
+
+  - name: envoy-gateway-system
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: gateway-control-plane
