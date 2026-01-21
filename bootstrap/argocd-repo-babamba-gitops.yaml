@@ -11,7 +11,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: repo-babamba-gitops
-  namespace: argocd
+  namespace: argocd1
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
