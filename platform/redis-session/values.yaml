@@ -1,3 +1,5 @@
+namespace: "common"
+
 service:
   name: redis-sentinel-service
   port: 26379
