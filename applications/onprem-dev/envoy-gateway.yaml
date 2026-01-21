@@ -9,6 +9,11 @@ spec:
     chart: gateway-helm
     repoURL: docker.io/envoyproxy
     targetRevision: v1.6.2
+    helm:
+      # Envoy Gateway chart includes large CRDs. Applying them via client-side apply can fail with:
+      # "metadata.annotations: Too long (262144 bytes)".
+      # We install CRDs separately (server-side apply) and tell ArgoCD to skip CRDs here.
+      skipCrds: true
   destination:
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
@@ -18,3 +23,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # Large CRDs (e.g. envoyproxies.gateway.envoyproxy.io) can exceed annotation size limits with client-side apply.
+      # Server-side apply avoids storing the full last-applied-configuration in annotations.
+      - ServerSideApply=true
