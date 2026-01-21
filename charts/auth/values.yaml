@@ -15,7 +15,7 @@ service:
 envFrom:
   configMapRef:
     name: db-config
-  configMapRef:
+  redisConfigMapRef:
     name: redis-config
   secretRef:
     name: db-credentials
