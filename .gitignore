@@ -1,1 +1,2 @@
 bootstrap/argocd-repo-babamba-gitops.yaml
+bootstrap/argocd-repo-babamba-gitops.example.yaml
