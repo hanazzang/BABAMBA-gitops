@@ -15,9 +15,11 @@ spec:
     routes:
       - receiver: gmail
         matchers:
-          - severity="warning"
+          - name: severity
+            value: warning
+            matchType: "="
         continue: true
-        
+
   receivers:
     - name: gmail
       emailConfigs:
