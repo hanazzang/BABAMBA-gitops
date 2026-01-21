@@ -1,5 +1,6 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
+metadata:
   name: {{ include "photo-service.fullname" . }}
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
