@@ -11,7 +11,7 @@ spec:
     groupBy: ["alertname"]
     groupWait: 10s
     groupInterval: 3m
-    repeatInterval: 30m
+    repeatInterval: 2h
     routes:
       - receiver: gmail
         matchers:
