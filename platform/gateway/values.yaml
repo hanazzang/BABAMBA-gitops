@@ -16,7 +16,7 @@ gateway:
 
 envoyProxy:
   name: envoy-gw-infra
-  namespace: envoy-gateway-system
+  namespace: gateway
   replicas: 2
   service:
     type: ClusterIP
