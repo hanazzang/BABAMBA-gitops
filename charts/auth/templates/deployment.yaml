@@ -28,13 +28,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+
           envFrom:
-            - configMapRef:
-                name: {{ .Values.envFrom.configMapRef.name }}
-            - configMapRef:
-                name: {{ .Values.envFrom.redisConfigMapRef.name }}    
-            - secretRef:
-                name: {{ .Values.envFrom.secretRef.name }}
+{{- toYaml .Values.envFrom | nindent 12 }}
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 

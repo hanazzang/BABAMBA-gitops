@@ -56,3 +56,7 @@ autoscaling:
     averageUtilization: 50
   memory:
     averageUtilization: 70
+
+
+autoscaling:
+  enabled: true
