@@ -19,3 +19,5 @@ resources:
 redis:
   maxmemory: "384mb"
   maxmemoryPolicy: "allkeys-lru"
+
+  namespace: common
