@@ -48,5 +48,8 @@ alertmanager:
   enabled: true
   alertmanagerSpec:
     replicas: 1
+    alertmanagerConfigSelector:
+      matchLabels:
+        release: onprem-dev-kube-prometheus-stack
 
 # kube-state-metrics / node-exporter 등은 기본 포함
