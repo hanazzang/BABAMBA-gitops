@@ -31,6 +31,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.envFrom.configMapRef.name }}
+            - configMapRef:
+                name: {{ .Values.envFrom.redisConfigMapRef.name }}    
             - secretRef:
                 name: {{ .Values.envFrom.secretRef.name }}
           resources:
