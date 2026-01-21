@@ -18,10 +18,12 @@ service:
 
 # ===== 환경변수 주입 (사전 생성된 리소스) =====
 envFrom:
-  configMapRef:
-    name: db-config
-  secretRef:
-    name: db-credentials
+  - configMapRef:
+      name: db-config
+  - configMapRef:
+      name: redis-config
+  - secretRef:
+      name: db-credentials
 
 # ===== 리소스 (dev 기준) =====
 resources:
