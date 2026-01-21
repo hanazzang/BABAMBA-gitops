@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "redis-cache.fullname" . }}
+  namespace: {{ .Values.namespace | default "common" }}
 spec:
   serviceName: {{ include "redis-cache.fullname" . }}
   replicas: {{ .Values.replicaCount }}
