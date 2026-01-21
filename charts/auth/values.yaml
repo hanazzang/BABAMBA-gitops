@@ -13,12 +13,12 @@ service:
   targetPort: 5001
 
 envFrom:
-  configMapRef:
-    name: db-config
-  redisConfigMapRef:
-    name: redis-config
-  secretRef:
-    name: db-credentials
+  - configMapRef:
+      name: db-config
+  - configMapRef:
+      name: redis-config
+  - secretRef:
+      name: db-credentials
 
 resources:
   limits:
@@ -29,6 +29,7 @@ resources:
     cpu: "100m"
 
 autoscaling:
+  enabled: false
   minReplicas: 1
   maxReplicas: 3
   cpu:

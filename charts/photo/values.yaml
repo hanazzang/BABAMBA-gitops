@@ -50,13 +50,10 @@ resources:
 # Autoscaling 관련 설정 (hpa.yaml)
 # ==========================================
 autoscaling:
+  enabled: false
   minReplicas: 1
   maxReplicas: 3
   cpu:
     averageUtilization: 50
   memory:
     averageUtilization: 70
-
-
-autoscaling:
-  enabled: true
