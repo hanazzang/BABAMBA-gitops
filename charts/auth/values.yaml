@@ -1,9 +1,12 @@
 replicaCount: 1
-
 image:
-  repository: hyunhojang/auth_server
-  tag: v2.02
+  repository: ghcr.io/hanazzang/auth_server
+  tag: "sha-17ad308"
   pullPolicy: IfNotPresent
+
+
+imagePullSecrets:
+  - name: ghcr-pull
 
 serviceAccount:
   name: auth-sa
