@@ -15,4 +15,4 @@ spec:
   targets:
     staticConfig:
       static:
-        - https://example.com
+        - https://google.com
