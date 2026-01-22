@@ -52,6 +52,9 @@ grafana:
 # Blackbox Exporter 설정(인프라 성능)
 prometheus-blackbox-exporter:
   enabled: true
+  # 아래 설정을 추가하여 서비스 강제 생성
+  service:
+    enabled: true
 
 prometheus:
   prometheusSpec:
