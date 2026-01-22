@@ -1,0 +1,87 @@
+global:
+  clusterName: "eks-cloud-prod"
+
+prometheus:
+  prometheusSpec:
+    replicas: 2
+    enableFeatures:
+      - agent # 에이전트 모드 활성화
+
+    # [보완] 부하 테스트 중 에이전트가 죽지 않도록 리소스 할당량 명시
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+    remoteWrite:
+      - url: "http://192.168.13.144:9090/api/v1/write" # 온프 ip
+        queueConfig:
+          maxSamplesPerSend: 10000
+          maxShards: 200
+
+        # 부하 테스트에 필요한 핵심 메트릭만 필터링하여 전송료 절감
+        writeRelabelConfigs:
+          - sourceLabels: [__name__]
+            regex: '(http_.*|node_.*|container_.*)'
+            action: keep
+
+    # 임시 디스크 사용
+    storageSpec:
+      emptyDir:
+        medium: ""
+        
+    # 노드 장애에 대비해 Prometheus Pod를 서로 다른 노드에 배치
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - prometheus
+            topologyKey: "kubernetes.io/hostname"
+            
+    # 모든 네임스페이스의 ServiceMonitor 감지
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+# 중앙 집중식 구조로 진행 시 사용
+# EKS에서는 Alertmanager와 Grafana를 끄고 온프레미스 것을 통합 사용
+alertmanager:
+  enabled: false
+grafana:
+  enabled: false
+nodeExporter:
+  enabled: true # EKS 노드 부하 확인을 위해 켜두는 것을 추천
+kubeStateMetrics:
+  enabled: true # Pod 상태(Pending, Error 등) 확인을 위해 필요
+
+# 온프/클라우드 따로 설정 시 사용
+# grafana:
+#   enabled: true
+#   grafana.ini:
+#     server:
+#       root_url: http://grafana.babamba-cloud.com # 실제 사용 도메인
+#   service:
+#     type: LoadBalancer
+#     annotations:
+#       # AWS Load Balancer Controller를 위한 설정
+#       service.beta.kubernetes.io/aws-load-balancer-type: "external"
+#       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+#       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+# alertmanager:
+#   alertmanagerSpec:
+#     replicas: 2
+#     storageSpec:
+#       volumeClaimTemplate:
+#         spec:
+#           storageClassName: gp3
+#           resources:
+#             requests:
+#               storage: 10Gi
