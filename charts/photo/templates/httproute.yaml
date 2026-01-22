@@ -15,7 +15,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /photo
+            value: /api/photo
       backendRefs:
           - group: ""
             kind: Service
