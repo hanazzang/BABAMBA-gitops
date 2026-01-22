@@ -1,41 +1,34 @@
+# Service 이름을 고정하여 Probe CRD에서 주소를 쉽게 찾도록 함
+fullnameOverride: "blackbox-exporter"
+
 config:
   modules:
-    # 1) HTTP 상태 체크용
     http_2xx:
       prober: http
       timeout: 5s
       http:
-        method: GET
-        preferred_ip_protocol: ip4
-
-    # 2) Ping RTT 체크용
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        follow_redirects: true
+        preferred_ip_protocol: "ip4"
     icmp:
       prober: icmp
       timeout: 5s
       icmp:
-        preferred_ip_protocol: ip4
+        preferred_ip_protocol: "ip4"
 
 service:
   type: ClusterIP
+  port: 9115
 
-# ICMP(ping)는 권한 필요. 대부분 클러스터에서 NET_RAW 필요.
+# ICMP 권한 부여
 securityContext:
-  runAsUser: 0
-  runAsNonRoot: false
   capabilities:
     add: ["NET_RAW"]
 
-# exporter 자체 메트릭(/metrics) 수집 (권장)
+# Blackbox Exporter '자체'의 상태 모니터링용 (타겟 모니터링용 아님)
 serviceMonitor:
   enabled: true
   defaults:
     labels:
-      # Prometheus(KPS)의 릴리즈 이름과 똑같이 적어야 합니다.
-      release: onprem-dev-kube-prometheus-stack 
-      
-  targets:
-    - name: google-dns
-      url: 8.8.8.8
-      interval: 10s
-      scrapeTimeout: 10s
-      module: icmp  # ping 모듈
+      release: onprem-dev-kube-prometheus-stack
+  # 아래 targets 섹션은 삭제합니다. (Probe CRD로 일원화)
