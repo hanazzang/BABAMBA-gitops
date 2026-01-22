@@ -76,7 +76,7 @@ prometheus:
       #         storage: 80Gi
 
     # 노드 장애에 대비해 Prometheus Pod를 서로 다른 노드에 배치
-    podAntiAffinity: "hard"
+    podAntiAffinity: "soft" # 프로메테우스 테스트 중이라 soft사용, 실 테스트 시에는 hard로 수정
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
