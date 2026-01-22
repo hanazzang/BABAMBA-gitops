@@ -13,7 +13,7 @@ spec:
   
   prober:
     # fullnameOverride 덕분에 이름이 짧고 명확해집니다.
-    url: http://blackbox-exporter.monitoring.svc:9115
+    url: blackbox-exporter.monitoring.svc:9115
   
   targets:
     staticConfig:
