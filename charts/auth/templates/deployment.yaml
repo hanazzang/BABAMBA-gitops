@@ -35,7 +35,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-  strategy:
+strategy:
     canary:
       stableService: {{ include "auth-server.fullname" . }}-stable
       canaryService: {{ include "auth-server.fullname" . }}-canary
