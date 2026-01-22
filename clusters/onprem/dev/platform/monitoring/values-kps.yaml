@@ -49,7 +49,9 @@ grafana:
     # storageClassName: "ceph" # Ceph StorageClass
     # size: 10Gi
 
-
+# Blackbox Exporter 설정(인프라 성능 테스트용)
+prometheus-blackbox-exporter:
+  enabled: true
 
 prometheus:
   prometheusSpec:
