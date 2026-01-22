@@ -3,7 +3,7 @@ global:
 
 prometheus:
   prometheusSpec:
-    replicas: 2
+    replicas: 1
     enableFeatures:
       - agent # 에이전트 모드 활성화
 
