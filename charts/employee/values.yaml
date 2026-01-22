@@ -15,7 +15,10 @@ service:
 
 containerPort: 5002
 
-configs:
-  dbConfig: db-config
-  redisConfig: redis-config
-  dbCredentials: db-credentials
+envFrom:
+  - configMapRef:
+      name: db-config
+  - configMapRef:
+      name: redis-config
+  - secretRef:
+      name: db-credentials
