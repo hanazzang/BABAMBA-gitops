@@ -28,7 +28,14 @@ securityContext:
 # exporter 자체 메트릭(/metrics) 수집 (권장)
 serviceMonitor:
   enabled: true
-  labels:
-    # kube-prometheus-stack이 이 ServiceMonitor를 잡도록 라벨을 맞춤
-    # 네가 지금까지 쓰던 값 유지
-    release: onprem-dev-kube-prometheus-stack
+  defaults:
+    labels:
+      # Prometheus(KPS)의 릴리즈 이름과 똑같이 적어야 합니다.
+      release: onprem-dev-kube-prometheus-stack 
+      
+  targets:
+    - name: google-dns
+      url: 8.8.8.8
+      interval: 10s
+      scrapeTimeout: 10s
+      module: icmp  # ping 모듈
