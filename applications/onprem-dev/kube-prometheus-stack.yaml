@@ -23,6 +23,15 @@ spec:
       helm:
         valueFiles:
           - $values/clusters/onprem/dev/platform/monitoring/values-kps.yaml
+    
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: prometheus-blackbox-exporter
+      # 운영상 버전 고정 권장 (원하는 버전으로 바꾸세요)
+      targetRevision: 11.7.0
+      helm:
+        valueFiles:
+          - $values/clusters/onprem/dev/platform/monitoring/values-kps.yaml
+
 
     # values 파일을 제공하는 Git 소스
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
