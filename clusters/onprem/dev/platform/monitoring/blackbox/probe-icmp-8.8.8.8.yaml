@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: probe-icmp-8-8-8-8
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  interval: 30s
+  module: icmp
+
+  prober:
+    # blackbox-exporter 서비스 주소(중요!)
+    # 설치 후 svc 이름이 다르면 여기만 수정하면 됨
+    url: http://onprem-blackbox-prometheus-blackbox-exporter.monitoring.svc:9115
+
+  targets:
+    staticConfig:
+      static:
+        - 8.8.8.8
