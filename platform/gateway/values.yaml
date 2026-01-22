@@ -19,7 +19,8 @@ envoyProxy:
   namespace: gateway
   replicas: 2
   service:
-    type: ClusterIP
+    type: LoadBalancer
+    loadBalancerIP: 192.168.90.240
   podLabels:
     app: envoy-gw-dataplane
   topologySpreadConstraints:
