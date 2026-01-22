@@ -49,10 +49,6 @@ grafana:
     # storageClassName: "ceph" # Ceph StorageClass
     # size: 10Gi
 
-# Blackbox Exporter 설정(인프라 성능 테스트용)
-prometheus-blackbox-exporter:
-  enabled: true
-
 prometheus:
   prometheusSpec:
     # EKS 데이터를 받기 위한 필수 설정
@@ -99,6 +95,10 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     
+
+# Blackbox Exporter 설정(인프라 성능 테스트용)
+prometheus-blackbox-exporter:
+  enabled: true
 
 alertmanager:
   enabled: true
