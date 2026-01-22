@@ -19,5 +19,6 @@ spec:
       - argocd
   endpoints:
     - port: metrics
+      targetPort: 8082 # 조회하신 서비스의 실제 포트 번호
       interval: 30s
       path: /metrics
