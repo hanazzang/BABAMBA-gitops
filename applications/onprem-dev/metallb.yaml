@@ -17,6 +17,10 @@ spec:
         prometheus:
           serviceMonitor:
             enabled: false
+        # ✅ L2만 쓸 거면 FRR(BGP) 스택 꺼서 speaker를 가볍게
+        speaker:
+          frr:
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
