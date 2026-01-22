@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos
+        revision: monitoring1
         directories:
           - path: clusters/onprem/dev/platform/*
   template:
@@ -17,14 +17,14 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos
+          targetRevision: monitoring1
           path: platform/{{path.basename}}
           helm:
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos
+          targetRevision: monitoring1
           ref: values
       destination:
         server: https://kubernetes.default.svc
@@ -33,3 +33,6 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

@@ -42,3 +42,22 @@ namespaces:
       argocd.argoproj.io/sync-options: Prune=false
     labels:
       purpose: infra
+
+  # observability/logging
+  - name: monitoring
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: observability
+
+  - name: loki
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: logging
+
+  - name: fluent-bit
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: logging

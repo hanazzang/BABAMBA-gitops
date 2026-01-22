@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: fluent-bit
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.extraEnv }}
+        env:
+          {{- toYaml .Values.extraEnv | nindent 10 }}
+        {{- end }}
+        {{- if .Values.extraEnvFrom }}
+        envFrom:
+          {{- toYaml .Values.extraEnvFrom | nindent 10 }}
+        {{- end }}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.metrics.enabled }}
+        ports:
+        - containerPort: {{ .Values.metrics.port }}
+          name: metrics
+        {{- end }}
+        volumeMounts:
+        - name: config
+          mountPath: /fluent-bit/etc/
+        - name: varlog
+          mountPath: /var/log
+        - name: fluent-bit-state
+          mountPath: /var/fluent-bit/state
+        {{- if .Values.filters.lua.enabled }}
+        - name: lua-scripts
+          mountPath: /fluent-bit/scripts
+        {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: fluent-bit-state
+        hostPath:
+          path: /var/fluent-bit/state
+          type: DirectoryOrCreate
+      {{- if .Values.filters.lua.enabled }}
+      - name: lua-scripts
+        configMap:
+          name: {{ .Release.Name }}-lua-scripts
+      {{- end }}
+
