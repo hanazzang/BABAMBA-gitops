@@ -16,7 +16,7 @@ spec:
       values: |
         prometheus:
           serviceMonitor:
-            enabled: true
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
