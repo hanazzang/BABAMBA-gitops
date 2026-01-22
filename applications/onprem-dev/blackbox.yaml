@@ -20,12 +20,12 @@ spec:
       targetRevision: 11.7.0
       helm:
         valueFiles:
-          - $values/clusters/onprem/prod/platform/monitoring/values-blackbox.yaml
+          - $values/clusters/onprem/dev/platform/monitoring/values-blackbox.yaml
 
     # 2) Probe/Rule/Dashboard 같은 “타깃 정의/정책” 매니페스트 적용
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
       targetRevision: monitoring2
-      path: clusters/onprem/prod/platform/monitoring/blackbox
+      path: clusters/onprem/dev/platform/monitoring/blackbox
       directory:
         recurse: true
 
@@ -41,7 +41,7 @@ spec:
     # automated:
     #   prune: true
     #   selfHeal: true
-    
+
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
