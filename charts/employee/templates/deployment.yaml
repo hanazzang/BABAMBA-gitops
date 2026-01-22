@@ -25,12 +25,7 @@ spec:
           ports:
             - containerPort: {{ .Values.containerPort }}
           envFrom:
-            - configMapRef:
-                name: {{ .Values.configs.dbConfig }}
-            - configMapRef:
-                name: {{ .Values.configs.redisConfig }}
-            - secretRef:
-                name: {{ .Values.configs.dbCredentials }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
 
   strategy:
     canary:
