@@ -3,8 +3,8 @@ replicaCount: 1
 
 # ===== 이미지 (환경별 핵심 값) =====
 image:
-  repository: ghcr.io/hanazzang/auth_server
-  tag: "sha-96f166a"
+  repository: hyunhojang/auth_server
+  tag: v2.02
   pullPolicy: IfNotPresent
 
 # ===== 서비스 계정 =====
@@ -34,7 +34,6 @@ resources:
 
 # ===== HPA =====
 autoscaling:
-  enabled: false
   minReplicas: 1
   maxReplicas: 3
   cpu:
