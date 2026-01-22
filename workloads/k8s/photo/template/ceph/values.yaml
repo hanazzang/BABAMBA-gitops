@@ -1,0 +1,37 @@
+# 1. 일반 설정
+replicaCount: 1
+
+# 2. 이미지 설정
+image:
+  repository: my-app-repo
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# 3. Ceph 및 스토리지 핵심 설정 (이 부분이 핵심입니다)
+ceph:
+  # Ceph 클러스터 정보 (ceph -s 또는 ceph fsid 명령어로 확인)
+  clusterId: "a269e86e-85ca-4b9c-a56d-a6a540a6a224"
+  # 데이터를 저장할 Pool 이름 (ceph osd pool ls로 확인)
+  poolName: "ceph-pool"
+  # 인증 정보
+  auth:
+    userId: "proxmox"
+    userKey: "AQB93m1pwxgEMRAADHaUzgK2HrZVkyZ4Du5l+Q==" # ceph auth get-key client.admin
+
+# 4. Persistence (PVC 및 StorageClass 상세)
+persistence:
+  enabled: true
+  storageClass: "ceph-rbd-sc"
+  accessMode: ReadWriteOnce   # RBD는 보통 RWO, CephFS는 RWX
+  size: 20Gi
+  reclaimPolicy: Delete       # Delete(삭제 시 볼륨도 삭제) 또는 Retain(데이터 유지)
+  mountPath: "/data"          # 컨테이너 내부 어디에 마운트할지
+
+# 5. 리소스 제한 (운영 환경 필수)
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi

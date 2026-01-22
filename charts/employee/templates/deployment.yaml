@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "employee-server.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "employee-server.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configs.dbConfig }}
+            - configMapRef:
+                name: {{ .Values.configs.redisConfig }}
+            - secretRef:
+                name: {{ .Values.configs.dbCredentials }}
+
+  strategy:
+    canary:
+      stableService: {{ include "employee-server.fullname" . }}-stable
+      canaryService: {{ include "employee-server.fullname" . }}-canary
+
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoute: employee-route
+            namespace: employee
+
+      steps:
+        - setWeight: 10
+        - pause: { duration: 30s }
+        - setWeight: 30
+        - pause: { duration: 30s }
+        - setWeight: 60
+        - pause: { duration: 30s }
+        - setWeight: 100
