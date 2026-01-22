@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: google-ping-check
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  jobName: google-ping
+  module: icmp
+  prober:
+    # 설치된 blackbox-exporter 서비스 주소를 입력합니다.
+    url: onprem-dev-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - 8.8.8.8

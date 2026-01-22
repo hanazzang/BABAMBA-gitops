@@ -12,5 +12,7 @@ spec:
       app.kubernetes.io/name: prometheus-blackbox-exporter
   endpoints:
     - port: http-metrics  # 포트 이름을 명시합니다.
+      # 이름 대신 실제 포트 번호(9115)를 명시하여 연결을 강제합니다.
+      targetPort: 9115
       interval: 30s
       path: /metrics
