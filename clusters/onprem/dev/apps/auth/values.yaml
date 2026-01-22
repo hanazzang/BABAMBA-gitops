@@ -2,7 +2,7 @@
 replicaCount: 1
 
 # ===== 이미지 (환경별 핵심 값) =====
-image:
+image:ghcr.io/hanazzang/auth_server:sha-66c48ee
   repository: ghcr.io/hanazzang/auth_server
   tag: "sha-17ad308"
   pullPolicy: IfNotPresent
