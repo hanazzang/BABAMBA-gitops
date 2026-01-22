@@ -85,7 +85,7 @@ prometheus:
 alertmanager:
   enabled: true
   alertmanagerSpec:
-    replicas: 2
+    replicas: 1
     alertmanagerConfigSelector:
       matchLabels:
         release: onprem-dev-kube-prometheus-stack
