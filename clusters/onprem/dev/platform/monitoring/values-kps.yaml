@@ -10,7 +10,23 @@ grafana:
   sidecar:
     dashboards:
       enabled: true
+      # 라벨 키
       label: grafana_dashboard
+
+      # (중요) ConfigMap에 grafana_dashboard: "1" 로 붙일 거라면 값도 맞춰주는 게 안전
+      labelValue: "1"
+
+      # (권장) RBAC 꼬임 방지: Grafana가 있는 네임스페이스만 스캔
+      # 보통 kube-prometheus-stack grafana도 monitoring에 있으니 monitoring 추천
+      searchNamespace: monitoring
+
+      # (권장) 폴더 분리하고 싶으면 ConfigMap에 이 annotation 달면 폴더가 나뉨
+      folderAnnotation: grafana_folder
+
+      # (권장) Grafana provisioning provider 설정
+      provider:
+        allowUiUpdates: false
+        foldersFromFilesStructure: true
 
   # 로그인 강제 + 계정 생성 금지
   grafana.ini:

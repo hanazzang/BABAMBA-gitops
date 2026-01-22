@@ -1,0 +1,218 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-k6-loadtest
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: loadtest
+data:
+  k6-loadtest.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
+          "id": 20,
+          "title": "🏆 인프라 구축 성과 보고 (Local Disk Ver.)",
+          "type": "text",
+          "options": {
+            "mode": "markdown",
+            "content": "# 🚀 인프라 고도화 성과 (HDD vs NVMe)\n**\"일반 디스크 환경에서도 성능 최적화를 증명합니다.\"**\n\n이 대시보드는 네트워크 안정성, 디스크 I/O 병목 해소, 그리고 자동화 성과를 시각화합니다."
+          }
+        },
+        {
+          "title": "Step 1. Connectivity (Ping RTT)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 2 },
+          "targets": [
+            {
+              "expr": "probe_duration_seconds{target='8.8.8.8'} * 1000",
+              "legendFormat": "RTT (ms)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 100 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "Network Uptime",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 2 },
+          "targets": [
+            {
+              "expr": "avg_over_time(probe_success[24h]) * 100",
+              "legendFormat": "Uptime",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 99.9 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "Step 2. Disk Usage (Used %)",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 2 },
+          "targets": [
+            {
+              "expr": "100 - ((node_filesystem_avail_bytes{mountpoint='/'} * 100) / node_filesystem_size_bytes{mountpoint='/'})",
+              "legendFormat": "Used",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 80 },
+                  { "color": "red", "value": 90 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "Step 3. CPU I/O Wait (병목 지표)",
+          "type": "timeseries",
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 10 },
+          "targets": [
+            {
+              "expr": "avg(irate(node_cpu_seconds_total{mode='iowait'}[5m])) by (instance) * 100",
+              "legendFormat": "{{instance}} I/O Wait",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "custom": { "fillOpacity": 20 },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 10 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "Local Disk Throughput (IOPS)",
+          "type": "timeseries",
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 10 },
+          "targets": [
+            {
+              "expr": "sum(rate(node_disk_reads_completed_total[1m])) by (instance)",
+              "legendFormat": "{{instance}} Read IOPS",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(node_disk_writes_completed_total[1m])) by (instance)",
+              "legendFormat": "{{instance}} Write IOPS",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "iops" }
+          }
+        },
+        {
+          "title": "Step 4. GitOps Sync Status",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 19 },
+          "targets": [
+            {
+              "expr": "sum(argocd_app_info{sync_status='Synced'})",
+              "legendFormat": "Synced Apps",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "fixed", "fixedColor": "blue" }
+            }
+          }
+        },
+        {
+          "title": "Step 5. HPA Scaling (Pod Replicas)",
+          "type": "timeseries",
+          "gridPos": { "h": 6, "w": 16, "x": 8, "y": 19 },
+          "targets": [
+            {
+              "expr": "sum(kube_hpa_status_current_replicas) by (hpa)",
+              "legendFormat": "{{hpa}} Current",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(kube_hpa_spec_target_replicas) by (hpa)",
+              "legendFormat": "{{hpa}} Target",
+              "refId": "B"
+            }
+          ]
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": ["NewHire", "LocalDisk", "Report"],
+      "templating": {
+        "list": [
+          {
+            "name": "DS_PROMETHEUS",
+            "label": "Data Source",
+            "type": "datasource",
+            "pluginId": "prometheus",
+            "query": "prometheus"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-3h",
+        "to": "now"
+      },
+      "title": "IT 인프라 성과 (Local Disk Ver)",
+      "version": 0
+    }
