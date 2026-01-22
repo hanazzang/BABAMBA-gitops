@@ -1,0 +1,34 @@
+config:
+  modules:
+    # 1) HTTP 상태 체크용
+    http_2xx:
+      prober: http
+      timeout: 5s
+      http:
+        method: GET
+        preferred_ip_protocol: ip4
+
+    # 2) Ping RTT 체크용
+    icmp:
+      prober: icmp
+      timeout: 5s
+      icmp:
+        preferred_ip_protocol: ip4
+
+service:
+  type: ClusterIP
+
+# ICMP(ping)는 권한 필요. 대부분 클러스터에서 NET_RAW 필요.
+securityContext:
+  runAsUser: 0
+  runAsNonRoot: false
+  capabilities:
+    add: ["NET_RAW"]
+
+# exporter 자체 메트릭(/metrics) 수집 (권장)
+serviceMonitor:
+  enabled: true
+  labels:
+    # kube-prometheus-stack이 이 ServiceMonitor를 잡도록 라벨을 맞춤
+    # 네가 지금까지 쓰던 값 유지
+    release: onprem-dev-kube-prometheus-stack

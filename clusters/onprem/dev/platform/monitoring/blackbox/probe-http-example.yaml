@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: probe-http-example
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  interval: 30s
+  module: http_2xx
+
+  prober:
+    url: http://onprem-blackbox-prometheus-blackbox-exporter.monitoring.svc:9115
+
+  targets:
+    staticConfig:
+      static:
+        - https://example.com
