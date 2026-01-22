@@ -4,16 +4,17 @@ metadata:
   name: probe-icmp-8-8-8-8
   namespace: monitoring
   labels:
+    # Prometheus가 이 라벨을 보고 수집 대상을 찾습니다.
     release: onprem-dev-kube-prometheus-stack
 spec:
-  interval: 30s
+  jobName: blackbox-icmp # Prometheus에서 job 라벨로 표시됨
+  interval: 15s
   module: icmp
-
+  
   prober:
-    # blackbox-exporter 서비스 주소(중요!)
-    # 설치 후 svc 이름이 다르면 여기만 수정하면 됨
-    url: http://onprem-blackbox-prometheus-blackbox-exporter.monitoring.svc:9115
-
+    # fullnameOverride 덕분에 이름이 짧고 명확해집니다.
+    url: http://blackbox-exporter.monitoring.svc:9115
+  
   targets:
     staticConfig:
       static:
