@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloud-prod-kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0" # CRD 배포 후 실행되도록 설정 
+spec:
+  project: default
+  destination:
+    server: <EKS-CLUSTER-URL> # EKS 클러스터 서버 주소
+    namespace: monitoring
+  sources:
+    # 1. Helm Chart 소스
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 80.13.3 # 온프레미스와 버전 통일 
+      helm:
+        valueFiles:
+          # EKS 전용 에이전트 설정 파일 참조
+          - $values/clusters/cloud/prod/platform/monitoring/values-eks.yaml
+    
+    # 2. values 파일을 제공하는 Git 소스
+    - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+      targetRevision: monitoring2
+      ref: values
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true # 대용량 리소스 처리를 위해 활성화
