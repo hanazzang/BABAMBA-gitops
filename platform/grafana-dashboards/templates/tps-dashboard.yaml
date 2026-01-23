@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # 1. 기존 대시보드와 이름이 겹치지 않도록 설정
+  name: grafana-dashboard-envoy-tps
+  namespace: monitoring
+  labels:
+    # 2. 그라파나 사이드카가 인식할 수 있도록 라벨 필수
+    grafana_dashboard: "1"
+  annotations:
+    # 3. 그라파나 폴더 지정
+    grafana_folder: "loadtest"
+data:
+  # 4. JSON 파일명도 겹치지 않게 설정
+  envoy-tps-dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "id": 99,
+          "title": "🚀 비즈니스 핵심 지표 (Business Key Metrics)",
+          "type": "row",
+          "collapsed": false
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisLabel": "RPS",
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "opacity",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "showPoints": "auto",
+                "spanNulls": false
+              },
+              "min": 0,
+              "unit": "reqps"
+            }
+          },
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 1 },
+          "id": 1,
+          "options": {
+            "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+            "tooltip": { "mode": "single", "sort": "none" }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_http_downstream_rq_total[1m]))",
+              "legendFormat": "Total TPS (전체 처리량)",
+              "refId": "A"
+            }
+          ],
+          "title": "🔥 실시간 서비스 TPS (Total Throughput)",
+          "type": "timeseries",
+          "description": "서버가 초당 처리하고 있는 전체 트래픽 양입니다."
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisLabel": "RPS",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "spanNulls": false
+              },
+              "min": 0,
+              "unit": "reqps"
+            }
+          },
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 1 },
+          "id": 2,
+          "options": {
+            "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(envoy_http_downstream_rq_total{envoy_response_code!~\"5.*\"}[1m]))",
+              "legendFormat": "Success (정상 처리)",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(envoy_http_downstream_rq_total{envoy_response_code=~\"5.*\"}[1m]))",
+              "legendFormat": "Error (5xx 서버 오류)",
+              "refId": "B"
+            }
+          ],
+          "title": "✅ 성공 vs 실패 (Success vs Error)",
+          "type": "timeseries",
+          "description": "트래픽 중 에러(5xx)가 얼마나 섞여 있는지 비교합니다."
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["envoy", "tps", "business"],
+      "templating": {
+        "list": []
+      },
+      "time": { "from": "now-30m", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Envoy 서비스 트래픽 (TPS)",
+      "uid": "envoy-tps-v1",
+      "version": 1,
+      "weekStart": ""
+    }
