@@ -16,6 +16,12 @@ spec:
         - path:
             type: PathPrefix
             value: /employee
+      filters:                # 이 섹션을 추가하세요
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefix: /employee
       backendRefs:
           - group: ""
             kind: Service
