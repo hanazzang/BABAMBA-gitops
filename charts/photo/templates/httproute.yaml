@@ -11,6 +11,7 @@ spec:
       namespace: gateway
   hostnames:
     - ehanadul.store
+    - api.ehanadul.store
   rules:
     - matches:
         - path:
