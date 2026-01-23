@@ -94,24 +94,15 @@ prometheus:
     #   # 데모용 임시 디렉터리 
     #   emptyDir:
     #     medium: ""
-    저장소 볼륨 설정
-    storageSpec: {}
+    # 저장소 볼륨 설정
+    storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: "" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
+          storageClassName: "local-storage" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
               storage: 70Gi
-    # 호스트 디렉토리 직접 연결 (HostPath 방식) - hana4에 만들어둠.
-    volumes:
-      - name: storage-volume
-        hostPath:
-          path: /prometheus
-          type: Directory
-    volumeMounts:
-      - name: storage-volume
-        mountPath: /prometheus
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
