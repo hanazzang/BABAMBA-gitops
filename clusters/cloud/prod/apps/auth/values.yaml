@@ -43,3 +43,10 @@ autoscaling:
     averageUtilization: 50
   memory:
     averageUtilization: 70
+
+
+tolerations:
+  - key: "spot"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
