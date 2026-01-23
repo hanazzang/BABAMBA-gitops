@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Values.namespace }}
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush           {{ .Values.service.flush }}
+        Log_Level       {{ .Values.service.logLevel }}
+        Parsers_File    parsers.conf
+
+    [INPUT]
+        Name            tail
+        Path            {{ .Values.input.tail.path }}
+    {{- if .Values.input.tail.exclude_path }}
+        Exclude_Path    {{ .Values.input.tail.exclude_path }}
+    {{- end }}
+        Parser          {{ .Values.input.tail.parser }}
+        Tag             {{ .Values.input.tail.tag }}
+        Mem_Buf_Limit   {{ .Values.input.tail.mem_buf_limit }}
+        Skip_Long_Lines {{ .Values.input.tail.skip_long_lines }}
+        DB              {{ .Values.input.tail.db }}
+
+    {{- if .Values.filters.kubernetes.enabled }}
+    [FILTER]
+        Name            kubernetes
+        Match           kube.*
+        Merge_Log       {{ if .Values.filters.kubernetes.mergeLog }}on{{ else }}off{{ end }}
+        Keep_Log        {{ if .Values.filters.kubernetes.keepLog }}on{{ else }}off{{ end }}
+    {{- end }}
+
+    {{- if .Values.filters.parser.enabled }}
+    {{- range .Values.filters.parser.rules }}
+    [FILTER]
+        Name            parser
+        Match           kube.*
+        Key_Name        {{ .key_name }}
+        Parser          {{ .name }}
+        Reserve_Data    On
+        Preserve_Key    Off
+    {{- end }}
+    {{- end }}
+
+    {{- if .Values.filters.recordModifier.enabled }}
+    [FILTER]
+        Name            record_modifier
+        Match           kube.*
+        {{- range .Values.filters.recordModifier.remove }}
+        Remove_Key      {{ . }}
+        {{- end }}
+    {{- end }}
+
+    {{- if .Values.filters.lua.enabled }}
+    [FILTER]
+        Name            lua
+        Match           kube.*
+        script          /fluent-bit/scripts/extract_fields.lua
+        call            {{ .Values.filters.lua.call }}
+    {{- end }}
+
+    {{- if .Values.output.stdout.enabled }}
+    [OUTPUT]
+        Name            stdout
+        Match           {{ .Values.output.stdout.match | default "kube.*" }}
+    {{- end }}
+        
+    [OUTPUT]
+        Name            loki
+        Match           {{ .Values.output.loki.match | default "kube.*" }}
+        Host            {{ .Values.output.loki.host }}
+        Port            {{ .Values.output.loki.port }}
+        {{- if .Values.output.loki.uri }}
+        Uri             {{ .Values.output.loki.uri }}
+        {{- end }}
+        {{- if .Values.output.loki.tenantID }}
+        tenant_id       {{ .Values.output.loki.tenantID }}
+        {{- end }}
+        {{- if .Values.output.loki.tls }}
+        tls             On
+        tls.verify      {{ if .Values.output.loki.tlsVerify }}On{{ else }}Off{{ end }}
+        {{- end }}
+        {{- if .Values.output.loki.httpUser }}
+        http_user       {{ .Values.output.loki.httpUser }}
+        {{- end }}
+        {{- if .Values.output.loki.httpPassword }}
+        http_passwd     {{ .Values.output.loki.httpPassword }}
+        {{- end }}
+        Labels          {{ join "," .Values.output.loki.labels }}
+        {{- if .Values.output.loki.removeKeys }}
+        Remove_Keys     {{ join "," .Values.output.loki.removeKeys }}
+        {{- end }}
+        {{- if .Values.output.loki.compress }}
+        Compress        {{ .Values.output.loki.compress }}
+        {{- end }}
+        {{- if .Values.output.loki.autoKubernetesLabels }}
+        Auto_Kubernetes_Labels {{ .Values.output.loki.autoKubernetesLabels }}
+        {{- end }}
+        
+  parsers.conf: |
+    [PARSER]
+        Name            docker
+        Format          json
+        Time_Key        time
+        Time_Format     %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep       On
+
+    # CRI(Containerd) 로그 파서: /var/log/containers/*.log
+    [PARSER]
+        Name            cri
+        Format          regex
+        Regex           ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[FP]) (?<log>.*)$
+        Time_Key        time
+        Time_Format     %Y-%m-%dT%H:%M:%S.%L%z
+        Time_Keep       On
+    
+    # HTTP 로그 파서 (Uvicorn/FastAPI 로그 형식)
+    [PARSER]
+        Name            http_log
+        Format          regex
+        Regex           ^(?<method>GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)\s+(?<path>/[^\s]*)\s+HTTP/[\d.]+"\s+(?<status_code>\d{3})
+        Time_Key        time
+        Time_Format     %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep       On
+    
+    # 에러 레벨 파서
+    [PARSER]
+        Name            error_level
+        Format          regex
+        Regex           (?<level>ERROR|WARN|INFO|DEBUG|FATAL|CRITICAL)
+        Time_Key        time
+        Time_Format     %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep       On
+{{- if .Values.filters.lua.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-lua-scripts
+  namespace: {{ .Values.namespace }}
+data:
+  extract_fields.lua: |
+{{ .Values.filters.lua.script | indent 4 }}
+{{- end }}
+

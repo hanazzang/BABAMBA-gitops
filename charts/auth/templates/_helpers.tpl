@@ -14,5 +14,3 @@
 app.kubernetes.io/name: {{ include "auth-server.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
-
-

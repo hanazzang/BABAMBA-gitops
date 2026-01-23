@@ -22,28 +22,6 @@ envFrom:
       name: redis-config
   - secretRef:
       name: db-credentials
-# vault:
-#   enabled: true
-#   role: auth-prod-cloud
-#   tlsSkipVerify: true
-#   outputFile: env  # /vault/secrets/env 로 생성됨
-
-#   secrets:
-#     - path: "kv/prod/cloud/common/db"
-#       keys:
-#         - DATABASE_HOST
-#         - DATABASE_PORT
-#         - DATABASE_DB_NAME
-#         - DATABASE_USER
-#         - DATABASE_PASSWORD
-#     - path: "kv/prod/cloud/common/redis"
-#       keys:
-#         - REDIS_SENTINEL_HOST
-#         - REDIS_SENTINEL_PORT
-#         - REDIS_MASTER_NAME
-#         - REDIS_PASSWORD
-#         - REDIS_CACHE_HOST
-#         - REDIS_CACHE_PORT
 
 resources:
   limits:

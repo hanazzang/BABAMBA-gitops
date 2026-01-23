@@ -1,0 +1,46 @@
+---
+# 1. Employee 네임스페이스용 통로
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxysql-service
+  namespace: employee
+spec:
+  ports:
+    - protocol: TCP
+      port: 6033
+      targetPort: 6033
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: proxysql-service
+  namespace: employee
+subsets:
+  - addresses:
+      - ip: 192.168.1.50  # 님 PC의 ProxySQL IP
+    ports:
+      - port: 6033
+---
+# 3. Auth 네임스페이스용 통로 (필요시 추가)
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxysql-service
+  namespace: auth
+spec:
+  ports:
+    - protocol: TCP
+      port: 6033
+      targetPort: 6033
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: proxysql-service
+  namespace: auth
+subsets:
+  - addresses:
+      - ip: 192.168.1.50
+    ports:
+      - port: 6033

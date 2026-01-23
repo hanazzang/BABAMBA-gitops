@@ -1,0 +1,25 @@
+# onprem-dev 클러스터: Fluent Bit(에이전트) 배포 → Loki로 전송
+# (ApplicationSet destination namespace와 일치)
+namespace: fluent-bit
+
+# (권장) 멀티클러스터 식별 라벨
+extraEnv:
+  - name: ENV
+    value: onprem
+  - name: CLUSTER_NAME
+    value: onprem-dev
+
+# 대부분의 최신 k8s는 containerd(CRI) 로그 포맷을 사용
+input:
+  tail:
+    parser: cri
+
+output:
+  loki:
+    # Loki는 같은 클러스터에 함께 배포(네임스페이스: loki)
+    # ArgoCD Helm releaseName 미지정 시 릴리즈명은 Application 이름(= onprem-dev-loki)
+    # Loki Service 이름: onprem-dev-loki-loki (platform/loki/templates/service.yaml 참고)
+    host: onprem-dev-loki-loki.loki.svc.cluster.local
+    port: 3100
+    tls: false
+
