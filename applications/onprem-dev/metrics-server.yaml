@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  source:
+    repoURL: https://kubernetes-sigs.github.io/metrics-server/ # Helm 레포 주소
+    chart: metrics-server
+    targetRevision: 3.12.1 # 원하는 버전
+    helm:
+      values: |
+        # ✅ 여기서 중요! 아까 해결하려던 TLS 문제를 여기서 한 번에 해결합니다.
+        defaultArgs:
+          - --cert-dir=/tmp
+          - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=Hostname,InternalIP,ExternalIP
+          - --kubelet-use-node-status-port
+          - --metric-resolution=15s
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
