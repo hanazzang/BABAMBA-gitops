@@ -18,21 +18,14 @@ spec:
         - path:
             type: PathPrefix
             value: /api/employee
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefix: /employee
       backendRefs:
-        - group: ""
-          kind: Service
-          # 이 이름이 틀리면 Connection Refused가 뜹니다
-          name: onprem-dev-employee-employee-server-stable
-          port: 5002
-          weight: 100
-        - group: ""
-          kind: Service
-          name: onprem-dev-employee-employee-server-canary
-          port: 5002
-          weight: 0
+          - group: ""
+            kind: Service
+            name: {{ include "employee-server.fullname" . }}-stable
+            port: {{ .Values.service.port }}
+            weight: 100
+          - group: ""
+            kind: Service
+            name: {{ include "employee-server.fullname" . }}-canary
+            port: {{ .Values.service.port }}
+            weight: 0
