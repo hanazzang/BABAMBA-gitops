@@ -31,12 +31,27 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_HOST
+            - name: MYSQL_HOST  # 앱 코드에서 이 이름을 사용할 수도 있으므로 추가합니다.
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_HOST
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_NAME
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_NAME
             - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_PORT
+            - name: MYSQL_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}

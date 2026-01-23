@@ -17,13 +17,13 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/employee  # 사용자가 브라우저에 입력하는 실제 주소
+            value: /api/employee  # 사용자가 입력하는 실제 주소
       filters:
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefix: /employee  # 앱 서버(Python)에 전달될 내부 경로
+              replacePrefix: /employee  # 앱 서버에 전달될 실제 내부 경로
       backendRefs:
         - group: ""
           kind: Service
