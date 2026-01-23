@@ -6,7 +6,6 @@ grafana:
   service:
     type: NodePort
     nodePort: 32300
-
   # 사이드카 설정(커스텀한 대시보드 사용)
   sidecar:
     dashboards:
@@ -29,7 +28,6 @@ grafana:
         allowUiUpdates: false
         foldersFromFilesStructure: true
 
-
   # 로그인 강제 + 계정 생성 금지
   grafana.ini:
     auth.anonymous:
@@ -50,7 +48,6 @@ grafana:
     enabled: false
     # storageClassName: "ceph" # Ceph StorageClass
     # size: 10Gi
-
 
 prometheus-node-exporter:
   tolerations:
@@ -79,11 +76,9 @@ prometheus:
     # 데이터 보존 기간 최적화
     retention: "7d"
 
-
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
     externalLabels:
       cluster: "onprem-dev" # 나중에 환경명 바뀔 때 여기만 수정
-
 
     replicas: 1
     resources:
@@ -94,20 +89,29 @@ prometheus:
         cpu: "1000m"
         memory: "2Gi"
 
-    # 스토리지 쓰려면 아래 주석 해제
-    storageSpec:
-      # 데모용 임시 디렉터리 
-      emptyDir:
-        medium: ""
-
-    # # 저장소 볼륨 설정
+    # # 스토리지 쓰려면 아래 주석 해제
+    # storageSpec:
+    #   # 데모용 임시 디렉터리 
+    #   emptyDir:
+    #     medium: ""
+    저장소 볼륨 설정
     storageSpec: {}
-    #   volumeClaimTemplate:
-    #     spec:
-    #       accessModes: ["ReadWriteOnce"]
-    #       resources:
-    #         requests:
-    #           storage: 70Gi
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 70Gi
+    # 호스트 디렉토리 직접 연결 (HostPath 방식) - hana4에 만들어둠.
+    volumes:
+      - name: storage-volume
+        hostPath:
+          path: /prometheus
+          type: Directory
+    volumeMounts:
+      - name: storage-volume
+        mountPath: /prometheus
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
@@ -125,7 +129,6 @@ prometheus:
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
 
-
 alertmanager:
   enabled: true
   alertmanagerSpec:
@@ -135,7 +138,6 @@ alertmanager:
         release: onprem-dev-kube-prometheus-stack
 
 # 데모 환경에서 불필요한 고부하 수집기 비활성화
-
 kubeProxy:
   enabled: false
 kubeScheduler:
