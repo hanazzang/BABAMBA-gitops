@@ -1,38 +1,34 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: onprem-dev-apps
+  name: platform-resources
   namespace: argocd
 spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos
+        revision: hana
         directories:
-          - path: clusters/onprem/dev/apps/*
+          - path: clusters/cloud/prod/platform/*
   template:
     metadata:
-      name: 'onprem-dev-{{path.basename}}'
+      name: 'cloud-prod-{{path.basename}}'
     spec:
       project: default
-
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos
-          path: charts/{{path.basename}}
+          targetRevision: hana
+          path: platform/{{path.basename}}
           helm:
             valueFiles:
+              - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
-
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos
+          targetRevision: hana
           ref: values
-          path: clusters
-
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
-
       syncPolicy:
         automated:
           prune: true

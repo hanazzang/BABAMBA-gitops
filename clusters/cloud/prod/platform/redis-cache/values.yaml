@@ -1,0 +1,12 @@
+replicaCount: 1
+
+resources:
+  limits:
+    memory: 1Gi
+
+redis:
+  maxmemory: "768mb"
+  maxmemoryPolicy: "allkeys-lru"
+
+nodeSelector:
+  role: cache

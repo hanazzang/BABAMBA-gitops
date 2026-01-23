@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-root-app
+  name: cloud-prod-root-app
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos
+    targetRevision: hana
     path: .
     directory:
       recurse: true
-      include: '{applications/onprem-dev/*.yaml,applicationsets/onprem-dev/*.yaml}'
+      include: '{applications/cloud-prod/*.yaml,applicationsets/cloud-prod/*.yaml}'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

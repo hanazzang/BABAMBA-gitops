@@ -1,31 +1,31 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: onprem-dev-apps
+  name: cloud-prod-apps
   namespace: argocd
 spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos
+        revision: hana
         directories:
-          - path: clusters/onprem/dev/apps/*
+          - path: clusters/cloud/prod/apps/*
   template:
     metadata:
-      name: 'onprem-dev-{{path.basename}}'
+      name: 'cloud-prod-{{path.basename}}'
     spec:
       project: default
 
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos
+          targetRevision: hana
           path: charts/{{path.basename}}
           helm:
             valueFiles:
               - $values/{{path}}/values.yaml
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos
+          targetRevision: hana
           ref: values
           path: clusters
 

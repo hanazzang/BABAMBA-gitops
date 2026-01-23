@@ -29,7 +29,6 @@ grafana:
         allowUiUpdates: false
         foldersFromFilesStructure: true
 
-
   # 로그인 강제 + 계정 생성 금지
   grafana.ini:
     auth.anonymous:
@@ -87,11 +86,9 @@ prometheus:
     # 데이터 보존 기간 최적화
     retention: "7d"
 
-
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
     externalLabels:
       cluster: "onprem-dev" # 나중에 환경명 바뀔 때 여기만 수정
-
 
     replicas: 1
     resources:
@@ -132,7 +129,6 @@ prometheus:
     probeSelector: {}
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
-
 
 alertmanager:
   enabled: true
