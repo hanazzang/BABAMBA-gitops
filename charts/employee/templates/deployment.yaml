@@ -1,10 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
+  # 헬름 차트 이름과 상관없이 실제 배포되는 이름을 명시하거나 include를 사용합니다.
   name: {{ include "employee-server.fullname" . }}
   namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -18,6 +21,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5002
           env:
@@ -43,6 +47,7 @@ spec:
                 name: {{ .Values.configs.dbCredentials }}
   strategy:
     canary:
+      # 실제 생성된 서비스 이름(onprem-dev-employee-employee-server-stable)과 일치해야 합니다.
       stableService: onprem-dev-employee-employee-server-stable
       canaryService: onprem-dev-employee-employee-server-canary
       trafficRouting:
