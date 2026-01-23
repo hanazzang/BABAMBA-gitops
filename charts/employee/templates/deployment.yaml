@@ -57,13 +57,13 @@ spec:
                 name: {{ .Values.configs.redisConfig }}
   strategy:
     canary:
-      # 서비스 이름 하드코딩 유지
-      stableService: onprem-dev-employee-employee-server-stable
-      canaryService: onprem-dev-employee-employee-server-canary
+      stableService: {{ include "employee-server.fullname" . }}-stable
+      canaryService: {{ include "employee-server.fullname" . }}-canary
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
-            httpRoute: employee-route
+            # HTTPRoute 이름은 하드코딩 해도 되지만, 위 파일과 일치해야 함
+            httpRoute: employee-route 
             namespace: employee
       steps:
         - setWeight: 10
