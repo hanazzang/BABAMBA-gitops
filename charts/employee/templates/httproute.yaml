@@ -27,7 +27,7 @@ spec:
       backendRefs:
         - group: ""
           kind: Service
-          # 실제 서비스 이름으로 강제 매핑
+          # 이 이름이 틀리면 Connection Refused가 뜹니다
           name: onprem-dev-employee-employee-server-stable
           port: 5002
           weight: 100
