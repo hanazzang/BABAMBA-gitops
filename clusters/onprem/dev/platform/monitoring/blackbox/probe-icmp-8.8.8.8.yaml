@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: probe-icmp-8-8-8-8
+  namespace: monitoring
+  labels:
+    # Prometheus가 이 라벨을 보고 수집 대상을 찾습니다.
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  jobName: blackbox-icmp # Prometheus에서 job 라벨로 표시됨
+  interval: 15s
+  module: icmp
+  
+  prober:
+    # fullnameOverride 덕분에 이름이 짧고 명확해집니다.
+    url: blackbox-exporter.monitoring.svc:9115
+  
+  targets:
+    staticConfig:
+      static:
+        - 8.8.8.8

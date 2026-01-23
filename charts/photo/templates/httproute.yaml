@@ -9,11 +9,13 @@ spec:
       kind: Gateway
       name: service-gateway
       namespace: gateway
+  hostnames:
+    - api.yxngjxe.store
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /photo
+            value: /api/photo
       backendRefs:
           - group: ""
             kind: Service
