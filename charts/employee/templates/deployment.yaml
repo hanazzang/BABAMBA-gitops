@@ -27,27 +27,34 @@ spec:
             - containerPort: 5002
           # [핵심] 환경 변수 주입 섹션
           env:
-            - name: MYSQL_HOST
+            # [수정] 앱이 실제 사용하는 이름(DATABASE_HOST)으로 변경
+            - name: DATABASE_HOST 
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
-                  key: DB_HOST
-            - name: DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DB_NAME
-            - name: MYSQL_PORT
+                  key: DB_HOST  # ConfigMap 키는 DB_HOST 유지 (이미 그렇게 설정하셨으므로)
+            
+            # [수정] 포트도 맞춰줍니다
+            - name: DATABASE_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_PORT
-            - name: DB_USER
+            
+            # DB 이름은 이미 맞게 되어있을 겁니다
+            - name: DATABASE_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_NAME
+            
+            # 유저/비번도 DATABASE_ 접두어로 변경
+            - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.configs.dbCredentials }}
                   key: DB_USER
-            - name: DB_PASSWORD
+            - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.configs.dbCredentials }}
