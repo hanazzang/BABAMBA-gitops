@@ -13,10 +13,6 @@ spec:
       app: {{ include "auth-server.fullname" . }}
   template:
     metadata:
-      {% comment %} annotations:
-        {{- if .Values.vault.enabled }}
-        {{- include "babamba.vault.annotations" . | nindent 8 }}
-        {{- end }} {% endcomment %}
       labels:
         app: {{ include "auth-server.fullname" . }}
         {{- include "auth-server.labels" . | nindent 8 }}
@@ -34,10 +30,6 @@ spec:
             - containerPort: {{ .Values.service.targetPort }}
           envFrom:
             {{- toYaml .Values.envFrom | nindent 12 }}
-          {% comment %} {{- if .Values.envFrom }}
-          envFrom:
-            {{- toYaml .Values.envFrom | nindent 12 }}
-          {{- end }} {% endcomment %}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
