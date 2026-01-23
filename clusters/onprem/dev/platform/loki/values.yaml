@@ -1,0 +1,49 @@
+# onprem-dev: 클러스터 내부 Loki (fluent-bit가 전송)
+# (ApplicationSet destination namespace와 일치)
+namespace: loki
+
+# onprem-dev에서는 외부 노출이 꼭 필요하지 않으므로 기본은 비활성화
+gateway:
+  enabled: false
+
+config:
+  common:
+    replication_factor: 1
+    ring:
+      kvstore:
+        store: inmemory
+
+persistence:
+  enabled: false
+  useEmptyDir: true
+  emptyDirSize: 10Gi
+
+# chart 기본값에 특정 노드(hostname)가 잡혀있을 수 있어 onprem-dev에서는 해제
+nodeSelector:
+  kubernetes.io/hostname: worker1
+
+# onprem-dev: 클러스터 내부 Loki (fluent-bit가 전송)
+# (ApplicationSet destination namespace와 일치)
+namespace: loki
+
+# onprem-dev에서는 외부 노출이 꼭 필요하지 않으므로 기본은 비활성화
+gateway:
+  enabled: true
+  type: NodePort
+  nodePort: 31000
+
+config:
+  common:
+    replication_factor: 1
+    ring:
+      kvstore:
+        store: inmemory
+
+persistence:
+  enabled: false
+  useEmptyDir: true
+  emptyDirSize: 10Gi
+
+# chart 기본값에 특정 노드(hostname)가 잡혀있을 수 있어 onprem-dev에서는 해제
+nodeSelector: {}
+

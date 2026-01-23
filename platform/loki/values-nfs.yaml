@@ -1,0 +1,47 @@
+nodeSelector:
+  kubernetes.io/hostname: worker1
+
+persistence:
+  enabled: true
+  size: 10Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-static
+  nfs:
+    createPV: true
+    server: "192.168.90.94"  ## 이 부분을 고쳐야 함
+    path: "/mnt/nfs/nfs"    ## 이 부분을 고쳐야 함
+
+config:
+  # NFS를 사용할 때는 object_store/filesystem으로 맞춰줘야 함
+  schema_config:
+    configs:
+      - from: 2020-10-24
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  storage_config:
+    tsdb_shipper:
+      # 재시작/노드이동에도 유지되게 /loki 아래로 두는 것을 권장
+      active_index_directory: /loki/tsdb-index
+      cache_location: /loki/tsdb-cache
+      cache_ttl: 24h
+    filesystem:
+      directory: /loki/chunks
+
+  compactor:
+    working_directory: /loki/compactor
+    compaction_interval: 10m
+    retention_enabled: true
+    retention_delete_delay: 12h
+    retention_delete_worker_count: 50
+    shared_store: filesystem
+
+  # 30일 보관(720h)
+  limits_config:
+    retention_period: 720h
+    max_query_length: 720h
