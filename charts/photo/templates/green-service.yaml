@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "photo-service.fullname" . }}-preview  # = green-service
+  labels:
+    {{- include "photo-service.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+  selector:
+    app: {{ include "photo-service.fullname" . }}

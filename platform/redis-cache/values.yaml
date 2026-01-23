@@ -1,0 +1,23 @@
+replicaCount: 1
+namespace: "common"
+
+image:
+  repository: redis
+  tag: "7"
+  pullPolicy: IfNotPresent
+
+service:
+  name: "redis-cache-service"
+  port: 6379
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+  limits:
+    memory: 512Mi
+    cpu: 300m
+
+redis:
+  maxmemory: "384mb"
+  maxmemoryPolicy: "allkeys-lru"

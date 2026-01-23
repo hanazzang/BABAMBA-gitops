@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "auth-server.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    {{- include "auth-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "auth-server.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "auth-server.fullname" . }}
+        {{- include "auth-server.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "auth-server.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+  # 중요: strategy는 spec의 하위 필드여야 합니다.
+  strategy:
+    canary:
+      stableService: {{ include "auth-server.fullname" . }}-stable
+      canaryService: {{ include "auth-server.fullname" . }}-canary
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoute: auth-route
+            namespace: auth
+      steps:
+        - setWeight: 10
+        - pause: { duration: 30s }
+        - setWeight: 30
+        - pause: { duration: 30s }
+        - setWeight: 60
+        - pause: { duration: 30s }
+        - setWeight: 100

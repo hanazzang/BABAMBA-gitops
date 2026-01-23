@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: gmail
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  route:
+    receiver: gmail
+    # 알림 그룹화 설정
+    groupBy: ["alertname", "cluster", "pod"]
+    groupWait: 10s
+    groupInterval: 3m
+    repeatInterval: 2h
+    routes:
+      - receiver: gmail
+        matchers:
+          - name: severity
+            value: warning
+            matchType: "="
+        continue: true
+
+  receivers:
+    - name: gmail
+      emailConfigs:
+        - to: "sieun6213@naver.com"
+          from: "sieun6213@gmail.com"
+          smarthost: "smtp.gmail.com:587"
+          authUsername: "sieun6213@gmail.com"
+          authPassword:
+            name: alertmanager-gmail
+            key: smtp_pass
+          # [핵심 수정] 명세에 맞춰 name 대신 key 사용
+          headers:
+            - key: "Subject"
+              value: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.cluster }} / {{ .CommonLabels.pod }})'
+          requireTLS: true
+          sendResolved: true # 장애 복구 시에도 알림 발송

@@ -9,6 +9,14 @@ spec:
     chart: gateway-helm
     repoURL: docker.io/envoyproxy
     targetRevision: v1.6.2
+    helm:
+      values: |
+        config:
+          envoyGateway:
+            provider:
+              kubernetes:
+                deploy:
+                  type: GatewayNamespace
   destination:
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
@@ -17,5 +25,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
       - ServerSideApply=true
