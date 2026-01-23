@@ -7,8 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring1
-    path: .
+    targetRevision: argos
     directory:
       recurse: true
       include: '{applications/onprem-dev/*.yaml,applicationsets/onprem-dev/*.yaml}'
