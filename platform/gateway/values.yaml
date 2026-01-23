@@ -14,6 +14,19 @@ gateway:
             matchLabels:
               gateway: user
 
+    - name: https
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: user
+      tls:
+        mode: Terminate
+        secretName: api-yxngjxe-tls   # <- 이 이름으로 gateway 네임스페이스에 TLS Secret 필요
+
 envoyProxy:
   name: envoy-gw-infra
   namespace: gateway
