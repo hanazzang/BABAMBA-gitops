@@ -1,6 +1,7 @@
 imagePullSecrets:
   - name: ghcr-pull
 
+
 envFrom:
   - configMapRef:
       name: db-config
@@ -8,3 +9,13 @@ envFrom:
       name: redis-config
   - secretRef:
       name: db-credentials
+
+# ===== HPA (dev 테스트용) =====
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70

@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: monitoring1
+        revision: hpa
         directories:
           - path: clusters/onprem/dev/platform/*
   template:
@@ -17,14 +17,14 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: monitoring1
+          targetRevision: hpa
           path: platform/{{path.basename}}
           helm:
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: monitoring1
+          targetRevision: hpa
           ref: values
       destination:
         server: https://kubernetes.default.svc

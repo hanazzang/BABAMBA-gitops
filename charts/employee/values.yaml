@@ -36,6 +36,7 @@ autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 3
+
   cpu:
     averageUtilization: 50
   memory:
