@@ -1,7 +1,3 @@
-clusterName: hana-eks-dev-usw2-eks
-region: us-west-2
-vpcId: vpc-00e7f160b941024ee
-
 serviceAccount:
   create: false
   name: aws-load-balancer-controller

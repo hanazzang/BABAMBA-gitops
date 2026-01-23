@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: main
+    targetRevision: hana
     path: clusters/cloud/prod/platform/aws-load-balancer-controller
   destination:
     server: https://kubernetes.default.svc
