@@ -11,6 +11,7 @@ spec:
       namespace: gateway
   hostnames:
     - api.yxngjxe.store
+    - yxngjxe.store
   rules:
     - matches:
         - path:
