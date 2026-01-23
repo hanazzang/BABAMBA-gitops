@@ -1,0 +1,221 @@
+image:
+  repository: fluent/fluent-bit
+  tag: 2.2.0
+  pullPolicy: IfNotPresent
+
+namespace: monitoring
+
+#
+# 멀티클러스터 식별/환경 구분 (DaemonSet 컨테이너 env로 주입)
+# - ENV: onprem / cloud 등
+# - CLUSTER_NAME: onprem-dev / onprem-prod / cloud-prod 등
+#
+extraEnv: []
+extraEnvFrom: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+# 배포 설정
+tolerations:
+  - operator: Exists
+
+
+# 메트릭 설정
+metrics:
+  enabled: true
+  port: 2020
+  
+# 로그 수집 설정
+service:
+  flush: 5
+  logLevel: info
+  workers: 2
+
+# 로그 수집 대상
+input:
+  tail:
+    path: /var/log/containers/*.log
+    # (노이즈 감소) fluent-bit 자신의 컨테이너 로그는 제외
+    exclude_path: /var/log/containers/*fluent-bit*.log
+    parser: docker
+    tag: kube.*
+    mem_buf_limit: 50MB
+    skip_long_lines: true
+    db: /var/fluent-bit/state/flb_kube.db
+    refresh_interval: 5
+    rotate_wait: 5
+
+# Kubernetes 메타데이터 추가 및 필터링
+filters:
+  kubernetes:
+    enabled: true
+    keepLog: false
+    mergeLog: true
+    # 모든 네임스페이스의 로그 수집
+    allowNamespaces:
+      - default
+      - monitoring
+      - argocd
+      - ingress-nginx
+
+  # HTTP 로그 파싱 (Uvicorn/FastAPI 로그 형식)
+  parser:
+    enabled: false
+    rules:
+      # HTTP 요청 로그 파싱 (예: "POST /auth/login HTTP/1.1" 200 OK)
+      - name: http_log
+        key_name: log
+        regex: '^(?<method>GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)\s+(?<path>/[^\s]*)\s+HTTP/[\d.]+"\s+(?<status_code>\d{3})'
+        reserve_data: true
+      
+      # 에러 레벨 추출
+      - name: error_level
+        key_name: log
+        regex: '(?<level>ERROR|WARN|INFO|DEBUG|FATAL|CRITICAL)'
+        reserve_data: true
+
+  # Lua 필터: 의미 필드 추출
+  lua:
+    enabled: true
+    call: extract_operational_fields
+    script: |
+      function extract_operational_fields(tag, ts, record)
+        local log = record["log"] or ""
+
+        -- namespace allowlist (원하는 범위만 Loki로 전송)
+        -- 필요 시 아래 목록에 네임스페이스를 추가/삭제하면 됨
+        local allow = {
+          ["default"] = true,
+          ["monitoring"] = true,
+          ["argocd"] = true,
+          ["ingress-nginx"] = true
+        }
+        local ns = record["kubernetes"] and record["kubernetes"]["namespace_name"]
+        if ns and (allow[ns] ~= true) then
+          return -1, ts, record
+        end
+
+        -- 멀티클러스터/환경 구분
+        record["env"] = os.getenv("ENV") or "onprem"
+        record["cluster"] = os.getenv("CLUSTER_NAME") or "unknown"
+
+        -- key=value 포맷 우선 파싱 (예: level=INFO request_id=... status=200 duration_ms=12.34)
+        local function kv(key)
+          return string.match(log, key .. "=([^%s]+)")
+        end
+
+        -- level 추출 (key=value 우선, 없으면 휴리스틱)
+        local level_kv = kv("level")
+        if level_kv then
+          record["level"] = level_kv
+        elseif string.match(log, "ERROR") or string.match(log, "Error") or string.match(log, "error") then
+          record["level"] = "ERROR"
+        elseif string.match(log, "WARN") or string.match(log, "Warn") or string.match(log, "warn") then
+          record["level"] = "WARN"
+        elseif string.match(log, "DEBUG") or string.match(log, "Debug") or string.match(log, "debug") then
+          record["level"] = "DEBUG"
+        else
+          record["level"] = "INFO"
+        end
+
+        -- request_id (라벨로는 쓰지 않고 필드로만 남김: 고카디널리티 방지)
+        local req_id = kv("request_id")
+        if req_id then
+          record["request_id"] = req_id
+        end
+
+        -- HTTP 상태 코드
+        local status_match =
+          kv("status") or kv("status_code")
+          or string.match(log, '"[A-Z]+ [^"]+ HTTP/[%d%.]+" (%d%d%d) ') -- nginx/common
+          or string.match(log, '" (%d%d%d) ')
+        if status_match then record["status_code"] = status_match end
+
+        -- 메서드/경로
+        local method_match =
+          kv("method")
+          or string.match(log, '^(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD) ')
+          or string.match(log, '"(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD) ')
+        if method_match then
+          record["method"] = method_match
+        end
+        local path_match =
+          kv("path")
+          or string.match(log, '"[A-Z]+ ([^%s]+) HTTP/[%d%.]+"') -- nginx/common
+          or string.match(log, ' [A-Z]+ ([^%s]+) ')
+        if path_match then
+          record["path"] = path_match
+        end
+
+        -- 응답 시간(ms)
+        local duration_match =
+          kv("duration_ms")
+          or kv("latency_ms")
+          or (function()
+            local rt = string.match(log, 'request_time=([%d%.]+)') or string.match(log, 'request_time:([%d%.]+)')
+            if rt then return tostring(tonumber(rt) * 1000) end
+            return nil
+          end)()
+          or string.match(log, 'executed in (%d+%.?%d*) ms')
+        if duration_match then
+          record["duration_ms"] = tonumber(duration_match)
+        end
+
+        -- 서비스명(service= 우선, 없으면 app 라벨)
+        local service_kv = kv("service")
+        if service_kv then
+          record["service"] = service_kv
+        end
+        local app = record["kubernetes"] and record["kubernetes"]["labels"] and record["kubernetes"]["labels"]["app"]
+        if (not record["service"]) and app then
+          record["service"] = app
+        end
+
+        return 2, ts, record
+      end
+
+  # 최소 정제: annotations 제거
+  recordModifier:
+    enabled: true
+    remove:
+      - kubernetes.annotations
+
+# Loki로 로그 전송
+output:
+  stdout:
+    enabled: false
+    match: kube.*
+  loki:
+    host: loki-loki
+    port: 3100
+    match: kube.*
+    # (선택) Loki push API 경로 (기본값: /loki/api/v1/push)
+    uri: /loki/api/v1/push
+    # (선택) HTTPS/TLS 사용
+    tls: false
+    tlsVerify: true
+    # (선택) Loki gateway에 BasicAuth를 붙인 경우
+    httpUser: ""
+    httpPassword: ""
+    # (선택) 멀티테넌시 사용 시 tenant_id (X-Scope-OrgID)
+    tenantID: ""
+    labels:
+      - job=fluent-bit
+      - namespace=$kubernetes['namespace_name']
+      - pod=$kubernetes['pod_name']
+      - service=$service
+      - level=$level
+      - env=$env
+      - cluster=$cluster
+    removeKeys:
+      - kubernetes
+      - stream
+      - time
+    compress: gzip
+

@@ -1,0 +1,25 @@
+{{- if and .Values.persistence.enabled .Values.persistence.nfs.createPV }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Release.Name }}-loki-pv
+  labels:
+    app: {{ .Release.Name }}-loki
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size | default "10Gi" }}
+  volumeMode: Filesystem
+  accessModes:
+    {{- toYaml (.Values.persistence.accessModes | default (list "ReadWriteOnce")) | nindent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.persistence.reclaimPolicy | default "Retain" }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- else }}
+  storageClassName: nfs-static
+  {{- end }}
+  mountOptions:
+    - vers=4.1
+  nfs:
+    server: {{ required "persistence.nfs.server is required when persistence.nfs.createPV=true" .Values.persistence.nfs.server }}
+    path: {{ required "persistence.nfs.path is required when persistence.nfs.createPV=true" .Values.persistence.nfs.path }}
+{{- end }}

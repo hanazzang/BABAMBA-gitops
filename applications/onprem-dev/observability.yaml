@@ -10,9 +10,7 @@ spec:
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
     targetRevision: monitoring2
-
     path: platform/grafana-dashboards/templates
-
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
