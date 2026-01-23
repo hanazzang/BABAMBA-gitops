@@ -49,14 +49,28 @@ grafana:
     # storageClassName: "ceph" # Ceph StorageClass
     # size: 10Gi
 
+prometheus-node-exporter:
+  tolerations:
+    # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
+    - operator: "Exists"
+
 prometheus:
   prometheusSpec:
+    # 노드 격리 설정 (Taint + NodeSelector)
+    nodeSelector:
+      dedicated: "monitoring"
+    tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "monitoring"
+      effect: "NoSchedule"
+
     # EKS 데이터를 받기 위한 필수 설정
     enableFeatures:
       - remote-write-receiver
 
     # 튜닝 적용: 수집 주기 완화 및 보존 기간 최적화
-    scrapeInterval: "30s"
+    scrapeInterval: "20s"
     evaluationInterval: "30s"
 
     # 데이터 보존 기간 최적화
@@ -80,14 +94,14 @@ prometheus:
       # 데모용 임시 디렉터리 
       emptyDir:
         medium: ""
-      # ceph 스토리지
-      # volumeClaimTemplate:
-      #   spec:
-      #     storageClassName: "ceph"   # Ceph StorageClass
-      #     accessModes: ["ReadWriteOnce"]
-      #     resources:
-      #       requests:
-      #         storage: 80Gi
+    # 저장소 볼륨 설정
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 70Gi
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
@@ -104,8 +118,6 @@ prometheus:
     probeSelector: {}
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
-
-    
 
 alertmanager:
   enabled: true
