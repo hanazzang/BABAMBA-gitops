@@ -95,7 +95,7 @@ prometheus:
       emptyDir:
         medium: ""
     # # 저장소 볼륨 설정
-    # storageSpec:
+    storageSpec: {}
     #   volumeClaimTemplate:
     #     spec:
     #       accessModes: ["ReadWriteOnce"]
