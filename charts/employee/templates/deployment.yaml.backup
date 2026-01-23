@@ -24,10 +24,6 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.containerPort }}
-          # 1. 개별 환경 변수 주입 (values.yaml의 env 섹션 가져오기)
-          env:
-            {{- toYaml .Values.env | nindent 12 }}
-          # 2. ConfigMap/Secret 전체 주입
           envFrom:
             {{- toYaml .Values.envFrom | nindent 12 }}
 
@@ -35,11 +31,13 @@ spec:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
       canaryService: {{ include "employee-server.fullname" . }}-canary
+
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
             httpRoute: employee-route
             namespace: employee
+
       steps:
         - setWeight: 10
         - pause: { duration: 30s }
