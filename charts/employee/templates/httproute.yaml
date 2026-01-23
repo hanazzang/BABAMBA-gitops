@@ -23,15 +23,15 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefix: /employee
+              replacePrefix: /employee  # 앱이 /employee 경로를 사용하는 경우
       backendRefs:
         - group: ""
           kind: Service
-          name: onprem-dev-employee-employee-server-stable # 실제 서비스 이름으로 수정
+          name: onprem-dev-employee-employee-server-stable
           port: 5002
           weight: 100
         - group: ""
           kind: Service
-          name: onprem-dev-employee-employee-server-canary # 실제 서비스 이름으로 수정
+          name: onprem-dev-employee-employee-server-canary
           port: 5002
           weight: 0

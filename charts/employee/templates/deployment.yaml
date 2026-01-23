@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: onprem-dev-employee-employee-server # 실제 서비스 이름과 맞춤
+  name: {{ include "employee-server.fullname" . }}
   namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -9,17 +9,17 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: employee-server # selectorLabels 확인
+      {{- include "employee-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: employee-server
+        {{- include "employee-server.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: employee-server
+        - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           ports:
-            - containerPort: 5002 # 앱이 실제로 떠 있는 포트
+            - containerPort: 5002
           env:
             - name: DB_HOST
               valueFrom:
