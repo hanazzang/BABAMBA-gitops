@@ -16,6 +16,12 @@ spec:
         - path:
             type: PathPrefix
             value: /api/photo
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /photo
       backendRefs:
           - group: ""
             kind: Service
