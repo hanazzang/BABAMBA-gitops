@@ -17,21 +17,21 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/employee  # 사용자가 입력하는 실제 주소
+            value: /api/employee
       filters:
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefix: /employee  # 앱 서버에 전달될 실제 내부 경로
+              replacePrefix: /employee
       backendRefs:
         - group: ""
           kind: Service
-          name: {{ include "employee-server.fullname" . }}-stable
-          port: {{ .Values.service.port }}
+          name: onprem-dev-employee-employee-server-stable # 실제 서비스 이름으로 수정
+          port: 5002
           weight: 100
         - group: ""
           kind: Service
-          name: {{ include "employee-server.fullname" . }}-canary
-          port: {{ .Values.service.port }}
+          name: onprem-dev-employee-employee-server-canary # 실제 서비스 이름으로 수정
+          port: 5002
           weight: 0

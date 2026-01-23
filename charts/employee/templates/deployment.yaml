@@ -1,37 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: {{ include "employee-server.fullname" . }}
+  name: onprem-dev-employee-employee-server # 실제 서비스 이름과 맞춤
+  namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
-  labels:
-    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: employee-server # selectorLabels 확인
   template:
     metadata:
       labels:
-        {{- include "employee-server.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: employee-server
     spec:
-      imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: employee-server
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.containerPort }}
-          # 'None' 에러 방지를 위해 명시적으로 환경 변수를 매핑합니다.
+            - containerPort: 5002 # 앱이 실제로 떠 있는 포트
           env:
             - name: DB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DB_HOST
-            - name: MYSQL_HOST  # 앱 코드에서 이 이름을 사용할 수도 있으므로 추가합니다.
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
@@ -41,17 +31,7 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_NAME
-            - name: MYSQL_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DB_NAME
             - name: DB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DB_PORT
-            - name: MYSQL_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
@@ -61,11 +41,10 @@ spec:
                 name: {{ .Values.configs.redisConfig }}
             - secretRef:
                 name: {{ .Values.configs.dbCredentials }}
-
   strategy:
     canary:
-      stableService: {{ include "employee-server.fullname" . }}-stable
-      canaryService: {{ include "employee-server.fullname" . }}-canary
+      stableService: onprem-dev-employee-employee-server-stable
+      canaryService: onprem-dev-employee-employee-server-canary
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
