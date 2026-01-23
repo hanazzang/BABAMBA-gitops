@@ -77,11 +77,10 @@ data:
               "color": { "mode": "thresholds" },
               "unit": "s",
               "thresholds": {
-                "mode": "absolute",
+                "mode": "percentage",
                 "steps": [
-                  { "color": "green", "value": 0 },
-                  { "color": "#EAB839", "value": 0.5 },
-                  { "color": "red", "value": 1 }
+                  { "color": "green", "value": 100 },
+                  { "color": "red", "value": 0 }
                 ]
               }
             }
