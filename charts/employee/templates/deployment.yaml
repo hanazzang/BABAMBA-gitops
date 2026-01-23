@@ -2,10 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
+  namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
-  labels:
-    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -16,33 +15,57 @@ spec:
       labels:
         {{- include "employee-server.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.containerPort }}
+            - containerPort: 5002
+          # [핵심] 환경 변수 주입 섹션
+          env:
+            - name: MYSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_NAME
+            - name: MYSQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_PORT
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.configs.dbCredentials }}
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.configs.dbCredentials }}
+                  key: DB_PASSWORD
           envFrom:
-            {{- toYaml .Values.envFrom | nindent 12 }}
-
+            - configMapRef:
+                name: {{ .Values.configs.redisConfig }}
   strategy:
     canary:
-      stableService: {{ include "employee-server.fullname" . }}-stable
-      canaryService: {{ include "employee-server.fullname" . }}-canary
-
+      # 서비스 이름 하드코딩 유지
+      stableService: onprem-dev-employee-employee-server-stable
+      canaryService: onprem-dev-employee-employee-server-canary
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
             httpRoute: employee-route
             namespace: employee
-
       steps:
         - setWeight: 10
-        - pause: { duration: 30s }
-        - setWeight: 30
-        - pause: { duration: 30s }
-        - setWeight: 60
         - pause: { duration: 30s }
         - setWeight: 100
