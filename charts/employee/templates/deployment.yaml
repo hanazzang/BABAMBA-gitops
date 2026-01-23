@@ -7,7 +7,9 @@ metadata:
   labels:
     {{- include "employee-server.labels" . | nindent 4 }}
 spec:
+  {{ if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{ end }}
   selector:
     matchLabels:
       {{- include "employee-server.selectorLabels" . | nindent 6 }}
@@ -26,6 +28,8 @@ spec:
             - containerPort: {{ .Values.containerPort }}
           envFrom:
             {{- toYaml .Values.envFrom | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
 
   strategy:
     canary:

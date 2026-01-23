@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "photo-service.fullname" . }}-hpa
+  name: {{ include "employee-server.fullname" . }}-hpa
   labels:
-    {{- include "photo-service.labels" . | nindent 4 }}
+    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
-    name: {{ include "photo-service.fullname" . }}
+    name: {{ include "employee-server.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
@@ -25,4 +25,4 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.memory.averageUtilization }}
-{{- end}}
+{{- end }}
