@@ -1,6 +1,11 @@
 imagePullSecrets:
   - name: ghcr-pull
 
+# ===== 이미지 (환경별 핵심 값) =====
+image:
+  repository: ghcr.io/hanazzang/auth_server
+  tag: "sha-29544c2"
+  pullPolicy: IfNotPresent
 
 envFrom:
   - configMapRef:
