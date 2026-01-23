@@ -18,20 +18,22 @@ spec:
         - path:
             type: PathPrefix
             value: /api/auth
+
       filters:
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
               replacePrefixMatch: /auth
+
       backendRefs:
-          - group: ""
-            kind: Service
-            name: auth-server-stable
-            port: 5001
-            weight: 100
-          - group: ""
-            kind: Service
-            name: auth-server-canary
-            port: 5001
-            weight: 0
+        - group: ""
+          kind: Service
+          name: auth-server-stable
+          port: 5001
+          weight: 100
+        - group: ""
+          kind: Service
+          name: auth-server-canary
+          port: 5001
+          weight: 0

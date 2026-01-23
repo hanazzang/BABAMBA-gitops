@@ -25,15 +25,15 @@ spec:
             path:
               type: ReplacePrefixMatch
               replacePrefixMatch: /employee
-              
+
       backendRefs:
-          - group: ""
-            kind: Service
-            name: {{ include "employee-server.fullname" . }}-stable
-            port: {{ .Values.service.port }}
-            weight: 100
-          - group: ""
-            kind: Service
-            name: {{ include "employee-server.fullname" . }}-canary
-            port: {{ .Values.service.port }}
-            weight: 0
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-stable
+          port: {{ .Values.service.port }}
+          weight: 100
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-canary
+          port: {{ .Values.service.port }}
+          weight: 0
