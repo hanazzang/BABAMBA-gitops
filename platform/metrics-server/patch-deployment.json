@@ -1,7 +1,3 @@
 - op: add
   path: /spec/template/spec/containers/0/args/-
   value: --kubelet-insecure-tls
-
-- op: replace
-  path: /spec/template/spec/containers/0/args/2
-  value: --kubelet-preferred-address-types=Hostname,InternalIP,ExternalIP

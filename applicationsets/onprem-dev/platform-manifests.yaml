@@ -12,7 +12,7 @@ spec:
           - path: platform/metrics-server
   template:
     metadata:
-      name: 'onprem-dev-{{path.basename}}' # => onprem-dev-metrics-server
+      name: 'onprem-dev-{{path.basename}}'
       annotations:
         argocd.argoproj.io/sync-wave: "0"
     spec:
