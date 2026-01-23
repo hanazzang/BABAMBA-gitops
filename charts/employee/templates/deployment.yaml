@@ -1,7 +1,6 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  # 헬름 차트 이름과 상관없이 실제 배포되는 이름을 명시하거나 include를 사용합니다.
   name: {{ include "employee-server.fullname" . }}
   namespace: employee
   annotations:
@@ -47,7 +46,7 @@ spec:
                 name: {{ .Values.configs.dbCredentials }}
   strategy:
     canary:
-      # 실제 생성된 서비스 이름(onprem-dev-employee-employee-server-stable)과 일치해야 합니다.
+      # 실제 서비스 이름과 100% 일치하도록 수정되었습니다.
       stableService: onprem-dev-employee-employee-server-stable
       canaryService: onprem-dev-employee-employee-server-canary
       trafficRouting:
