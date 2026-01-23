@@ -19,8 +19,7 @@ persistence:
   emptyDirSize: 10Gi
 
 # chart 기본값에 특정 노드(hostname)가 잡혀있을 수 있어 onprem-dev에서는 해제
-nodeSelector:
-  kubernetes.io/hostname: worker1
+nodeSelector: {}
 
 # onprem-dev: 클러스터 내부 Loki (fluent-bit가 전송)
 # (ApplicationSet destination namespace와 일치)

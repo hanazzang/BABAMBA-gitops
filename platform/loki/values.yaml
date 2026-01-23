@@ -67,8 +67,7 @@ persistence:
     server: ""
     path: ""
 # nodeSelector (worker 전용 배치 가능)
-nodeSelector:
-  kubernetes.io/hostname: worker1
+nodeSelector: {}
 
 # WAL 설정 (업로드 전 로그 내구성 보강)
 wal:

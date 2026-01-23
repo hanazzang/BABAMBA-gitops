@@ -1,5 +1,4 @@
-nodeSelector:
-  kubernetes.io/hostname: worker1
+nodeSelector: {}
 
 persistence:
   enabled: true
