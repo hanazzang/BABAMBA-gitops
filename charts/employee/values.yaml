@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/hanazzang/employee_server
   pullPolicy: Always
-  tag: "sha-29544c2"
+  tag: "sha-758193e"
 
 imagePullSecrets:
   - name: ghcr-pull
@@ -15,10 +15,7 @@ service:
 
 containerPort: 5002
 
-envFrom:
-  - configMapRef:
-      name: db-config
-  - configMapRef:
-      name: redis-config
-  - secretRef:
-      name: db-credentials
+configs:
+  dbConfig: db-config
+  redisConfig: redis-config
+  dbCredentials: db-credentials
