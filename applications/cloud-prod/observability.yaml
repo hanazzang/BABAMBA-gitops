@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloud-prod-observability
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: HEAD
+    path: workloads/monitoring/eks # EKS용 모니터링 리소스 경로
+  destination:
+    server: <EKS-클러스터-서버-주소>
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
