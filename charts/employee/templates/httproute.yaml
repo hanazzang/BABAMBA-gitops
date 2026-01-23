@@ -11,25 +11,27 @@ spec:
       kind: Gateway
       name: service-gateway
       namespace: gateway
+  hostnames:
+    - api.yxngjxe.store
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/employee
-      filters:                # 이 섹션을 추가하세요
+            value: /api/employee  # 사용자가 브라우저에 입력하는 주소
+      filters:
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefix: /employee
+              replacePrefix: /employee  # 앱 서버(Python)로 전달될 실제 주소
       backendRefs:
-          - group: ""
-            kind: Service
-            name: {{ include "employee-server.fullname" . }}-stable
-            port: {{ .Values.service.port }}
-            weight: 100
-          - group: ""
-            kind: Service
-            name: {{ include "employee-server.fullname" . }}-canary
-            port: {{ .Values.service.port }}
-            weight: 0
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-stable
+          port: {{ .Values.service.port }}
+          weight: 100
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-canary
+          port: {{ .Values.service.port }}
+          weight: 0
