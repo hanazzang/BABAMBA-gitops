@@ -10,8 +10,7 @@ spec:
       name: service-gateway
       namespace: gateway
   hostnames:
-    - api.yxngjxe.store
-    - yxngjxe.store
+    - ehanadul.store
   rules:
     - matches:
         - path:
