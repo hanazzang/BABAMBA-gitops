@@ -11,16 +11,21 @@ spec:
   source:
     repoURL: https://kubernetes-sigs.github.io/metrics-server/ # Helm 레포 주소
     chart: metrics-server
-    targetRevision: 3.12.1 # 원하는 버전
+    # 3.13.0 차트는 metrics-server v0.8.0(appVersion)를 사용합니다.
+    # (3.12.1은 v0.7.1이라, 기존에 v0.8.0을 쓰던 환경이면 오히려 다운그레이드가 될 수 있음)
+    targetRevision: 3.13.0 # 원하는 버전
     helm:
       values: |
-        # ✅ 여기서 중요! 아까 해결하려던 TLS 문제를 여기서 한 번에 해결합니다.
-        defaultArgs:
-          - --cert-dir=/tmp
+        # NOTE:
+        # - apiService.insecureSkipTLSVerify 는 "API aggregation -> metrics-server" 구간 TLS 검증 옵션입니다.
+        # - --kubelet-insecure-tls 는 "metrics-server -> kubelet" 구간(노드 인증서) TLS 검증을 끄는 옵션입니다.
+        apiService:
+          insecureSkipTLSVerify: true
+
+        # 기본 defaultArgs는 차트 기본값을 그대로 사용하고,
+        # 필요한 옵션만 추가 args로 넣는 편이 업그레이드/유지보수에 안전합니다.
+        args:
           - --kubelet-insecure-tls
-          - --kubelet-preferred-address-types=Hostname,InternalIP,ExternalIP
-          - --kubelet-use-node-status-port
-          - --metric-resolution=15s
   syncPolicy:
     automated:
       prune: true
