@@ -7,7 +7,9 @@ metadata:
   labels:
     {{- include "auth-server.labels" . | nindent 4 }}
 spec:
+  {{ if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{ end }}
   selector:
     matchLabels:
       app: {{ include "auth-server.fullname" . }}
@@ -29,29 +31,20 @@ spec:
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           envFrom:
-            - configMapRef:
-                name: {{ .Values.envFrom.configMapRef.name }}
-                optional: true
-            - configMapRef:
-                name: {{ .Values.envFrom.redisConfigMapRef.name }}    
-                optional: true
-            - secretRef:
-                name: {{ .Values.envFrom.secretRef.name }}
-                optional: true
+            {{- toYaml .Values.envFrom | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
+  # 중요: strategy는 spec의 하위 필드여야 합니다.
   strategy:
     canary:
       stableService: {{ include "auth-server.fullname" . }}-stable
       canaryService: {{ include "auth-server.fullname" . }}-canary
-
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
             httpRoute: auth-route
             namespace: auth
-
       steps:
         - setWeight: 10
         - pause: { duration: 30s }

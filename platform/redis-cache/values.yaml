@@ -1,4 +1,5 @@
 replicaCount: 1
+namespace: "common"
 
 image:
   repository: redis
@@ -6,6 +7,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
+  name: "redis-cache-service"
   port: 6379
 
 resources:
@@ -19,5 +21,3 @@ resources:
 redis:
   maxmemory: "384mb"
   maxmemoryPolicy: "allkeys-lru"
-
-  namespace: common

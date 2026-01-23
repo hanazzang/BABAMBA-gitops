@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-loki
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-loki
+spec:
+  replicas: {{ .Values.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-loki
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-loki
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default (printf "%s-loki" .Release.Name) }}
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ .Release.Name }}-loki
+                topologyKey: kubernetes.io/hostname
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: loki
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- if .Values.extraEnv }}
+          env:
+            {{- toYaml .Values.extraEnv | nindent 12 }}
+          {{- end }}
+          {{- if .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml .Values.extraEnvFrom | nindent 12 }}
+          {{- end }}
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          args:
+            - -config.file=/etc/loki/local-config.yaml
+          ports:
+            - name: http-metrics
+              containerPort: 3100
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/loki
+            {{- if .Values.persistence.enabled }}
+            - name: storage
+              mountPath: /loki
+            {{- else if .Values.persistence.useEmptyDir }}
+            - name: storage
+              mountPath: /loki
+            {{- end }}
+            {{- if .Values.wal.enabled }}
+            - name: wal
+              mountPath: {{ .Values.wal.path }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-loki-config
+        {{- if .Values.persistence.enabled }}
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-loki-pvc" .Release.Name) }}
+        {{- else if .Values.persistence.useEmptyDir }}
+        - name: storage
+          emptyDir:
+            {{- if .Values.persistence.emptyDirSize }}
+            sizeLimit: {{ .Values.persistence.emptyDirSize }}
+            {{- end }}
+        {{- end }}
+        {{- if .Values.wal.enabled }}
+        - name: wal
+          emptyDir:
+            {{- if .Values.wal.emptyDirSize }}
+            sizeLimit: {{ .Values.wal.emptyDirSize }}
+            {{- end }}
+        {{- end }}
+

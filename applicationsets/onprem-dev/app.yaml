@@ -26,6 +26,7 @@ spec:
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: hpa
+
           ref: values
           path: clusters
 
@@ -37,5 +38,3 @@ spec:
         automated:
           prune: true
           selfHeal: true
-        syncOptions:
-          - CreateNamespace=true

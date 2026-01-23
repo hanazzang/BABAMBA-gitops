@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-metrics
+  namespace: monitoring
+  labels:
+    # 프로메테우스가 이 ServiceMonitor를 인식하게 하는 핵심 라벨입니다.
+    # values-kps.yaml의 release 이름(onprem-dev-kube-prometheus-stack)과 맞춰야 합니다.
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  # 어떤 Service를 수집할지 결정합니다. 
+  # ArgoCD 설치 시 기본으로 생성되는 메트릭용 서비스를 타겟팅합니다.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  # 모든 네임스페이스를 보되, 특히 argocd 네임스페이스를 포함하도록 설정합니다.
+  namespaceSelector:
+    matchNames:
+      - argocd
+  endpoints:
+    - port: metrics
+      targetPort: 8082 # 조회하신 서비스의 실제 포트 번호
+      interval: 30s
+      path: /metrics

@@ -1,2 +1,4 @@
+/home/kosa/BABAMBA-gitops/bootstrap/secret.yaml
 bootstrap/argocd-repo-babamba-gitops.yaml
 bootstrap/argocd-repo-babamba-gitops.example.yaml
+

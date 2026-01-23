@@ -7,7 +7,9 @@ metadata:
   labels:
     {{- include "employee-server.labels" . | nindent 4 }}
 spec:
+  {{ if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{ end }}
   selector:
     matchLabels:
       {{- include "employee-server.selectorLabels" . | nindent 6 }}
@@ -25,15 +27,9 @@ spec:
           ports:
             - containerPort: {{ .Values.containerPort }}
           envFrom:
-            - configMapRef:
-                name: {{ .Values.configs.dbConfig }}
-                optional: true
-            - configMapRef:
-                name: {{ .Values.configs.redisConfig }}
-                optional: true
-            - secretRef:
-                name: {{ .Values.configs.dbCredentials }}
-                optional: true
+            {{- toYaml .Values.envFrom | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
 
   strategy:
     canary:
