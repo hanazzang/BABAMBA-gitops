@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "employee-server.fullname" . }}-canary
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.containerPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "employee-server.selectorLabels" . | nindent 4 }}

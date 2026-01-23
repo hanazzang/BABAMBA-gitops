@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "redis-cache.fullname" . }}
+  namespace: {{ .Values.namespace | default "common" }}
+spec:
+  serviceName: {{ include "redis-cache.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "redis-cache.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "redis-cache.name" . }}
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["redis-server"]
+          args:
+            - "--maxmemory"
+            - "{{ .Values.redis.maxmemory }}"
+            - "--maxmemory-policy"
+            - "{{ .Values.redis.maxmemoryPolicy }}"
+            - "--save"
+            - ""
+            - "--appendonly"
+            - "no"
+          ports:
+            - containerPort: 6379
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5

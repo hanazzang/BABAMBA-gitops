@@ -1,0 +1,26 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: {{ .Values.envoyProxy.name | quote }}
+  namespace: {{ .Values.envoyProxy.namespace | quote }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-6"
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        type: {{ .Values.envoyProxy.service.type | quote }}
+
+      envoyDeployment:
+        replicas: {{ .Values.envoyProxy.replicas }}
+        pod:
+          {{- if .Values.envoyProxy.podLabels }}
+          labels:
+{{ toYaml .Values.envoyProxy.podLabels | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.envoyProxy.topologySpreadConstraints }}
+          topologySpreadConstraints:
+{{ toYaml .Values.envoyProxy.topologySpreadConstraints | nindent 12 }}
+          {{- end }}

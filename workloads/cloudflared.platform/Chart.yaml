@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cloudflared
+description: Cloudflare Tunnel Agent
+version: 0.1.0
+appVersion: "latest"

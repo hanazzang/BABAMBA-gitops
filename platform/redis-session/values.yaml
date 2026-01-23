@@ -1,0 +1,8 @@
+namespace: "common"
+
+service:
+  name: redis-sentinel-service
+  port: 26379
+
+sentinels:
+  - ip: "192.168.13.169"

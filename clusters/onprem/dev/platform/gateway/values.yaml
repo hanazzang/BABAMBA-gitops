@@ -1,0 +1,3 @@
+gateway:
+  namespace: gateway
+  gatewayClassName: envoy
