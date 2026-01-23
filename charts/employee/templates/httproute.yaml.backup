@@ -23,7 +23,7 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefix: /employee  # 앱 서버가 실제로 인식하는 주소
+              replacePrefix: /employee  # 앱 서버에 전달되는 주소
       backendRefs:
         - group: ""
           kind: Service

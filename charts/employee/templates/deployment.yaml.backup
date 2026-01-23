@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "employee-server.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "employee-server.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          # 중요: env 섹션을 추가하여 ConfigMap의 값을 앱이 사용하는 변수명에 직접 연결합니다.
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_NAME
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configs.dbConfig }}
+                  key: DB_PORT
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configs.redisConfig }}
+            - secretRef:
+                name: {{ .Values.configs.dbCredentials }}
+
+  strategy:
+    canary:
+      stableService: {{ include "employee-server.fullname" . }}-stable
+      canaryService: {{ include "employee-server.fullname" . }}-canary
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoute: employee-route
+            namespace: employee
+      steps:
+        - setWeight: 10
+        - pause: { duration: 30s }
+        - setWeight: 30
+        - pause: { duration: 30s }
+        - setWeight: 60
+        - pause: { duration: 30s }
+        - setWeight: 100
