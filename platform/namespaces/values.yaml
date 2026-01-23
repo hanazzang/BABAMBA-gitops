@@ -61,3 +61,9 @@ namespaces:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: logging
+
+  - name: common
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: redis
