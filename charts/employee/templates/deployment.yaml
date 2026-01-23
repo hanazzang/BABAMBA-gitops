@@ -32,7 +32,7 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_HOST
-            - name: DATABASE_NAME
+            - name: DATABASE_DB_NAME
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
