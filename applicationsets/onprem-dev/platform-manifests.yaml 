@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-manifests
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: hpa
+        directories:
+          - path: platform/metrics-server
+  template:
+    metadata:
+      name: 'onprem-dev-{{path.basename}}' # => onprem-dev-metrics-server
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: hpa
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: kube-system
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
