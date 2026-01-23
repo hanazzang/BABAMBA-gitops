@@ -21,7 +21,7 @@ spec:
           ports:
             - containerPort: 5002
           env:
-            - name: DB_HOST
+            - name: MYSQL_HOST
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
@@ -31,16 +31,24 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_NAME
-            - name: DB_PORT
+            - name: MYSQL_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
                   key: DB_PORT
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.configs.dbCredentials }}
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.configs.dbCredentials }}
+                  key: DB_PASSWORD
           envFrom:
             - configMapRef:
                 name: {{ .Values.configs.redisConfig }}
-            - secretRef:
-                name: {{ .Values.configs.dbCredentials }}
   strategy:
     canary:
       # 실제 클러스터에 생성된 서비스 이름으로 하드코딩
