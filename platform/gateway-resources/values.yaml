@@ -2,7 +2,6 @@ gateway:
   name: service-gateway
   namespace: gateway
   gatewayClassName: envoy
-
   listeners:
     - name: http
       port: 80
@@ -12,14 +11,17 @@ gateway:
           from: Selector
           selector:
             matchLabels:
-              gateway: user
+              gateway: user  # 이 레이블이 있는 네임스페이스의 Route만 허용
 
 envoyProxy:
   name: envoy-gw-infra
   namespace: envoy-gateway-system
   replicas: 2
   service:
-    type: ClusterIP
+    type: LoadBalancer  # 외부 접속을 위해 변경
+    annotations:
+      # MetalLB에게 특정 IP 할당 요청 (보안 및 고정 IP 관리용)
+      metallb.universe.tf/loadBalancerIPs: "192.168.1.199"
   podLabels:
     app: envoy-gw-dataplane
   topologySpreadConstraints:
