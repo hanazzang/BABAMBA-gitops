@@ -94,14 +94,14 @@ prometheus:
       # 데모용 임시 디렉터리 
       emptyDir:
         medium: ""
-    # 저장소 볼륨 설정
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 70Gi
+    # # 저장소 볼륨 설정
+    # storageSpec:
+    #   volumeClaimTemplate:
+    #     spec:
+    #       accessModes: ["ReadWriteOnce"]
+    #       resources:
+    #         requests:
+    #           storage: 70Gi
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
