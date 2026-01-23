@@ -11,11 +11,13 @@ spec:
       kind: Gateway
       name: service-gateway
       namespace: gateway
+  hostnames:
+    - api.yxngjxe.store
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /employee
+            value: /api/employee
       backendRefs:
           - group: ""
             kind: Service

@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: gmail-eks
+  namespace: monitoring
+  labels:
+    release: eks-prometheus-stack
+spec:
+  route:
+    receiver: gmail
+    groupBy: ["alertname", "cluster", "region"] # EKS는 region 추가 권장
+    groupWait: 10s
+    groupInterval: 3m
+    repeatInterval: 2h
+  receivers:
+    - name: gmail
+      emailConfigs:
+        - to: "sieun6213@naver.com"
+          from: "sieun6213@gmail.com"
+          smarthost: "smtp.gmail.com:587"
+          authUsername: "sieun6213@gmail.com"
+          authPassword:
+            name: alertmanager-gmail
+            key: smtp_pass
+          headers:
+            - key: "Subject"
+              # EKS 클러스터명과 리전 정보를 포함하도록 설정
+              value: '[EKS-{{ .Status | toUpper }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.cluster }} / {{ .CommonLabels.region }})'
+          requireTLS: true 
