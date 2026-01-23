@@ -15,11 +15,17 @@ spec:
       labels:
         {{- include "employee-server.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5002
+          # [핵심] 환경 변수 주입 섹션
           env:
             - name: MYSQL_HOST
               valueFrom:
@@ -51,7 +57,7 @@ spec:
                 name: {{ .Values.configs.redisConfig }}
   strategy:
     canary:
-      # 실제 클러스터에 생성된 서비스 이름으로 하드코딩
+      # 서비스 이름 하드코딩 유지
       stableService: onprem-dev-employee-employee-server-stable
       canaryService: onprem-dev-employee-employee-server-canary
       trafficRouting:
