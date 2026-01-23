@@ -24,3 +24,9 @@ spec:
           topologySpreadConstraints:
 {{ toYaml .Values.envoyProxy.topologySpreadConstraints | nindent 12 }}
           {{- end }}
+
+        tolerations:
+          - key: "spot"
+            operator: "Equal"
+            value: "true"
+            effect: "NoSchedule"
