@@ -11,6 +11,7 @@ spec:
       kind: Gateway
       name: service-gateway
       namespace: gateway
+      sectionName: https    # <--- 이거 없으면 443(HTTPS) 요청은 500 에러 남
   hostnames:
     - api.yxngjxe.store
   rules:
@@ -18,14 +19,12 @@ spec:
         - path:
             type: PathPrefix
             value: /api/auth
-
       filters:
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
               replacePrefixMatch: /auth
-
       backendRefs:
         - group: ""
           kind: Service

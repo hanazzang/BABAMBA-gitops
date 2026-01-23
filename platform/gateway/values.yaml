@@ -25,7 +25,7 @@ gateway:
               gateway: user
       tls:
         mode: Terminate
-        secretName: api-yxngjxe-tls   # <- 이 이름으로 gateway 네임스페이스에 TLS Secret 필요
+        secretName: api-yxngjxe-tls # gateway 네임스페이스에 이 Secret이 반드시 있어야 함
 
 envoyProxy:
   name: envoy-gw-infra
