@@ -22,15 +22,3 @@ envFrom:
       name: redis-config
   - secretRef:
       name: db-credentials
-
-env:
-- name: DB_HOST
-  value: "192.168.1.50"  # ProxySQL IP
-- name: DB_PORT
-  value: "6033"
-- name: DB_USER
-  value: "kosa"
-- name: DB_PASSWORD
-  value: "kosa"
-- name: DB_NAME
-  value: "employees"
