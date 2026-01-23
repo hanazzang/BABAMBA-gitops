@@ -17,7 +17,7 @@ spec:
 
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring1
+    targetRevision: hpa
     path: platform/kps-crds/crds
     directory:
       recurse: true
