@@ -7,10 +7,10 @@ metadata:
   annotations:
     # kube-prometheus-stack(CRD 설치) 이후에 생성되도록 순서를 뒤로 미룹니다.
     argocd.argoproj.io/sync-wave: "6"
+  {{- with .Values.monitoring.prometheusReleaseLabel }}
   labels:
-    {{- with .Values.monitoring.prometheusReleaseLabel }}
     release: {{ . | quote }}
-    {{- end }}
+  {{- end }}
 spec:
   selector:
     matchLabels:
