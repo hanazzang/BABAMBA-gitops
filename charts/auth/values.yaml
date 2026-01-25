@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: ghcr.io/hanazzang/auth_server
-  tag: "sha-a77d302"
+  tag: "sha-2e30ade"
   pullPolicy: IfNotPresent
 
 
