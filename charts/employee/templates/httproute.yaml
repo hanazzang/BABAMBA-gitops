@@ -13,7 +13,7 @@ spec:
       namespace: gateway
       sectionName: https
   hostnames:
-    - api.yxngjxe.store
+    - api.yongun.shop
   rules:
     - matches:
         - path:
