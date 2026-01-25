@@ -10,10 +10,10 @@ grafana:
   sidecar:
     dashboards:
       enabled: true
-      # 라벨 키
+      # 라벨 키(해당 라벨이 있는 configmap 스캔)
       label: grafana_dashboard
 
-      # (중요) ConfigMap에 grafana_dashboard: "1" 로 붙일 거라면 값도 맞춰주는 게 안전
+      # ConfigMap에 grafana_dashboard: "1" 로 붙일 거라면 값도 맞춰주는 게 안전
       labelValue: "1"
 
       # (권장) RBAC 꼬임 방지: Grafana가 있는 네임스페이스만 스캔
@@ -88,7 +88,7 @@ prometheus:
 
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
     externalLabels:
-      cluster: "onprem-dev" # 나중에 환경명 바뀔 때 여기만 수정
+      cluster: "onprem-prod" # 나중에 환경명 바뀔 때 여기만 수정
 
     replicas: 1
     resources:
@@ -154,4 +154,9 @@ kubeScheduler:
 kubeControllerManager:
   enabled: false
 
-# kube-state-metrics / node-exporter 등은 기본 포함
+# kube-state-metrics / node-exporter 등은 기본 포함이지만 명시
+# 노드 및 K8s 상태 지표 명시적 활성화
+nodeExporter:
+  enabled: true
+kubeStateMetrics:
+  enabled: true
