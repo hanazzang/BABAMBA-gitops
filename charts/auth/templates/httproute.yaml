@@ -28,11 +28,11 @@ spec:
       backendRefs:
         - group: ""
           kind: Service
-          name: auth-server-stable
+          name: {{ include "auth-server.fullname" . }}-stable
           port: 5001
           weight: 100
         - group: ""
           kind: Service
-          name: auth-server-canary
+          name: {{ include "auth-server.fullname" . }}-canary
           port: 5001
           weight: 0
