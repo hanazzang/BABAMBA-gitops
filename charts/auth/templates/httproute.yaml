@@ -18,13 +18,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/auth
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /auth
+            value: /auth
       backendRefs:
         - group: ""
           kind: Service

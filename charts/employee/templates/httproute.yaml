@@ -11,21 +11,14 @@ spec:
       kind: Gateway
       name: service-gateway
       namespace: gateway
+      sectionName: https
   hostnames:
     - api.yxngjxe.store
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/employee
-
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /employee
-
+            value: /employee
       backendRefs:
         - group: ""
           kind: Service
