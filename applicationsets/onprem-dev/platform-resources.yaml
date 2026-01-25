@@ -10,6 +10,9 @@ spec:
         revision: hpa
         directories:
           - path: clusters/onprem/dev/platform/*
+          - path: clusters/onprem/dev/platform/keda
+            exclude: true
+
   template:
     metadata:
       name: 'onprem-dev-{{path.basename}}'
