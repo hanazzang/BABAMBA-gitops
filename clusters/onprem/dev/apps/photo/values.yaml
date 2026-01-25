@@ -30,7 +30,7 @@ persistence:
   type: hostPath
   hostPath: /mnt/data/photos
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 1Gi
   mountPath: /app/static/uploads
 
 # ===== 환경변수 주입 (사전 생성된 리소스) =====
