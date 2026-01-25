@@ -21,7 +21,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-stack-prometheus.monitoring.svc:9090
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: gateway_rps
         query: 'sum(rate(envoy_http_downstream_rq_total{namespace="{{ .Values.envoyProxy.namespace }}",app="{{ .Values.envoyProxy.podLabels.app }}"}[1m]))'
         threshold: "200"

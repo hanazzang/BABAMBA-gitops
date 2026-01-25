@@ -58,7 +58,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-stack-prometheus.monitoring.svc:9090
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: auth_rps
         query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "auth-server.name" . }}"}[1m]))'
         threshold: "20"
@@ -67,7 +67,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-stack-prometheus.monitoring.svc:9090
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: auth_p95_latency_seconds
         query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "auth-server.name" . }}"}[5m])) by (le))'
         threshold: "0.3"
