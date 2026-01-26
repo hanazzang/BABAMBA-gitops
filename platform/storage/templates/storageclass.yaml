@@ -1,0 +1,10 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard # 혹은 fast, nfs-client 등
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true" # 이것을 기본 스토리지로 설정
+    argocd.argoproj.io/sync-wave: "-5" # 다른 앱보다 먼저 생성되도록 설정
+provisioner: rancher.io/local-path # [주의] 사용하는 Provisioner에 맞춰 수정 (AWS면 kubernetes.io/aws-ebs 등)
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer

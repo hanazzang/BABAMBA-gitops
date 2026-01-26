@@ -1,3 +1,4 @@
+
 {{- if and .Values.autoscaling.enabled (not .Values.keda.enabled) }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -16,6 +17,7 @@ spec:
     name: {{ include "employee-server.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+
   {{- with .Values.autoscaling.behavior }}
   behavior:{{ toYaml . | nindent 4 }}
   {{- end }}

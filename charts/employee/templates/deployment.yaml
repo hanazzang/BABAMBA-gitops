@@ -12,20 +12,24 @@ spec:
   {{ end }}
   selector:
     matchLabels:
-      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+      app: {{ include "employee-server.fullname" . }}
   template:
     metadata:
       labels:
-        {{- include "employee-server.selectorLabels" . | nindent 8 }}
+        app: {{ include "employee-server.fullname" . }}
+        {{- include "employee-server.labels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        - name: {{ include "employee-server.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.containerPort }}
+            - containerPort: {{ .Values.service.targetPort }}
           envFrom:
             {{- toYaml .Values.envFrom | nindent 12 }}
           resources:
@@ -35,13 +39,12 @@ spec:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
       canaryService: {{ include "employee-server.fullname" . }}-canary
-
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
+            # [중요] Auth와 겹치지 않게 employee 라우트 지정
             httpRoute: employee-route
             namespace: employee
-
       steps:
         - setWeight: 10
         - pause: { duration: 30s }
