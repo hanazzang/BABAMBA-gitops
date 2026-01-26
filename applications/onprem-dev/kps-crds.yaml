@@ -23,7 +23,7 @@ spec:
       recurse: true
 
 
-  syncPolicy: {}
+  syncPolicy: 
   # 처음 한번만 한 번 배포. CRD는 자주 안 바뀜.
   # 잘못 적용되면 기존 리소스까지 다 영향 주니까 autoSync꺼두기
     automated: {}
