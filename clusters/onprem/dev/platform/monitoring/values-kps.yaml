@@ -6,6 +6,27 @@ grafana:
   service:
     type: NodePort
     nodePort: 32300
+  # 사이드카 설정(커스텀한 대시보드 사용)
+  sidecar:
+    dashboards:
+      enabled: true
+      # 라벨 키(해당 라벨이 있는 configmap 스캔)
+      label: grafana_dashboard
+
+      # ConfigMap에 grafana_dashboard: "1" 로 붙일 거라면 값도 맞춰주는 게 안전
+      labelValue: "1"
+
+      # (권장) RBAC 꼬임 방지: Grafana가 있는 네임스페이스만 스캔
+      # 보통 kube-prometheus-stack grafana도 monitoring에 있으니 monitoring 추천
+      searchNamespace: monitoring
+
+      # (권장) 폴더 분리하고 싶으면 ConfigMap에 이 annotation 달면 폴더가 나뉨
+      folderAnnotation: grafana_folder
+
+      # (권장) Grafana provisioning provider 설정
+      provider:
+        allowUiUpdates: false
+        foldersFromFilesStructure: true
 
   # 사이드카 설정(커스텀한 대시보드 사용)
   sidecar:
@@ -58,7 +79,20 @@ grafana:
       access: proxy
       url: http://onprem-dev-loki-loki.loki.svc.cluster.local:3100
       isDefault: false
+prometheus-node-exporter:
+  tolerations:
+    # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
+    - operator: "Exists"
 
+# operator도 격리
+prometheusOperator:
+  nodeSelector:
+    dedicated: "monitoring"
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "monitoring"
+    effect: "NoSchedule"
 
 prometheus-node-exporter:
   tolerations:
@@ -87,11 +121,9 @@ prometheus:
     # 데이터 보존 기간 최적화
     retention: "7d"
 
-
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
     externalLabels:
-      cluster: "onprem-dev" # 나중에 환경명 바뀔 때 여기만 수정
-
+      cluster: "onprem-prod" # 나중에 환경명 바뀔 때 여기만 수정
 
     replicas: 1
     resources:
@@ -102,20 +134,20 @@ prometheus:
         cpu: "1000m"
         memory: "2Gi"
 
-    # 스토리지 쓰려면 아래 주석 해제
+    # # 스토리지 쓰려면 아래 주석 해제
+    # storageSpec:
+    #   # 데모용 임시 디렉터리 
+    #   emptyDir:
+    #     medium: ""
+    # 저장소 볼륨 설정
     storageSpec:
-      # 데모용 임시 디렉터리 
-      emptyDir:
-        medium: ""
-
-    # # 저장소 볼륨 설정
-    storageSpec: {}
-    #   volumeClaimTemplate:
-    #     spec:
-    #       accessModes: ["ReadWriteOnce"]
-    #       resources:
-    #         requests:
-    #           storage: 70Gi
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "local-storage" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 70Gi
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
@@ -133,17 +165,23 @@ prometheus:
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
 
-
 alertmanager:
   enabled: true
   alertmanagerSpec:
     replicas: 1
+    # 노드 격리 설정 추가
+    nodeSelector:
+      dedicated: "monitoring"
+    tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "monitoring"
+      effect: "NoSchedule"
     alertmanagerConfigSelector:
       matchLabels:
         release: onprem-dev-kube-prometheus-stack
 
 # 데모 환경에서 불필요한 고부하 수집기 비활성화
-
 kubeProxy:
   enabled: false
 kubeScheduler:
@@ -151,4 +189,9 @@ kubeScheduler:
 kubeControllerManager:
   enabled: false
 
-# kube-state-metrics / node-exporter 등은 기본 포함
+# kube-state-metrics / node-exporter 등은 기본 포함이지만 명시
+# 노드 및 K8s 상태 지표 명시적 활성화
+nodeExporter:
+  enabled: true
+kubeStateMetrics:
+  enabled: true

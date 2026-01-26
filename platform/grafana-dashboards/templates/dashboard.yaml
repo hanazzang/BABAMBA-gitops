@@ -11,6 +11,9 @@ data:
   # 파일명을 dashboard.json으로 설정하여 직관성을 높였습니다.
   dashboard.json: |-
     {
+      "uid": "main",
+      "title": 통합 대시보드",
+      "editable": true,
       "annotations": {
         "list": [
           {

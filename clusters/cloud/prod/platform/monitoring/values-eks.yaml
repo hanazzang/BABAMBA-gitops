@@ -1,13 +1,17 @@
 global:
   clusterName: "eks-cloud-prod"
+  externalLabels:
+    cluster: "eks-cloud-prod" # 온프레미스에서 쿼리할 때 구분자 역할
 
 prometheus:
   prometheusSpec:
     replicas: 1
     enableFeatures:
       - agent # 에이전트 모드 활성화
+    externalLabels:
+      cluster: "eks-prod"  # 모든 지표에 이 라벨이 추가됨
 
-    # [보완] 부하 테스트 중 에이전트가 죽지 않도록 리소스 할당량 명시
+    # 부하 테스트 중 에이전트가 죽지 않도록 리소스 할당량 명시
     resources:
       requests:
         cpu: 500m
@@ -21,11 +25,11 @@ prometheus:
         queueConfig:
           maxSamplesPerSend: 10000
           maxShards: 200
-
+          batchSendDeadline: 10s # 네트워크 지연 고려
         # 부하 테스트에 필요한 핵심 메트릭만 필터링하여 전송료 절감
         writeRelabelConfigs:
           - sourceLabels: [__name__]
-            regex: '(http_.*|node_.*|container_.*)'
+            regex: '(http_.*|node_.*|container_.*|kube_pod_status_phase|kube_hpa_.*)' # HPA 지표 추가
             action: keep
 
     # 임시 디스크 사용
@@ -33,17 +37,17 @@ prometheus:
       emptyDir:
         medium: ""
         
-    # 노드 장애에 대비해 Prometheus Pod를 서로 다른 노드에 배치
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values:
-                    - prometheus
-            topologyKey: "kubernetes.io/hostname"
+    # # 노드 장애에 대비해 Prometheus Pod를 서로 다른 노드에 배치(replicas: 2이상일 시 사용)
+    # affinity:
+    #   podAntiAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #           matchExpressions:
+    #             - key: app.kubernetes.io/name
+    #               operator: In
+    #               values:
+    #                 - prometheus
+    #         topologyKey: "kubernetes.io/hostname"
             
     # 모든 네임스페이스의 ServiceMonitor 감지
     serviceMonitorSelectorNilUsesHelmValues: false

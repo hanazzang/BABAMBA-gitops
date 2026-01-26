@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hybrid-bursting-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "loadtest"
+spec:
+  data:
+    hybrid-bursting.json: |-
+      {
+        "title": "Hybrid Cloud Bursting Monitor",
+        "panels": [
+          {
+            "title": "Cluster-wise Traffic Distribution (RPS)",
+            "type": "timeseries",
+            "targets": [
+              { "expr": "sum(rate(envoy_cluster_upstream_rq_total[1m])) by (cluster)", "legendFormat": "{ {cluster} }" }
+            ]
+          },
+          {
+            "title": "App Response Latency Comparison (P95)",
+            "type": "timeseries",
+            "targets": [
+              { "expr": "histogram_quantile(0.95, sum(rate(envoy_cluster_upstream_rq_time_bucket[1m])) by (le, cluster))", "legendFormat": "{ {cluster} } P95" }
+            ]
+          },
+          {
+            "title": "Active Pod Count (HPA Scaling)",
+            "type": "timeseries",
+            "targets": [
+              { "expr": "kube_hpa_status_current_replicas", "legendFormat": "{ {cluster} } Replicas" }
+            ]
+          }
+        ]
+      }

@@ -1,18 +1,19 @@
+# applications/cloud-prod/kps-crds.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloud-prod-observability
+  name: cloud-prod-kps-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10" # KPS(에이전트) 설치 후 실행
+    argocd.argoproj.io/sync-wave: "0" # 가장 먼저 설치
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
     targetRevision: monitoring2
-    path: workloads/monitoring/eks # EKS용 모니터링 리소스 경로
+    path: platform/kps-crds/crds # 공용 CRD 경로 재사용
   destination:
-    server: <EKS-클러스터-서버-주소>
+    server: <EKS-CLUSTER-URL> # eks클러스터 주소
     namespace: monitoring
   syncPolicy:
     automated:
@@ -20,4 +21,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - ServerSideApply=true # CRD는 크기가 커서 필수

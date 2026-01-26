@@ -1,21 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-root-app
+  name: locust-resources
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring2
-    path: .
-    directory:
-      recurse: true
-      include: '{applications/onprem-dev/*.yaml,applicationsets/onprem-dev/*.yaml}'
+    targetRevision: stress
+    path: platform/locust
+
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: locust
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true
