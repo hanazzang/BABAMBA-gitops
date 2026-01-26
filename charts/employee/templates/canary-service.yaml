@@ -13,19 +13,4 @@ spec:
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:
-    apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "employee-server.fullname" . }}-stable
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-  labels:
-    {{- include "employee-server.labels" . | nindent 4 }}
-spec:
-  ports:
-    - name: http
-      protocol: TCP
-      port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-  selector:
     {{- include "employee-server.selectorLabels" . | nindent 4 }}
