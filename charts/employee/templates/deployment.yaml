@@ -31,27 +31,27 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
-                  key: DB_HOST
+                  key: DATABASE_HOST
             - name: DATABASE_DB_NAME
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
-                  key: DB_NAME
+                  key: DATABASE_DB_NAME
             - name: DATABASE_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Values.configs.dbConfig }}
-                  key: DB_PORT
+                  key: DATABASE_PORT
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.configs.dbCredentials }}
-                  key: DB_USER
+                  key: DATABASE_USER
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.configs.dbCredentials }}
-                  key: DB_PASSWORD
+                  key: DATABASE_PASSWORD
           envFrom:
             - configMapRef:
                 name: {{ .Values.configs.redisConfig }}
