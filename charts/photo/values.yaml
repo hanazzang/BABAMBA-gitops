@@ -1,6 +1,3 @@
-# ==========================================
-# Deployment 관련 설정 (deployment.yaml)
-# ==========================================
 replicaCount: 1
 
 image:
@@ -11,42 +8,24 @@ image:
 imagePullSecrets:
   - name: ghcr-pull
 
-# ==========================================
-# ServiceAccount 관련 설정 (serviceaccount.yaml)
-# ==========================================
-
 serviceAccount:
   name: photo-sa
 
-# ==========================================
-# Service 관련 설정 (service.yaml)
-# ==========================================
-
 service:
-  port: 5003
+  port: 5003        # [중요] Photo 서버 포트
   targetPort: 5003
 
-# ==========================================
-# Persistence 관련 설정 (pv-pvc.yaml & deployment.yaml)
-# ==========================================
+# [수정] StorageClass를 사용하는 방식으로 변경
 persistence:
   enabled: true
-  # hostPath: 단일 노드에만 안전(RWO). HPA로 여러 노드로 퍼지면 Pending/데이터 불일치 위험.
-  # cephfs(RWX)로 전환하려면:
-  # - type: pvc
-  # - storageClass: cephfs-rwx (예시)
-  # - accessMode: ReadWriteMany
-  type: hostPath
+  storageClassName: "standard" # [중요] 클러스터에 있는 StorageClass 이름 (platform/storage 참고)
   size: 1Gi
-  hostPath: /mnt/data/photos
-  # type=pvc 일 때 사용
-  storageClass: ""
-  accessMode: ReadWriteOnce
   mountPath: /app/static/uploads
 
-# ==========================================
-# Resource 관리 설정 (deployment.yaml)
-# ==========================================
+# [추가] Ingress/Gateway 설정
+ingress:
+  host: api.yongun.shop
+
 resources:
   limits:
     memory: "512Mi"
@@ -55,52 +34,11 @@ resources:
     memory: "128Mi"
     cpu: "100m"
 
-# ==========================================
-# Autoscaling 관련 설정 (hpa.yaml)
-# ==========================================
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 1
   maxReplicas: 3
   cpu:
     averageUtilization: 50
   memory:
     averageUtilization: 70
-  # 실무 포인트: 스케일링 정책(플랩핑 방지)
-  behavior:
-    scaleUp:
-      stabilizationWindowSeconds: 0
-      policies:
-        - type: Percent
-          value: 100
-          periodSeconds: 15
-        - type: Pods
-          value: 2
-          periodSeconds: 15
-      selectPolicy: Max
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-        - type: Percent
-          value: 50
-          periodSeconds: 60
-        - type: Pods
-          value: 1
-          periodSeconds: 60
-      selectPolicy: Min
-
-# Prometheus 스크랩 설정 (/metrics)
-monitoring:
-  prometheusReleaseLabel: ""
-  podMonitor:
-    enabled: false
-    path: /metrics
-    interval: 15s
-    scrapeTimeout: 10s
-
-# KEDA (Prometheus 트리거 기반 오토스케일)
-keda:
-  enabled: false
-  pollingInterval: 15
-  cooldownPeriod: 300
-  triggers: []

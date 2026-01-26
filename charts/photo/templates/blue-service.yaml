@@ -1,12 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "photo-service.fullname" . }}-active   # = blue-service
+  name: {{ include "photo-service.fullname" . }}-active
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
   ports:
     - name: http
+      protocol: TCP
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:
