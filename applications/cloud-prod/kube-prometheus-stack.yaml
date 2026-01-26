@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   destination:
-    server: https://14aafe276b19e2c2cf3864df93f31b1c.gr7.us-west-2.eks.amazonaws.com/ # EKS 클러스터 서버 주소
+    server: https://14aafe276b19e2c2cf3864df93f31b1c.gr7.us-west-2.eks.amazonaws.com # EKS 클러스터 서버 주소
     namespace: monitoring
   sources:
     # 1. Helm Chart 소스

@@ -12,7 +12,7 @@ spec:
     targetRevision: monitoring2
     path: workloads/monitoring/eks # EKS용 모니터링 리소스 경로
   destination:
-    server: https://14aafe276b19e2c2cf3864df93f31b1c.gr7.us-west-2.eks.amazonaws.com/
+    server: https://14aafe276b19e2c2cf3864df93f31b1c.gr7.us-west-2.eks.amazonaws.com
     namespace: monitoring
   syncPolicy:
     automated:
