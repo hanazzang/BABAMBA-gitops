@@ -31,8 +31,17 @@ service:
 # ==========================================
 persistence:
   enabled: true
+  # hostPath: 단일 노드에만 안전(RWO). HPA로 여러 노드로 퍼지면 Pending/데이터 불일치 위험.
+  # cephfs(RWX)로 전환하려면:
+  # - type: pvc
+  # - storageClass: cephfs-rwx (예시)
+  # - accessMode: ReadWriteMany
+  type: hostPath
   size: 1Gi
   hostPath: /mnt/data/photos
+  # type=pvc 일 때 사용
+  storageClass: ""
+  accessMode: ReadWriteOnce
   mountPath: /app/static/uploads
 
 # ==========================================
@@ -50,10 +59,48 @@ resources:
 # Autoscaling 관련 설정 (hpa.yaml)
 # ==========================================
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
   maxReplicas: 3
   cpu:
     averageUtilization: 50
   memory:
     averageUtilization: 70
+  # 실무 포인트: 스케일링 정책(플랩핑 방지)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+
+# Prometheus 스크랩 설정 (/metrics)
+monitoring:
+  prometheusReleaseLabel: ""
+  podMonitor:
+    enabled: false
+    path: /metrics
+    interval: 15s
+    scrapeTimeout: 10s
+
+# KEDA (Prometheus 트리거 기반 오토스케일)
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers: []
