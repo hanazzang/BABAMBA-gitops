@@ -32,3 +32,10 @@ spec:
           name: {{ include "photo-service.fullname" . }}-active
           port: {{ .Values.service.port }}
           weight: 100
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /static/uploads
+      backendRefs:
+        - name: photo-service-active
+          port: 5003
