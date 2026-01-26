@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: stress
+    targetRevision: monitoring2
     path: platform/locust
 
   destination:
