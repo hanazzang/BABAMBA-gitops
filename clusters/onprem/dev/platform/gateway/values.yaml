@@ -1,6 +1,24 @@
 gateway:
   namespace: gateway
   gatewayClassName: envoy
+  # onprem-dev: HTTPS 리스너는 TLS Secret 의존이 있으므로 기본적으로 HTTP만 사용합니다.
+  # HTTPS가 필요하면 gateway 네임스페이스에 api-yxngjxe-tls Secret을 만든 뒤,
+  # 아래 listeners에 https 리스너를 추가하세요.
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: user
+
+envoyProxy:
+  service:
+    # MetalLB IPAddressPool(onprem-dev-pool)과 일치해야 주소가 할당됩니다.
+    loadBalancerIP: 192.168.13.199
 
 # Envoy dataplane metrics scrape (/stats/prometheus) + RPS 기반 autoscaling(KEDA)
 monitoring:
