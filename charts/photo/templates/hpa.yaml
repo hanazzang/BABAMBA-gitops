@@ -1,4 +1,4 @@
-{{- if and .Values.autoscaling.enabled (not .Values.keda.enabled) }}
+{{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -7,14 +7,12 @@ metadata:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
+    # [중요] Rollout 타겟팅
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
     name: {{ include "photo-service.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
-  {{- with .Values.autoscaling.behavior }}
-  behavior:{{ toYaml . | nindent 4 }}
-  {{- end }}
   metrics:
     - type: Resource
       resource:
@@ -28,4 +26,4 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.memory.averageUtilization }}
-{{- end}}
+{{- end }}

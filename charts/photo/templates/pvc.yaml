@@ -1,0 +1,15 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "photo-service.fullname" . }}-pvc
+  labels:
+    {{- include "photo-service.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.persistence.storageClassName | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+{{- end }}

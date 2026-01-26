@@ -2,12 +2,12 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "photo-service.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
-  {{ if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{ end }}
   selector:
     matchLabels:
       app: {{ include "photo-service.fullname" . }}
@@ -18,28 +18,43 @@ spec:
         {{- include "photo-service.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ include "photo-service.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          # [스토리지 마운트]
+          {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: photo-storage
               mountPath: {{ .Values.persistence.mountPath }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+      
+      # [PVC 연결]
       volumes:
         - name: photo-storage
+          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "photo-service.fullname" . }}-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+
   strategy:
     blueGreen:
+      # 위에서 만든 서비스 이름과 매핑
       activeService: {{ include "photo-service.fullname" . }}-active
       previewService: {{ include "photo-service.fullname" . }}-preview
-
-      # 새 버전(Preview) 올려놓고 확인 후 Promote로 스위치
+      
+      # 자동 승격 끄기 (수동 승인 후 전환)
       autoPromotionEnabled: false
-
-      # 스위치 후 기존 ReplicaSet을 잠깐 유지(롤백 빠르게)
+      
+      # 전환 후 기존 Pod 종료 대기 시간
       scaleDownDelaySeconds: 30
