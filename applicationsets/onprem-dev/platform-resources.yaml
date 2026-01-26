@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos-test
+        revision: monitoring2
         directories:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
@@ -22,14 +22,14 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: monitoring2
           path: platform/{{path.basename}}
           helm:
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: monitoring2
           ref: values
       destination:
         server: https://kubernetes.default.svc

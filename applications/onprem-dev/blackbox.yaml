@@ -24,14 +24,14 @@ spec:
 
     # 2) Probe/Rule/Dashboard 같은 “타깃 정의/정책” 매니페스트 적용
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: hpa
+      targetRevision: monitoring2
       path: clusters/onprem/dev/platform/monitoring/blackbox
       directory:
         recurse: true
 
     # 3) values 제공용 Git ref
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: hpa
+      targetRevision: monitoring2
       ref: values
 
   syncPolicy:

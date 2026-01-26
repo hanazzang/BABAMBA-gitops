@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: locust-scenario-config  # 이름 뒤에 해시(랜덤값)가 붙지 않음
+  namespace: locust
+data:
+  locustfile.py: |
+    from locust import HttpUser, task, between
+
+    class PhotoServiceUser(HttpUser):
+        wait_time = between(1, 2)
+
+        @task
+        def load_test_photo(self):
+            # 테스트할 서비스 주소에 맞춰 수정
+            self.client.get("/photos")
