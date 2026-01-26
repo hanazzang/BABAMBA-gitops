@@ -1,6 +1,0 @@
-apiVersion: v2
-name: vault-k8s-auth
-description: Kubernetes resources for Vault Kubernetes auth (token reviewer SA/RBAC)
-type: application
-version: 0.1.0
-appVersion: "0.1.0"

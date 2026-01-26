@@ -13,9 +13,6 @@ spec:
       namespace: gateway
   hostnames:
     - api.yongun.shop
-    - ehanadul.store
-    - api.ehanadul.store
-
   rules:
     - matches:
         - path:

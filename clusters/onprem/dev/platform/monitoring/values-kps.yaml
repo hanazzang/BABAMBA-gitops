@@ -51,18 +51,6 @@ grafana:
     # storageClassName: "ceph" # Ceph StorageClass
     # size: 10Gi
 
-<<<<<<< HEAD
-
-
-prometheus:
-  prometheusSpec:
-    # 튜닝 적용: 수집 주기 완화 및 보존 기간 최적화
-    scrapeInterval: "30s"
-    evaluationInterval: "30s"
-
-    # 데이터 보존 기간 최적화 (스토리지 절약)  
-    retention: "3d"
-=======
   # loki
   additionalDataSources:
     - name: Loki
@@ -99,18 +87,13 @@ prometheus:
     # 데이터 보존 기간 최적화
     retention: "7d"
 
->>>>>>> argos
 
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
     externalLabels:
       cluster: "onprem-dev" # 나중에 환경명 바뀔 때 여기만 수정
 
-<<<<<<< HEAD
-    replicas: 2
-=======
 
     replicas: 1
->>>>>>> argos
     resources:
       requests:
         cpu: "300m"
@@ -124,21 +107,6 @@ prometheus:
       # 데모용 임시 디렉터리 
       emptyDir:
         medium: ""
-<<<<<<< HEAD
-      # ceph 스토리지
-      # volumeClaimTemplate:
-      #   spec:
-      #     storageClassName: "ceph"   # Ceph StorageClass
-      #     accessModes: ["ReadWriteOnce"]
-      #     resources:
-      #       requests:
-      #         storage: 30Gi
-
-    # [서비스모니터] 모든 네임스페이스의 ServiceMonitor 자동 감지
-    serviceMonitorSelectorNilUsesHelmValues: false
-    serviceMonitorSelector: {}
-    
-=======
 
     # # 저장소 볼륨 설정
     storageSpec: {}
@@ -165,26 +133,17 @@ prometheus:
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
 
->>>>>>> argos
 
 alertmanager:
   enabled: true
   alertmanagerSpec:
-<<<<<<< HEAD
-    replicas: 2
-=======
     replicas: 1
->>>>>>> argos
     alertmanagerConfigSelector:
       matchLabels:
         release: onprem-dev-kube-prometheus-stack
 
-<<<<<<< HEAD
-# [튜닝] 데모 환경에서 불필요한 고부하 수집기 비활성화
-=======
 # 데모 환경에서 불필요한 고부하 수집기 비활성화
 
->>>>>>> argos
 kubeProxy:
   enabled: false
 kubeScheduler:

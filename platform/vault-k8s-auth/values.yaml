@@ -1,4 +1,0 @@
-tokenReviewer:
-  enabled: true
-  name: vault-token-reviewer
-  namespace: kube-system
