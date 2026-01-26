@@ -2,59 +2,37 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
-  namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+      app: {{ include "employee-server.fullname" . }}
   template:
     metadata:
       labels:
-        {{- include "employee-server.selectorLabels" . | nindent 8 }}
+        app: {{ include "employee-server.fullname" . }}
+        {{- include "employee-server.labels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        - name: {{ include "employee-server.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 5002
-          # [핵심] 환경 변수 주입 섹션
-          env:
-            - name: DATABASE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DATABASE_HOST
-            - name: DATABASE_DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DATABASE_DB_NAME
-            - name: DATABASE_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configs.dbConfig }}
-                  key: DATABASE_PORT
-            - name: DATABASE_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.configs.dbCredentials }}
-                  key: DATABASE_USER
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.configs.dbCredentials }}
-                  key: DATABASE_PASSWORD
+            - containerPort: {{ .Values.service.targetPort }}
           envFrom:
-            - configMapRef:
-                name: {{ .Values.configs.redisConfig }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
   strategy:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
@@ -62,10 +40,14 @@ spec:
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
-            # HTTPRoute 이름은 하드코딩 해도 되지만, 위 파일과 일치해야 함
-            httpRoute: employee-route 
+            # [중요] Auth와 겹치지 않게 employee 라우트 지정
+            httpRoute: employee-route
             namespace: employee
       steps:
         - setWeight: 10
+        - pause: { duration: 30s }
+        - setWeight: 30
+        - pause: { duration: 30s }
+        - setWeight: 60
         - pause: { duration: 30s }
         - setWeight: 100

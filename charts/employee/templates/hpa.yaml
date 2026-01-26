@@ -1,0 +1,29 @@
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "employee-server.fullname" . }}-hpa
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    # [중요] Rollout을 타겟으로 지정
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: {{ include "employee-server.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.cpu.averageUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.memory.averageUtilization }}
+{{- end }}
