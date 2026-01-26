@@ -22,7 +22,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}-------------------------------------------
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.configs.redisConfig }}
@@ -33,10 +33,10 @@ spec:
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
-            # HTTPRoute 이름은 하드코딩 해도 되지만, 위 파일과 일치해야 함
-            httpRoute: employee-route 
+            httpRoute: employee-route
             namespace: employee
       steps:
         - setWeight: 10
-        - pause: { duration: 30s }
+        - pause:
+            duration: 30s
         - setWeight: 100
