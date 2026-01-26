@@ -26,13 +26,13 @@ spec:
   syncPolicy: {}
   # 처음 한번만 한 번 배포. CRD는 자주 안 바뀜.
   # 잘못 적용되면 기존 리소스까지 다 영향 주니까 autoSync꺼두기
-    # automated: {}
-    # syncOptions:
-    #   - ServerSideApply=true
-    #   - Replace=true
-    #   - SkipSchemaValidation=true
-    #   - Prune=false   # CRD는 절대 자동 삭제 금지
-    #   - ApplyOutOfSyncOnly=true
+    automated: {}
+    syncOptions:
+      - ServerSideApply=true
+      - Replace=true
+      - SkipSchemaValidation=true
+      - Prune=false   # CRD는 절대 자동 삭제 금지
+      - ApplyOutOfSyncOnly=true
 
 
   ignoreDifferences:
