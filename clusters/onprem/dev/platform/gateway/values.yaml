@@ -1,3 +1,27 @@
 gateway:
   namespace: gateway
   gatewayClassName: envoy
+
+# Envoy dataplane metrics scrape (/stats/prometheus) + RPS 기반 autoscaling(KEDA)
+monitoring:
+  podMonitor:
+    enabled: true
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+
+keda:
+  enabled: true
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers:
+    # Gateway total RPS (Prometheus) -> threshold 기준으로 scale
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: gateway_rps
+        query: 'sum(rate(envoy_http_downstream_rq_total{namespace="{{ .Values.envoyProxy.namespace }}",app="{{ .Values.envoyProxy.podLabels.app }}"}[1m]))'
+        threshold: "200"
