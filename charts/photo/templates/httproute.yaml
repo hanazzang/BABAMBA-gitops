@@ -14,28 +14,32 @@ spec:
   hostnames:
     - {{ .Values.ingress.host | quote }}
   rules:
+    # 1️⃣ /photo -> /로 rewrite
     - matches:
         - path:
             type: PathPrefix
             value: /photo
       filters:
-        # [기능] /api/photo/upload -> /photo/upload 로 변경하여 컨테이너 전달
         - type: URLRewrite
           urlRewrite:
             path:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
       backendRefs:
-        # [중요] 항상 active(Blue) 서비스를 바라봐야 함
         - group: ""
           kind: Service
           name: {{ include "photo-service.fullname" . }}-active
           port: {{ .Values.service.port }}
           weight: 100
+
+    # 2️⃣ /static/uploads -> 그대로 photo-service-active로 전달
     - matches:
         - path:
             type: PathPrefix
             value: /static/uploads
       backendRefs:
-        - name: photo-service-active
-          port: 5003
+        - group: ""
+          kind: Service
+          name: {{ include "photo-service.fullname" . }}-active
+          port: {{ .Values.service.port }}
+          weight: 100
