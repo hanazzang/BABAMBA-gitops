@@ -21,8 +21,8 @@ spec:
       tls:
         mode: {{ .tls.mode | quote }}
         certificateRefs:
-          - kind: Secret
+          - group: ""
+            kind: Secret
             name: {{ .tls.secretName | quote }}
-            namespace: {{ $.Values.gateway.namespace | quote }} # Secret이 있는 네임스페이스 명시
 {{- end }}
 {{- end }}
