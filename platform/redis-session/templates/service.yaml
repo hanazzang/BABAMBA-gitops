@@ -4,14 +4,11 @@ metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.namespace | default "common" }}
 spec:
-  selector: {} # 셀렉터는 비워둡니다.
+  type: ExternalName
+  # 리스트의 첫 번째 IP(192.168.13.169)를 목적지로 설정합니다.
+  externalName: {{ (index .Values.sentinels 0).ip }}
   ports:
     - name: sentinel
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}
       protocol: TCP
-  # 여기에 실제 센티널이 떠 있는 IP들을 명시합니다.
-  externalIPs:
-{{- range .Values.sentinels }}
-    - {{ .ip | quote }}
-{{- end }}
