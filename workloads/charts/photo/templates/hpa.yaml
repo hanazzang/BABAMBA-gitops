@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "auth-server.fullname" . }}-hpa
+  name: {{ include "photo-service.fullname" . }}-hpa
   labels:
-    {{- include "auth-server.labels" . | nindent 4 }}
+    {{- include "photo-service.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: Rollout
-    name: {{ include "auth-server.fullname" . }}
+    kind: Deployment
+    name: {{ include "photo-service.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
@@ -25,4 +25,4 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.memory.averageUtilization }}
-{{- end }}
+{{- end}}

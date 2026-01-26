@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-kps-crds
+  name: cloud-prod-kps-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "-10"
 
 spec:
   project: default
@@ -15,22 +15,22 @@ spec:
 
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring1
+    targetRevision: hana
     path: platform/kps-crds/crds
     directory:
       recurse: true
 
-  syncPolicy: {}
+  syncPolicy:
   # 처음 한번만 한 번 배포. CRD는 자주 안 바뀜.
   # 잘못 적용되면 기존 리소스까지 다 영향 주니까 autoSync꺼두기
-    # automated: {}
-    # syncOptions:
-    #   - ServerSideApply=true
-    #   - Replace=true
-    #   - SkipSchemaValidation=true
-    #   - Prune=false   # CRD는 절대 자동 삭제 금지
-    #   - ApplyOutOfSyncOnly=true
-    
+    automated: {}
+    syncOptions:
+      - ServerSideApply=true
+      - Replace=true
+      - SkipSchemaValidation=true
+      - Prune=false   # CRD는 절대 자동 삭제 금지
+      - ApplyOutOfSyncOnly=true
+
   ignoreDifferences:
     - group: apiextensions.k8s.io
       kind: CustomResourceDefinition

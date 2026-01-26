@@ -10,23 +10,14 @@ spec:
       name: service-gateway
       namespace: gateway
   hostnames:
-    - ehanadul.store
-    - api.ehanadul.store
+    - api.yxngjxe.store
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /api/photo
-
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /photo
-
       backendRefs:
-        - group: ""
-          kind: Service
-          name: photo-service-active
-          port: 5003
+          - group: ""
+            kind: Service
+            name: photo-service-active
+            port: 5003

@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cloud-prod-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: hana
+        directories:
+          - path: clusters/cloud/prod/apps/*
+  template:
+    metadata:
+      name: 'cloud-prod-{{path.basename}}'
+    spec:
+      project: default
+
+      sources:
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: hana
+          path: charts/{{path.basename}}
+          helm:
+            valueFiles:
+              - $values/{{path}}/values.yaml
+
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: hana
+          ref: values
+          path: clusters
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

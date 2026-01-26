@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: 1.7.2
+    helm:
+      parameters:
+        - name: clusterName
+          value: hana-eks-dev-usw2-eks
+        - name: region
+          value: us-west-2
+        - name: vpcId
+          value: vpc-00e7f160b941024ee
+        - name: serviceAccount.create
+          value: "false"
+        - name: serviceAccount.name
+          value: aws-load-balancer-controller
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

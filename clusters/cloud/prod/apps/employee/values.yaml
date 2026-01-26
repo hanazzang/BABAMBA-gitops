@@ -1,0 +1,17 @@
+imagePullSecrets:
+  - name: ghcr-pull
+
+tolerations:
+  - key: "spot"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+
+envFrom:
+  - configMapRef:
+      name: db-config
+  - configMapRef:
+      name: redis-config
+  - secretRef:
+      name: db-credentials
