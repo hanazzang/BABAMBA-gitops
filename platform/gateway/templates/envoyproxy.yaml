@@ -11,17 +11,9 @@ spec:
     kubernetes:
       envoyService:
         type: {{ .Values.envoyProxy.service.type | quote }}
-        {{- with .Values.envoyProxy.service.loadBalancerIP }}
-        loadBalancerIP: {{ . | quote }}
-        {{- end }}
 
       envoyDeployment:
-        {{- with .Values.envoyProxy.deploymentName }}
-        name: {{ . | quote }}
-        {{- end }}
-        {{- if not .Values.keda.enabled }}
         replicas: {{ .Values.envoyProxy.replicas }}
-        {{- end }}
         pod:
           {{- if .Values.envoyProxy.podLabels }}
           labels:

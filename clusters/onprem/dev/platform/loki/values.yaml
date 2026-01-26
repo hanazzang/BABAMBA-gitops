@@ -19,7 +19,6 @@ persistence:
   emptyDirSize: 10Gi
 
 # chart 기본값에 특정 노드(hostname)가 잡혀있을 수 있어 onprem-dev에서는 해제
-
 nodeSelector:
   kubernetes.io/hostname: k8s-worker1
 

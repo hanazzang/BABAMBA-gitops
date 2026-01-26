@@ -1,9 +1,0 @@
-# KEDA (onprem-dev)
-#
-# Prometheus 트리거를 쓸 예정이므로 기본 설치만 먼저 진행합니다.
-# (ScaledObject는 각 앱 차트에서 생성)
-operator:
-  replicaCount: 1
-
-metricsServer:
-  replicaCount: 1

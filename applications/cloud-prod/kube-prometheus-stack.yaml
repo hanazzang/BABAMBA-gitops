@@ -22,7 +22,7 @@ spec:
     
     # 2. values 파일을 제공하는 Git 소스
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: hpa
+      targetRevision: monitoring2
       ref: values
   
   syncPolicy:

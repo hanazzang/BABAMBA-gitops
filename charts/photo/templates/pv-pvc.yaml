@@ -1,7 +1,3 @@
-{{- if .Values.persistence.enabled }}
-{{- $ptype := (.Values.persistence.type | default "hostPath") }}
-
-{{- if eq $ptype "hostPath" }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -13,8 +9,6 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: {{ .Values.persistence.hostPath }}
-  # default StorageClass가 있어도 PVC가 동적 프로비저닝으로 새 볼륨을 만들지 않게 고정
-  storageClassName: ""
   persistentVolumeReclaimPolicy: Retain
 ---
 apiVersion: v1
@@ -24,24 +18,6 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: ""
   resources:
     requests:
       storage: {{ .Values.persistence.size }}
-
-{{- else }}
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ include "photo-service.fullname" . }}-pvc
-spec:
-  accessModes:
-    - {{ .Values.persistence.accessMode | default "ReadWriteMany" }}
-  {{- with .Values.persistence.storageClass }}
-  storageClassName: {{ . | quote }}
-  {{- end }}
-  resources:
-    requests:
-      storage: {{ .Values.persistence.size }}
-{{- end }}
-{{- end }}

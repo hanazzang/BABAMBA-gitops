@@ -16,23 +16,6 @@ service:
   port: 5003
   targetPort: 5003
 
-# ===== 스토리지 (CephFS RWX) =====
-# hostPath(RWO)에서 CephFS(RWX)로 전환하여 HPA 수평확장 시에도 마운트가 깨지지 않게 합니다.
-# persistence:
-#   enabled: true
-#   type: pvc
-#   storageClass: cephfs-rwx
-#   accessMode: ReadWriteMany
-#   size: 5Gi
-#   mountPath: /app/static/uploads
-persistence:
-  enabled: true
-  type: hostPath
-  hostPath: /mnt/data/photos
-  accessMode: ReadWriteOnce
-  size: 1Gi
-  mountPath: /app/static/uploads
-
 # ===== 환경변수 주입 (사전 생성된 리소스) =====
 #envFrom:
 #  configMapRef:

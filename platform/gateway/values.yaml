@@ -30,9 +30,6 @@ gateway:
 envoyProxy:
   name: envoy-gw-infra
   namespace: gateway
-  # Envoy Gateway 컨트롤러가 생성하는 dataplane Deployment의 이름을 고정합니다.
-  # (KEDA/HPA 등에서 scaleTargetRef.name으로 안정적으로 참조하기 위함)
-  deploymentName: envoy-gw-infra
   replicas: 2
   service:
     type: LoadBalancer
@@ -46,49 +43,3 @@ envoyProxy:
       labelSelector:
         matchLabels:
           app.kubernetes.io/component: proxy
-
-# Gateway dataplane autoscaling (KEDA + Prometheus)
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 10
-  # 플랩핑 방지용 기본 behavior (필요시 환경별 values에서 조정)
-  behavior:
-    scaleUp:
-      stabilizationWindowSeconds: 0
-      policies:
-        - type: Percent
-          value: 100
-          periodSeconds: 15
-        - type: Pods
-          value: 2
-          periodSeconds: 15
-      selectPolicy: Max
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-        - type: Percent
-          value: 50
-          periodSeconds: 60
-        - type: Pods
-          value: 1
-          periodSeconds: 60
-      selectPolicy: Min
-
-monitoring:
-  # kube-prometheus-stack이 PodMonitor를 전체 선택하도록 되어 있으면 비워도 됩니다.
-  prometheusReleaseLabel: ""
-  podMonitor:
-    enabled: false
-    # Envoy prometheus endpoint (admin /stats/prometheus)
-    path: /stats/prometheus
-    interval: 15s
-    scrapeTimeout: 10s
-    # Envoy Gateway 기본 admin 포트가 19000인 케이스가 많습니다. (환경에 맞게 조정)
-    targetPort: 19000
-
-keda:
-  enabled: false
-  pollingInterval: 15
-  cooldownPeriod: 300
-  triggers: []
