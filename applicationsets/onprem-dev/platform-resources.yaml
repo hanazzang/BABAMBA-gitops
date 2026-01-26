@@ -33,3 +33,37 @@ spec:
         automated:
           prune: true
           selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: monitoring-storage
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: onprem-dev-monitoring-storage
+            namespace: monitoring
+            path: clusters/onprem/dev/platform/monitoring
+  template:
+    metadata:
+      name: '{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: monitoring2
+        path: '{{path}}'
+        directory:
+          recurse: false
+          include: '{pv.yaml,storageclass.yaml}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
