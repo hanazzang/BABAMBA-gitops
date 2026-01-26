@@ -4,7 +4,14 @@ metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.namespace | default "common" }}
 spec:
+  selector: {} # 셀렉터는 비워둡니다.
   ports:
     - name: sentinel
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}
+      protocol: TCP
+  # 여기에 실제 센티널이 떠 있는 IP들을 명시합니다.
+  externalIPs:
+{{- range .Values.sentinels }}
+    - {{ .ip | quote }}
+{{- end }}
