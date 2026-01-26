@@ -24,7 +24,7 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefixMatch: /photo
+              replacePrefixMatch: /
       backendRefs:
         # [중요] 항상 active(Blue) 서비스를 바라봐야 함
         - group: ""
