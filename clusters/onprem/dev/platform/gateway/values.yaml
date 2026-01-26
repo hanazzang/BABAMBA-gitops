@@ -1,9 +1,6 @@
 gateway:
   namespace: gateway
   gatewayClassName: envoy
-  # onprem-dev: HTTPS 리스너는 TLS Secret 의존이 있으므로 기본적으로 HTTP만 사용합니다.
-  # HTTPS가 필요하면 gateway 네임스페이스에 api-yxngjxe-tls Secret을 만든 뒤,
-  # 아래 listeners에 https 리스너를 추가하세요.
   listeners:
     - name: http
       port: 80
@@ -14,6 +11,19 @@ gateway:
           selector:
             matchLabels:
               gateway: user
+
+    - name: https
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: user
+      tls:
+        mode: Terminate
+        secretName: api-yong-tls   # ← gateway 네임스페이스에 이 Secret 있어야 함
 
 envoyProxy:
   service:
