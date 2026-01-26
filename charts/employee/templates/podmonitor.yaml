@@ -1,26 +1,26 @@
-# {{- if .Values.monitoring.podMonitor.enabled }}
-# apiVersion: monitoring.coreos.com/v1
-# kind: PodMonitor
-# metadata:
-#   name: {{ include "employee-server.fullname" . }}
-#   annotations:
-#     # kube-prometheus-stack(CRD 설치) 이후에 생성되도록 순서를 뒤로 미룹니다.
-#     argocd.argoproj.io/sync-wave: "6"
-#   labels:
-#     {{- include "employee-server.labels" . | nindent 4 }}
-#     {{- with .Values.monitoring.prometheusReleaseLabel }}
-#     release: {{ . | quote }}
-#     {{- end }}
-# spec:
-#   selector:
-#     matchLabels:
-#       {{- include "employee-server.selectorLabels" . | nindent 6 }}
-#   podMetricsEndpoints:
-#     - path: {{ .Values.monitoring.podMonitor.path | default "/metrics" }}
-#       interval: {{ .Values.monitoring.podMonitor.interval | default "15s" }}
-#       scrapeTimeout: {{ .Values.monitoring.podMonitor.scrapeTimeout | default "10s" }}
-#       targetPort: {{ .Values.containerPort }}
-#       relabelings:
-#         - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
-#           targetLabel: app
-# {{- end }}
+{{- if .Values.monitoring.podMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "employee-server.fullname" . }}
+  annotations:
+    # kube-prometheus-stack(CRD 설치) 이후에 생성되도록 순서를 뒤로 미룹니다.
+    argocd.argoproj.io/sync-wave: "6"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheusReleaseLabel }}
+    release: {{ . | quote }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+    - path: {{ .Values.monitoring.podMonitor.path | default "/metrics" }}
+      interval: {{ .Values.monitoring.podMonitor.interval | default "15s" }}
+      scrapeTimeout: {{ .Values.monitoring.podMonitor.scrapeTimeout | default "10s" }}
+      targetPort: {{ .Values.containerPort }}
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+          targetLabel: app
+{{- end }}
