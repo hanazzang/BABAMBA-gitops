@@ -2,39 +2,30 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
+  namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
-  labels:
-    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
-  {{ if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{ end }}
   selector:
     matchLabels:
-      app: {{ include "employee-server.fullname" . }}
+      {{- include "employee-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ include "employee-server.fullname" . }}
-        {{- include "employee-server.labels" . | nindent 8 }}
+        {{- include "employee-server.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ include "employee-server.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - containerPort: {{ .Values.service.targetPort }}
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}-------------------------------------------
           envFrom:
-            {{- toYaml .Values.envFrom | nindent 12 }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-
+            - configMapRef:
+                name: {{ .Values.configs.redisConfig }}
   strategy:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
@@ -42,14 +33,10 @@ spec:
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
-            # [중요] Auth와 겹치지 않게 employee 라우트 지정
-            httpRoute: employee-route
+            # HTTPRoute 이름은 하드코딩 해도 되지만, 위 파일과 일치해야 함
+            httpRoute: employee-route 
             namespace: employee
       steps:
         - setWeight: 10
-        - pause: { duration: 30s }
-        - setWeight: 30
-        - pause: { duration: 30s }
-        - setWeight: 60
         - pause: { duration: 30s }
         - setWeight: 100
