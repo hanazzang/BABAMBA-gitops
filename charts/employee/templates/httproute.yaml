@@ -18,6 +18,12 @@ spec:
         - path:
             type: PathPrefix
             value: /employee
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
       backendRefs:
         - group: ""
           kind: Service
