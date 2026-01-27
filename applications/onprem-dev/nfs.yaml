@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
     path: platform/storage # 실제 StorageClass 야물이 있는 경로
-    targetRevision: HEAD
+    targetRevision: argos-test
   destination:
     server: https://kubernetes.default.svc
     namespace: default # SC는 전역 리소스지만 앱 등록을 위해 지정 (보통 default)
