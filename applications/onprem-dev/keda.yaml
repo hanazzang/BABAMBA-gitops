@@ -24,7 +24,7 @@ spec:
           - $values/clusters/onprem/dev/platform/keda/values.yaml
 
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: argos-test
+      targetRevision: argos-ceph
       ref: values
 
   syncPolicy:
