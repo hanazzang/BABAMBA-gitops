@@ -1,10 +1,11 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: nfs-client  # [수정] photo 서비스에서 쓰는 이름과 통일
+  name: {{ .Values.storageClass.name }}
+  namespace: {{ .Values.namespace | default "common" }}
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true" # 클러스터 기본값으로 설정
+    storageclass.kubernetes.io/is-default-class: "{{ .Values.storageClass.isDefault }}"
     argocd.argoproj.io/sync-wave: "-5"
-provisioner: k8s-sigs.io/nfs-subdir-external-provisioner # [참고] 실제 NFS 프로비저너 이름
-reclaimPolicy: Retain # [수정] 데이터 안전을 위해 Delete보다 Retain 추천
-volumeBindingMode: Immediate
+provisioner: {{ .Values.storageClass.provisioner }}
+reclaimPolicy: {{ .Values.storageClass.reclaimPolicy }}
+volumeBindingMode: {{ .Values.storageClass.bindingMode }}
