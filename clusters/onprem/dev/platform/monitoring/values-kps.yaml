@@ -87,8 +87,8 @@ prometheus:
     retention: "7d"
 
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
-    externalLabels:
-      cluster: "onprem-prod" # 나중에 환경명 바뀔 때 여기만 수정
+    # externalLabels:
+    #   cluster: "onprem-prod" # 나중에 환경명 바뀔 때 여기만 수정
 
     replicas: 1
     resources:
