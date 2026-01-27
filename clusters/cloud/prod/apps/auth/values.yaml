@@ -1,0 +1,73 @@
+# ===== 기본 스케일 =====
+replicaCount: 1
+
+# ===== 이미지 (환경별 핵심 값) =====
+image:
+  repository: ghcr.io/hanazzang/auth_server
+  tag: "sha-45b1443"
+  pullPolicy: IfNotPresent
+
+# ===== 서비스 계정 =====
+serviceAccount:
+  name: auth-sa
+
+# ===== 서비스 포트 =====
+service:
+  port: 5001
+  targetPort: 5001
+
+# ===== 환경변수 주입 (사전 생성된 리소스) =====
+envFrom:
+  - configMapRef:
+      name: db-config
+  - configMapRef:
+      name: redis-config
+  - secretRef:
+      name: db-credentials
+
+# ===== 리소스 (dev 기준) =====
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "200m"
+    memory: "512Mi"
+
+# ===== HPA =====
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70
+
+# /metrics 스크랩 + Prometheus 기반 오토스케일(KEDA)
+monitoring:
+  podMonitor:
+    enabled: true
+
+keda:
+  enabled: true
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers:
+    # RPS (total) / replicas => per-pod RPS 목표치(threshold)
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: auth_rps
+        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "auth-server.name" . }}"}[1m]))'
+        threshold: "20"
+
+    # p95 latency (seconds) - 임계치 초과 시 scale up 되도록 구성
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: auth_p95_latency_seconds
+        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "auth-server.name" . }}"}[5m])) by (le))'
+        threshold: "0.3"
