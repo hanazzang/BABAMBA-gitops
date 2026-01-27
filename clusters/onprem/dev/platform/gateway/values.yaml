@@ -12,7 +12,7 @@ gateway:
             matchLabels:
               gateway: user
 
-    - name: https
+    - name: https 
       port: 443
       protocol: HTTPS
       allowedRoutes:
