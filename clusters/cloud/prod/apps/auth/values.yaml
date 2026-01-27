@@ -50,7 +50,7 @@ monitoring:
     enabled: true
 
 keda:
-  enabled: true
+  enabled: false
   pollingInterval: 15
   cooldownPeriod: 300
   triggers:

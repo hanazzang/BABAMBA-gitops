@@ -17,7 +17,7 @@ envFrom:
 
 # ===== HPA (dev 테스트용) =====
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 1
   maxReplicas: 5
   cpu:
@@ -27,10 +27,10 @@ autoscaling:
 
 monitoring:
   podMonitor:
-    enabled: true
+    enabled: false
 
 keda:
-  enabled: true
+  enabled: false
   pollingInterval: 15
   cooldownPeriod: 300
   triggers:
