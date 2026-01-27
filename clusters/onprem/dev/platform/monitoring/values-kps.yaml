@@ -94,21 +94,21 @@ prometheusOperator:
     value: "monitoring"
     effect: "NoSchedule"
 
-prometheus-node-exporter:
-  tolerations:
-    # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
-    - operator: "Exists"
+# prometheus-node-exporter:
+#   tolerations:
+#     # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
+#     - operator: "Exists"
 
 prometheus:
   prometheusSpec:
-    # 노드 격리 설정 (Taint + NodeSelector)
-    nodeSelector:
-      dedicated: "monitoring"
-    tolerations:
-    - key: "dedicated"
-      operator: "Equal"
-      value: "monitoring"
-      effect: "NoSchedule"
+    # # 노드 격리 설정 (Taint + NodeSelector)
+    # nodeSelector:
+    #   dedicated: "monitoring"
+    # tolerations:
+    # - key: "dedicated"
+    #   operator: "Equal"
+    #   value: "monitoring"
+    #   effect: "NoSchedule"
 
     # EKS 데이터를 받기 위한 필수 설정
     enableFeatures:
