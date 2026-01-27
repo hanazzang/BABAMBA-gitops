@@ -18,9 +18,12 @@ service:
 # [스토리지 설정]
 persistence:
   enabled: true
-  storageClassName: "nfs-client"
-  size: 1Gi
-  mountPath: /app/static/uploads
+  # 앞서 생성한 StorageClass 이름
+  storageClass: "csi-cephfs-sc"
+  # CephFS는 다중 접속(RWX) 가능
+  accessMode: "ReadWriteMany"
+  size: "2Gi"
+  mountPath: "/app/static/uploads"
 
 # [NFS 상세 정보]
 pvName: "photo-service-pv"

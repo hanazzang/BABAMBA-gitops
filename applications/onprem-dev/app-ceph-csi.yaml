@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-csi
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://ceph.github.io/csi-charts
+    chart: ceph-csi-rbd
+    targetRevision: 3.16.0
+    helm:
+      parameters:
+        - name: csiConfig.clusterID
+          value: "ceph-cluster"
+        - name: csiConfig.monitors[0]
+          value: "10.10.10.101:6789" # Proxmox Node 1
+        - name: csiConfig.monitors[1]
+          value: "10.10.10.102:6789" # Proxmox Node 2
+        - name: csiConfig.monitors[2]
+          value: "10.10.10.103:6789" # Proxmox Node 2
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ceph-csi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

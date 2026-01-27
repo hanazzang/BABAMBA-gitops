@@ -1,8 +1,41 @@
+# [StorageClass 설정]
 storageClass:
-  name: nfs-client
+  name: csi-cephfs-sc
   isDefault: true
-  provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
-  reclaimPolicy: Retain
+  # CephFS Provisioner로 변경
+  provisioner: cephfs.csi.ceph.com
+  reclaimPolicy: Delete
   bindingMode: Immediate
+  allowVolumeExpansion: true
+  
+  parameters:
+    # [중요] 실제 Ceph 클러스터 ID 입력 (ceph mon map)
+    clusterID: "ceph-cluster"
+    
+    # [중요] 방금 연결에 성공한 파일 시스템 이름
+    fsName: "cephfs"
+    
+    # Secret 정보 (기존 csi-rbd-secret 재사용)
+    csi.storage.k8s.io/provisioner-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/provisioner-secret-namespace: "ceph-csi"
+    csi.storage.k8s.io/controller-expand-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/controller-expand-secret-namespace: "ceph-csi"
+    csi.storage.k8s.io/node-stage-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/node-stage-secret-namespace: "ceph-csi"
+    
+    # Secret 내의 Key 매핑 (userID, userKey 사용)
+    csi.storage.k8s.io/provisioner-secret-share-key: "userKey"
+    csi.storage.k8s.io/node-stage-secret-share-key: "userKey"
 
+# [애플리케이션 PVC 설정]
+persistence:
+  enabled: true
+  # 위에서 정의한 StorageClass 이름 사용
+  storageClass: "csi-cephfs-sc"
+  # [핵심] CephFS의 장점: 여러 Pod가 동시에 쓰기 가능
+  accessMode: "ReadWriteMany"
+  size: "2Gi"
+  mountPath: "/app/static/uploads"
+
+# [기타 설정]
 namespace: "common"

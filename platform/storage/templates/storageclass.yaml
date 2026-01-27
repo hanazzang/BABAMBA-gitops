@@ -9,3 +9,8 @@ metadata:
 provisioner: {{ .Values.storageClass.provisioner }}
 reclaimPolicy: {{ .Values.storageClass.reclaimPolicy }}
 volumeBindingMode: {{ .Values.storageClass.bindingMode }}
+allowVolumeExpansion: {{ .Values.storageClass.allowVolumeExpansion | default true }}
+parameters:
+  {{- range $key, $value := .Values.storageClass.parameters }}
+  {{ $key }}: "{{ $value }}"
+  {{- end }}
