@@ -42,3 +42,7 @@ autoscaling:
     averageUtilization: 50
   memory:
     averageUtilization: 70
+    
+pvName: "photo-service-pv"
+size: "1Gi"
+hostPath: "/mnt/data/photo-storage"
