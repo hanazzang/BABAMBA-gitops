@@ -10,7 +10,15 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyService:
+        {{- if .Values.envoyProxy.service.type }}
         type: {{ .Values.envoyProxy.service.type | quote }}
+        {{- end }}
+
+        {{- with .Values.envoyProxy.service.annotations }}
+        annotations:
+{{ toYaml . | nindent 10 }}
+        {{- end }}
+
         {{- with .Values.envoyProxy.service.loadBalancerIP }}
         loadBalancerIP: {{ . | quote }}
         {{- end }}
