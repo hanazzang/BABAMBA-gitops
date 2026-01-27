@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onprem-dev-prom-metric-check
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "12"
+spec:
+  project: default
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: hpa2
+    path: platform/prom-metric-check/templates
+    directory:
+      recurse: true
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+

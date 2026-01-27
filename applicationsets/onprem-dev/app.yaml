@@ -23,8 +23,11 @@ spec:
 
           path: charts/{{path.basename}}
           helm:
+            ignoreMissingValueFiles: true
             valueFiles:
               - $values/{{path}}/values.yaml
+              - $values/{{path}}/values-autoscaling.yaml 
+              - $values/{{path}}/values-scenario.yaml 
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: hpa2

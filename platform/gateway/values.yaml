@@ -54,6 +54,12 @@ autoscaling:
   enabled: false
   minReplicas: 2
   maxReplicas: 10
+  cpu:
+    # HPA(metrics-server) 기준: requests 대비 평균 CPU 사용률(%)
+    averageUtilization: 60
+  memory:
+    # HPA(metrics-server) 기준: requests 대비 평균 Memory 사용률(%)
+    averageUtilization: 70
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0

@@ -110,3 +110,34 @@ gitops/
             ├── apps/
             └── platform/
 </pre>
+
+### 모니터링을 위한 노드에 셋팅
+
+```
+kubectl label node eks-worker1 dedicated=monitoring-loki --overwrite
+```
+
+### revision 일괄변경
+```
+bash scripts/fix-argocd-revisions.sh hana --apply
+```
+
+### hpa 시나리오 테스트를 위한 sh 파일 : 각 앱/플랫폼의 values-scenario.yaml만 갱신
+```
+chmod +x ./scripts/set-autoscaling-scenario.sh
+
+# HPA-0: HPA/KEDA off
+./scripts/set-autoscaling-scenario.sh 0
+
+# HPA-1: HPA(cpu/memory) on, KEDA off
+./scripts/set-autoscaling-scenario.sh 1
+
+# HPA-2: KEDA(RPS/p95) on (+ CPU/MEM 보조트리거는 values-autoscaling에서 직접)
+./scripts/set-autoscaling-scenario.sh 2
+
+
+git diff
+git add .
+git commit -m "set autoscaling scenario: 1"
+git push
+```

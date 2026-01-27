@@ -1,0 +1,79 @@
+# 시나리오 스위치
+# - 0: autoscaling.enabled=false, keda.enabled=false
+# - 1: autoscaling.enabled=true,  keda.enabled=false
+# - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95)
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "200m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70
+
+monitoring:
+  podMonitor:
+    enabled: true
+
+keda:
+  enabled: true
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers:
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: employee_rps
+        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m]))'
+        threshold: "20"
+
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: employee_p95_latency_seconds
+        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[5m])) by (le))'
+        threshold: "0.3"
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: employee_cpu_util_percent
+        query: >
+          avg(
+            100 *
+            (
+              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",container!="POD"}[2m]))
+              /
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="cpu",unit="core"})
+            )
+          )
+        threshold: "60"
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: employee_mem_util_percent
+        query: >
+          avg(
+            100 *
+            (
+              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",container!="POD"})
+              /
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="memory",unit="byte"})
+            )
+          )
+        threshold: "70"
+
