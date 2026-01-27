@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: locust-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: stress
+    path: platform/locust
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: locust
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true

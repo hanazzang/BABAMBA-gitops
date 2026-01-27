@@ -2,10 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "employee-server.fullname" . }}
+  namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
-  labels:
-    {{- include "employee-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -17,7 +16,6 @@ spec:
         app: {{ include "employee-server.fullname" . }}
         {{- include "employee-server.labels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -26,6 +24,7 @@ spec:
         - name: {{ include "employee-server.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+<<<<<<< HEAD
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           envFrom:
@@ -33,6 +32,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
+=======
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
+>>>>>>> argos-test
   strategy:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
@@ -45,9 +48,6 @@ spec:
             namespace: employee
       steps:
         - setWeight: 10
-        - pause: { duration: 30s }
-        - setWeight: 30
-        - pause: { duration: 30s }
-        - setWeight: 60
-        - pause: { duration: 30s }
+        - pause:
+            duration: 30s
         - setWeight: 100

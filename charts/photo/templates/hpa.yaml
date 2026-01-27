@@ -7,8 +7,9 @@ metadata:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
+    # [중요] Rollout 타겟팅
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: {{ include "photo-service.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
@@ -25,4 +26,4 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.memory.averageUtilization }}
-{{- end}}
+{{- end }}

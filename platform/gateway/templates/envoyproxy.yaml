@@ -10,10 +10,26 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyService:
+        {{- if .Values.envoyProxy.service.type }}
         type: {{ .Values.envoyProxy.service.type | quote }}
+        {{- end }}
+
+        {{- with .Values.envoyProxy.service.annotations }}
+        annotations:
+{{ toYaml . | nindent 10 }}
+        {{- end }}
+
+        {{- with .Values.envoyProxy.service.loadBalancerIP }}
+        loadBalancerIP: {{ . | quote }}
+        {{- end }}
 
       envoyDeployment:
+        {{- with .Values.envoyProxy.deploymentName }}
+        name: {{ . | quote }}
+        {{- end }}
+        {{- if not .Values.keda.enabled }}
         replicas: {{ .Values.envoyProxy.replicas }}
+        {{- end }}
         pod:
           {{- if .Values.envoyProxy.podLabels }}
           labels:
@@ -24,9 +40,3 @@ spec:
           topologySpreadConstraints:
 {{ toYaml .Values.envoyProxy.topologySpreadConstraints | nindent 12 }}
           {{- end }}
-
-          tolerations:
-            - key: "spot"
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"

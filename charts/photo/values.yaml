@@ -1,6 +1,3 @@
-# ==========================================
-# Deployment 관련 설정 (deployment.yaml)
-# ==========================================
 replicaCount: 1
 
 image:
@@ -11,33 +8,29 @@ image:
 imagePullSecrets:
   - name: ghcr-pull
 
-# ==========================================
-# ServiceAccount 관련 설정 (serviceaccount.yaml)
-# ==========================================
-
 serviceAccount:
   name: photo-sa
-
-# ==========================================
-# Service 관련 설정 (service.yaml)
-# ==========================================
 
 service:
   port: 5003
   targetPort: 5003
 
-# ==========================================
-# Persistence 관련 설정 (pv-pvc.yaml & deployment.yaml)
-# ==========================================
+# [스토리지 설정]
 persistence:
   enabled: true
+  storageClassName: "nfs-client"
   size: 1Gi
-  hostPath: /mnt/data/photos
   mountPath: /app/static/uploads
 
-# ==========================================
-# Resource 관리 설정 (deployment.yaml)
-# ==========================================
+# [NFS 상세 정보]
+pvName: "photo-service-pv"
+size: "1Gi"
+nfsServer: "192.168.13.187"
+nfsPath: "/data/nfs/photo"
+
+ingress:
+  host: api.yongun.shop
+
 resources:
   limits:
     memory: "512Mi"
@@ -46,14 +39,5 @@ resources:
     memory: "128Mi"
     cpu: "100m"
 
-# ==========================================
-# Autoscaling 관련 설정 (hpa.yaml)
-# ==========================================
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 3
-  cpu:
-    averageUtilization: 50
-  memory:
-    averageUtilization: 70

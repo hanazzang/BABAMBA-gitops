@@ -25,17 +25,27 @@ gateway:
               gateway: user
       tls:
         mode: Terminate
+<<<<<<< HEAD
         secretName: api-yxngjxe-tls # gateway 네임스페이스에 이 Secret이 반드시 있어야 함
+=======
+        secretName: api-yong-tls   # gateway ns에 Secret 필요 (공통)
+>>>>>>> argos-test
 
 envoyProxy:
   name: envoy-gw-infra
   namespace: gateway
+  deploymentName: envoy-gw-infra
   replicas: 2
+
   service:
-    type: LoadBalancer
-    loadBalancerIP: 192.168.1.199
+    # ✅ 환경별(clusters)에서만 설정하도록 비워둠
+    type: null
+    loadBalancerIP: null
+    annotations: null
+
   podLabels:
     app: envoy-gw-dataplane
+
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
@@ -43,3 +53,44 @@ envoyProxy:
       labelSelector:
         matchLabels:
           app.kubernetes.io/component: proxy
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+
+monitoring:
+  prometheusReleaseLabel: ""
+  podMonitor:
+    enabled: false
+    path: /stats/prometheus
+    interval: 15s
+    scrapeTimeout: 10s
+    targetPort: 19000
+
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers: []

@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloud-prod-root-app
+  name: onprem-dev-root-app
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: hana
+    targetRevision: argos-test
     path: .
     directory:
       recurse: true

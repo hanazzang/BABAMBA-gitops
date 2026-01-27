@@ -6,11 +6,17 @@
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- include "employee-server.name" . | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name (include "employee-server.name" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "employee-server.labels" -}}
+{{- define "employee-server.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "employee-server.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{- define "employee-server.labels" -}}
+helm.sh/chart: {{ printf "%s-%s" .Chart.Name (.Chart.Version | replace "+" "_") }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{ include "employee-server.selectorLabels" . }}
 {{- end -}}

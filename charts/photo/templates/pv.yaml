@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.pvName | default "photo-service-pv" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  capacity:
+    storage: {{ .Values.size | default "1Gi" }}
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: "nfs-client"
+  nfs:
+    server: {{ .Values.nfsServer | default "192.168.13.187" }} # <--- 여기에 NFS VM IP 입력
+    path: {{ .Values.nfsPath | default "/data/nfs/photo" }}

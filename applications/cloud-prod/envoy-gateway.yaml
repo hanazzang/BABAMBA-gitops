@@ -17,13 +17,6 @@ spec:
               kubernetes:
                 deploy:
                   type: GatewayNamespace
-
-        tolerations:
-        - key: "spot"
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
-          
   destination:
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
@@ -33,3 +26,4 @@ spec:
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
+

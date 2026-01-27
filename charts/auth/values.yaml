@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: ghcr.io/hanazzang/auth_server
-  tag: "sha-2e30ade"
+  tag: "sha-45b1443"
   pullPolicy: IfNotPresent
 
 
@@ -24,18 +24,62 @@ envFrom:
       name: db-credentials
 
 resources:
-  limits:
-    memory: "512Mi"
-    cpu: "200m"
   requests:
     memory: "128Mi"
     cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "200m"
+
 
 autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 3
+  enabled: true
+  minReplicas: 2  #가용성을 위해 최소 2개
+  maxReplicas: 10
   cpu:
-    averageUtilization: 50
+    averageUtilization: 70
   memory:
     averageUtilization: 70
+  # 실무 포인트: 스케일링 정책(플랩핑 방지)
+  # - scaleUp: 빠르게 확장 (부족하면 즉시 반응)
+  # - scaleDown: 천천히 축소 (트래픽 출렁임/배포 중 흔들림 완화)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+
+# Prometheus 스크랩 설정 (/metrics)
+monitoring:
+  # kube-prometheus-stack의 Prometheus가 ServiceMonitor/PodMonitor를 "전체 선택"하도록 설정되어 있으면 비워도 됩니다.
+  # 필요 시에만 아래 라벨을 맞추세요. (예: onprem-dev-kube-prometheus-stack)
+  prometheusReleaseLabel: ""
+  podMonitor:
+    enabled: false
+    path: /metrics
+    interval: 15s
+    scrapeTimeout: 10s
+
+# KEDA (Prometheus 트리거 기반 오토스케일)
+# - enabled=true로 켜면, 기존 HPA(autoscaling/v2)는 생성하지 않고 KEDA가 HPA를 생성/관리합니다.
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers: []

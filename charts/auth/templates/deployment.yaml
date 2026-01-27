@@ -7,7 +7,9 @@ metadata:
   labels:
     {{- include "auth-server.labels" . | nindent 4 }}
 spec:
+  {{ if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{ end }}
   selector:
     matchLabels:
       app: {{ include "auth-server.fullname" . }}
@@ -22,12 +24,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      
       containers:
         - name: {{ include "auth-server.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

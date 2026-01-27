@@ -10,6 +10,11 @@ spec:
         revision: argos-test
         directories:
           - path: clusters/onprem/dev/platform/*
+          - path: clusters/onprem/dev/platform/keda
+            exclude: true
+          - path: clusters/onprem/dev/platform/monitoring
+            exclude: true
+
   template:
     metadata:
       name: 'onprem-dev-{{path.basename}}'
@@ -29,6 +34,15 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
       syncPolicy:
         automated:
           prune: true

@@ -4,7 +4,7 @@ metadata:
   name: cloud-prod-kube-prometheus-stack
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0" # CRD 배포 후 실행되도록 설정 
+    argocd.argoproj.io/sync-wave: "5" # CRD 배포 후 실행되도록 설정 
 spec:
   project: default
   destination:

@@ -7,9 +7,14 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: hana
+        revision: argos-test
         directories:
           - path: clusters/cloud/prod/platform/*
+          - path: clusters/cloud/prod/platform/keda
+            exclude: true
+          - path: clusters/cloud/prod/platform/monitoring
+            exclude: true
+
   template:
     metadata:
       name: 'cloud-prod-{{path.basename}}'
@@ -17,19 +22,31 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: hana
+          targetRevision: argos-test
           path: platform/{{path.basename}}
           helm:
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: hana
+          targetRevision: argos-test
           ref: values
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

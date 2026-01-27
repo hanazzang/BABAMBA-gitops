@@ -1,6 +1,6 @@
 apiVersion: v2
 name: photo-service
-description: Photo Service Helm chart
+description: Photo Service Helm chart (Blue/Green with Storage)
 type: application
 version: 0.1.0
 appVersion: "v2.02"
