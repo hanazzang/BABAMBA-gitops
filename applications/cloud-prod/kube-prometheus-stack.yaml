@@ -8,7 +8,8 @@ metadata:
 spec:
   project: default
   destination:
-    server: <EKS-CLUSTER-URL> # EKS 클러스터 서버 주소
+    # cloud-prod: ArgoCD가 같은 클러스터에 설치된 전제(in-cluster)
+    server: https://kubernetes.default.svc
     namespace: monitoring
   sources:
     # 1. Helm Chart 소스
@@ -22,7 +23,8 @@ spec:
     
     # 2. values 파일을 제공하는 Git 소스
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: monitoring2
+      targetRevision: hpa2
+
       ref: values
   
   syncPolicy:

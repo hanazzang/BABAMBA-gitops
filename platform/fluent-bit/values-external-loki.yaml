@@ -148,8 +148,8 @@ output:
     enabled: false
     match: kube.*
   loki:
-    host: CHANGE_ME  # 현재 클러스터의 노드 IP로 변경 (스크립트가 자동으로 바꿔줍니다)
-    port: 31000      # Loki gateway NodePort
+    host: 192.168.1.147  # onprem Loki gateway(LoadBalancer, MetalLB 할당 IP)
+    port: 3100           # Loki gateway Service port
     match: kube.*
     # (선택) Loki push API 경로 (기본값: /loki/api/v1/push)
     uri: /loki/api/v1/push

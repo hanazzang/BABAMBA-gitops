@@ -7,7 +7,8 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos-test
+        revision: hpa2
+
         directories:
           - path: clusters/onprem/dev/apps/*
   template:
@@ -18,14 +19,16 @@ spec:
 
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: hpa2
+
           path: charts/{{path.basename}}
           helm:
             valueFiles:
               - $values/{{path}}/values.yaml
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: hpa2
+
           ref: values
           path: clusters
 
