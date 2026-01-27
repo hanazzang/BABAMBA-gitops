@@ -24,5 +24,5 @@ persistence:
 # - 먼저 노드에 라벨을 부여하세요:
 #   kubectl label node eks-worker1 dedicated=monitoring-loki --overwrite
 nodeSelector:
-  dedicated: monitoring-loki
+  loki: monitoring-loki
 

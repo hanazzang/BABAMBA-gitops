@@ -112,14 +112,46 @@ gitops/
 </pre>
 
 ### 모니터링을 위한 노드에 셋팅
+- 프로메테우스와 loki는 다른 노드에 셋팅되어야 합니다. 
 
 ```
-kubectl label node eks-worker1 dedicated=monitoring-loki --overwrite
+kubectl label node eks-worker1 dedicated=monitoring  # 프로메테우스 특정노드에 고정
+# kubectl taint node eks-worker1 dedicated=monitoring:NoSchedule # 해당 파드에 이후 다른파드 못들어옴.(기존의 파드를 쫓아내진 않음.)
+
+kubectl label node eks-worker1 loki=monitoring-loki   # loki 특정노트에 고정
+
+
+# 만약 라벨제거해야할 경우
+kubectl label node eks-worker1 dedicated-
+kubectl label node eks-worker1 loki-
+```
+### nfs 공유폴더 설정
+```
+# nfs폴더가 위치해야 할 곳(예를들어 192.168.1.147)
+sudo apt update
+sudo apt install nfs-kernel-server
+공유 폴더 생성: sudo mkdir -p /data/nfs/photo
+권한 설정: sudo chown -R nobody:nogroup /data/nfs/photo (보안 정책에 따라 조정 필요)
+Exports 설정: /etc/exports 파일 맨 아래에 다음 내용 추가:
+/data/nfs/photo 192.168.1.0/24(rw,sync,no_subtree_check) (192.168.1.x 대역의 모든 노드에 읽기/쓰기 허용 설정)
+설정 적용: sudo exportfs -ra
+서비스 재시작: sudo systemctl restart nfs-kernel-server 
+
+# 마운트해서 쓸 노드쪽
+sudo apt install -y nfs-common
+sudo mount -t nfs 192.168.1.147:/data/nfs/photo /mnt
 ```
 
-### revision 일괄변경
+
+### revision 일괄변경 - argocd에서 싱크안맞다면 이 부분부터 점검 
 ```
-bash scripts/fix-argocd-revisions.sh hana --apply
+bash scripts/fix-argocd-revisions.sh hpa2 --apply
+```
+
+### 하드코딩된 ip 변수로 적용 
+- ips.env 수정 후
+```
+bash scripts/ipctl.sh apply
 ```
 
 ### hpa 시나리오 테스트를 위한 sh 파일 : 각 앱/플랫폼의 values-scenario.yaml만 갱신

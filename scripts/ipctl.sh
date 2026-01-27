@@ -90,6 +90,26 @@ def print_kv(path: Path, label: str, value: str | None) -> None:
 
 targets: list[dict] = []
 
+# 0) applications/cloud-prod — destination.server (온프 ArgoCD → EKS 원격 관리)
+eks_url = env("EKS_CLUSTER_URL")
+cloud_prod_dir = repo_root / "applications/cloud-prod"
+if cloud_prod_dir.exists():
+    for f in sorted(cloud_prod_dir.glob("*.yaml")):
+        txt = read_text(f)
+        m = re.search(r"^\s*server:\s*(.+?)(\s*(#.*))?$", txt, flags=re.MULTILINE)
+        if not m:
+            continue
+        cur = m.group(1).strip()
+        if mode == "scan":
+            print_kv(f, f"cloud-prod {f.name} destination.server", cur)
+        elif eks_url:
+            # https://kubernetes.default.svc 또는 <EKS-CLUSTER-URL> → EKS_CLUSTER_URL
+            pat = r"^(\s*server:\s*)(?:https://kubernetes\.default\.svc|<EKS-CLUSTER-URL>)(\s*(#.*)?)$"
+            new_txt, n = re.subn(pat, rf"\g<1>{eks_url}\g<2>", txt, flags=re.MULTILINE)
+            if n:
+                write_text(f, new_txt)
+                print(f"[apply] {f}: {n} replacements")
+
 # 1) cloud-prod fluent-bit → onprem loki(NodePort)
 fb_host = env("ONPREM_LOKI_NODE_IP")
 fb_port = env("ONPREM_LOKI_NODEPORT")

@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   destination:
-    # cloud-prod: ArgoCD가 같은 클러스터에 설치된 전제(in-cluster)
-    server: https://kubernetes.default.svc
+    # 온프 ArgoCD가 EKS 원격 관리 시 ips.env 의 EKS_CLUSTER_URL 로 채움 (ipctl apply)
+    server: <EKS-CLUSTER-URL>
     namespace: monitoring
   sources:
     # 1. Helm Chart 소스
