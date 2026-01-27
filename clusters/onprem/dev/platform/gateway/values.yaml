@@ -1,36 +1,10 @@
-gateway:
-  namespace: gateway
-  gatewayClassName: envoy
-  listeners:
-    - name: http
-      port: 80
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              gateway: user
-
-    - name: https 
-      port: 443
-      protocol: HTTPS
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              gateway: user
-      tls:
-        mode: Terminate
-        secretName: api-yong-tls   # ← gateway 네임스페이스에 이 Secret 있어야 함
+# clusters/onprem/dev/platform/envoy-gateway/values.yaml
 
 envoyProxy:
   service:
-    # MetalLB IPAddressPool(onprem-dev-pool)과 일치해야 주소가 할당됩니다.
+    type: LoadBalancer
     loadBalancerIP: 192.168.13.199
 
-# Envoy dataplane metrics scrape (/stats/prometheus) + RPS 기반 autoscaling(KEDA)
 monitoring:
   podMonitor:
     enabled: true
@@ -45,7 +19,6 @@ keda:
   pollingInterval: 15
   cooldownPeriod: 300
   triggers:
-    # Gateway total RPS (Prometheus) -> threshold 기준으로 scale
     - type: prometheus
       metricType: AverageValue
       metadata:
