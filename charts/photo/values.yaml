@@ -12,17 +12,22 @@ serviceAccount:
   name: photo-sa
 
 service:
-  port: 5003        # [중요] Photo 서버 포트
+  port: 5003
   targetPort: 5003
 
-# [수정] StorageClass를 사용하는 방식으로 변경
+# [스토리지 설정]
 persistence:
   enabled: true
-  storageClassName: "" # standard # [중요] 클러스터에 있는 StorageClass 이름 (platform/storage 참고)
+  storageClassName: "nfs-client"
   size: 1Gi
   mountPath: /app/static/uploads
 
-# [추가] Ingress/Gateway 설정
+# [NFS 상세 정보]
+pvName: "photo-service-pv"
+size: "1Gi"
+nfsServer: "192.168.13.187"
+nfsPath: "/data/nfs/photo"
+
 ingress:
   host: api.yongun.shop
 
@@ -36,13 +41,3 @@ resources:
 
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 3
-  cpu:
-    averageUtilization: 50
-  memory:
-    averageUtilization: 70
-    
-pvName: "photo-service-pv"
-size: "1Gi"
-hostPath: "/mnt/data/photo-storage"

@@ -3,13 +3,14 @@ kind: PersistentVolume
 metadata:
   name: {{ .Values.pvName | default "photo-service-pv" }}
   annotations:
-    argocd.argoproj.io/sync-wave: "-10" # StorageClass(-5)보다 더 먼저 생성되도록 설정
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   capacity:
     storage: {{ .Values.size | default "1Gi" }}
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: "" # 수동 바인딩을 위해 빈 값 유지
-  hostPath:
-    path: {{ .Values.hostPath | default "/mnt/data/photo-storage" }}
+  storageClassName: "nfs-client"
+  nfs:
+    server: {{ .Values.nfsServer | default "192.168.13.187" }} # <--- 여기에 NFS VM IP 입력
+    path: {{ .Values.nfsPath | default "/data/nfs/photo" }}

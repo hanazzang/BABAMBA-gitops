@@ -3,7 +3,7 @@ kind: Rollout
 metadata:
   name: {{ include "photo-service.fullname" . }}
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "2" # PV/PVC(-10, -5)보다 나중에 생성됨
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
@@ -30,31 +30,29 @@ spec:
             - containerPort: {{ .Values.service.targetPort }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          
           # [스토리지 마운트]
           {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: photo-storage
-              mountPath: {{ .Values.persistence.mountPath }}
+              mountPath: {{ .Values.persistence.mountPath | default "/app/static/uploads" }}
           {{- end }}
       
-      # [PVC 연결]
+      # [볼륨 정의]
       volumes:
         - name: photo-storage
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
+            # PVC의 이름과 정확히 매핑 (pvc.yaml의 metadata.name과 일치해야 함)
             claimName: {{ include "photo-service.fullname" . }}-pvc
           {{- else }}
           emptyDir: {}
           {{- end }}
 
+  # [배포 전략: BlueGreen]
   strategy:
     blueGreen:
-      # 위에서 만든 서비스 이름과 매핑
       activeService: {{ include "photo-service.fullname" . }}-active
       previewService: {{ include "photo-service.fullname" . }}-preview
-      
-      # 자동 승격 끄기 (수동 승인 후 전환)
-      autoPromotionEnabled: false
-      
-      # 전환 후 기존 Pod 종료 대기 시간
+      autoPromotionEnabled: false # 수동 승인으로 안정성 확보
       scaleDownDelaySeconds: 30
