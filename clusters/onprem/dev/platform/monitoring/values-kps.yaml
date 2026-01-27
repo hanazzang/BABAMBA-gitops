@@ -98,6 +98,10 @@ prometheus:
       limits:
         cpu: "1000m"
         memory: "2Gi"
+    
+    service:
+    type: NodePort
+    nodePort: 30090  # 이 포트로 접근 시도
 
     # # 스토리지 쓰려면 아래 주석 해제
     # storageSpec:
