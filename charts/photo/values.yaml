@@ -18,7 +18,7 @@ service:
 # [수정] StorageClass를 사용하는 방식으로 변경
 persistence:
   enabled: true
-  storageClassName: "standard" # [중요] 클러스터에 있는 StorageClass 이름 (platform/storage 참고)
+  storageClassName: "" # standard # [중요] 클러스터에 있는 StorageClass 이름 (platform/storage 참고)
   size: 1Gi
   mountPath: /app/static/uploads
 
