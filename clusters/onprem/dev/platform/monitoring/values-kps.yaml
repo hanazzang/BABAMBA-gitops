@@ -98,10 +98,6 @@ prometheus:
       limits:
         cpu: "1000m"
         memory: "2Gi"
-    
-    service:
-    type: NodePort
-    nodePort: 30090  # 이 포트로 접근 시도
 
     # # 스토리지 쓰려면 아래 주석 해제
     # storageSpec:
@@ -133,6 +129,10 @@ prometheus:
     probeSelector: {}
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
+  
+  service:
+    type: NodePort
+    nodePort: 30090  # 이 포트로 접근 시도
 
 alertmanager:
   enabled: true

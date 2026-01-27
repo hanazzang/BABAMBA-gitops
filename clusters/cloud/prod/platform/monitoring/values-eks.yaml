@@ -28,7 +28,8 @@ prometheus:
         # 부하 테스트에 필요한 핵심 메트릭만 필터링하여 전송료 절감
         writeRelabelConfigs:
           - sourceLabels: [__name__]
-            regex: '(http_.*|node_.*|container_.*|kube_pod_status_phase|kube_hpa_.*)' # HPA 지표 추가
+            # prometheus_remote_storage_.* 지표 추가
+            regex: '(http_.*|node_.*|container_.*|kube_pod_status_phase|kube_hpa_.*|prometheus_remote_storage_.*)' 
             action: keep
 
     # 임시 디스크 사용
