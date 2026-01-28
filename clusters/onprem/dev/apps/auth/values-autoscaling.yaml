@@ -1,0 +1,79 @@
+# 시나리오 스위치
+# - 0: autoscaling.enabled=false, keda.enabled=false
+# - 1: autoscaling.enabled=true,  keda.enabled=false
+# - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95)
+
+resources:
+  requests:
+    cpu: "100m"  ## CPU 사용률 = 실사용 / 100m
+    memory: "128Mi" # Memory 사용률 = 실사용 / 128Mi
+  limits:
+    cpu: "200m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 15
+  cpu:
+    averageUtilization: 85  # Pod 평균 CPU가 85% 초과하면 scale-out
+  memory:
+    averageUtilization: 70  # Pod 평균 Memory가 70% 초과하면 scale-out
+
+monitoring:
+  podMonitor:
+    enabled: true
+
+keda:
+  enabled: true
+  pollingInterval: 15  # 15초마다 Prometheus 질의
+  cooldownPeriod: 60  # Scale-in은 1분 유지 후 감소
+  triggers:
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: auth_rps
+        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "auth-server.name" . }}"}[1m]))'
+        threshold: "20" # auth-server 전체 RPS > 20 일 때 scale-out, CPU 오르기 전에도 미리 확장 가능
+
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: auth_p95_latency_seconds
+        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "auth-server.name" . }}"}[5m])) by (le))'
+        threshold: "0.3"  # p95 latency가 300ms 초과
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: auth_cpu_util_percent 
+        query: >
+          avg(
+            100 *
+            (
+              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",container!="POD"}[2m]))
+              /
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",resource="cpu",unit="core"})
+            )
+          )
+        threshold: "85"  # CPU 사용률 (Prometheus 기반)
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: auth_mem_util_percent
+        query: >
+          avg(
+            100 *
+            (
+              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",container!="POD"})
+              /
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",resource="memory",unit="byte"})
+            )
+          )
+        threshold: "70"  # Memory 사용률 (Prometheus 기반)
+

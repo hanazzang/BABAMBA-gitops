@@ -27,6 +27,8 @@ spec:
     # values 파일을 제공하는 Git 소스
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
       targetRevision: argos-test
+
+
       ref: values
   
   ignoreDifferences:

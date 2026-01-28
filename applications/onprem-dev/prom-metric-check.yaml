@@ -1,19 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloud-prod-observability
+  name: onprem-dev-prom-metric-check
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10" # KPS(에이전트) 설치 후 실행
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   project: default
-  source:
-    repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-test
-    path: workloads/monitoring/eks # EKS용 모니터링 리소스 경로
+
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: argos-test
+
+    path: platform/prom-metric-check/templates
+    directory:
+      recurse: true
+
   syncPolicy:
     automated:
       prune: true
@@ -21,3 +27,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+

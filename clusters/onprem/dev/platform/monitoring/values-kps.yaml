@@ -94,21 +94,16 @@ prometheusOperator:
     value: "monitoring"
     effect: "NoSchedule"
 
-# prometheus-node-exporter:
-#   tolerations:
-#     # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
-#     - operator: "Exists"
-
 prometheus:
   prometheusSpec:
-    # # 노드 격리 설정 (Taint + NodeSelector)
-    # nodeSelector:
-    #   dedicated: "monitoring"
-    # tolerations:
-    # - key: "dedicated"
-    #   operator: "Equal"
-    #   value: "monitoring"
-    #   effect: "NoSchedule"
+    # 노드 격리 설정 (Taint + NodeSelector) — dedicated=monitoring 노드에 스케줄되려면 둘 다 필요
+    nodeSelector:
+      dedicated: "monitoring"
+    tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "monitoring"
+      effect: "NoSchedule"
 
     # EKS 데이터를 받기 위한 필수 설정
     enableFeatures:
@@ -122,8 +117,8 @@ prometheus:
     retention: "7d"
 
     # [알림 고도화] 모든 알림에 클러스터 이름 강제 삽입
-    externalLabels:
-      cluster: "onprem-prod" # 나중에 환경명 바뀔 때 여기만 수정
+    # externalLabels:
+    #   cluster: "onprem-prod" # 나중에 환경명 바뀔 때 여기만 수정
 
     replicas: 1
     resources:
@@ -164,6 +159,10 @@ prometheus:
     probeSelector: {}
     # Probe가 위치한 네임스페이스 선택(기본: 전체 허용)
     probeNamespaceSelector: {}
+  
+  service:
+    type: NodePort
+    nodePort: 30090  # 이 포트로 접근 시도
 
 alertmanager:
   enabled: true

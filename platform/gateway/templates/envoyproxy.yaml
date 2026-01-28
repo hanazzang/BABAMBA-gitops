@@ -27,7 +27,7 @@ spec:
         {{- with .Values.envoyProxy.deploymentName }}
         name: {{ . | quote }}
         {{- end }}
-        {{- if not .Values.keda.enabled }}
+        {{- if and (not .Values.keda.enabled) (not .Values.autoscaling.enabled) }}
         replicas: {{ .Values.envoyProxy.replicas }}
         {{- end }}
         pod:

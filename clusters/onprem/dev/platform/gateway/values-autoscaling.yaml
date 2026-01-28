@@ -1,0 +1,79 @@
+# 시나리오 스위치
+# - 0: autoscaling.enabled=false, keda.enabled=false (고정 replicas)
+# - 1: autoscaling.enabled=true,  keda.enabled=false (HPA: CPU/MEM, metrics-server)
+# - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95 + CPU% + MEM%)
+
+monitoring:
+  podMonitor:
+    enabled: true
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 13
+  cpu:
+    averageUtilization: 85
+  memory:
+    averageUtilization: 70
+
+keda:
+  enabled: true
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers:
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: gateway_rps
+        query: 'sum(rate(envoy_http_downstream_rq_total{namespace="{{ .Values.envoyProxy.namespace }}",app="{{ .Values.envoyProxy.podLabels.app }}"}[1m]))'
+        threshold: "200"
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: gateway_p95_latency_ms
+        query: >
+          histogram_quantile(
+            0.95,
+            sum(
+              rate(
+                envoy_http_downstream_rq_time_bucket{namespace="{{ .Values.envoyProxy.namespace }}",app="{{ .Values.envoyProxy.podLabels.app }}"}[1m]
+              )
+            ) by (le)
+          )
+        threshold: "300"
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: gateway_cpu_util_percent
+        query: >
+          avg(
+            100 *
+            (
+              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Values.envoyProxy.namespace }}",pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",container!="POD"}[2m]))
+              /
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Values.envoyProxy.namespace }}",pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",resource="cpu",unit="core"})
+            )
+          )
+        threshold: "85"
+
+    - type: prometheus
+      metricType: Value
+      metadata:
+        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        metricName: gateway_mem_util_percent
+        query: >
+          avg(
+            100 *
+            (
+              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Values.envoyProxy.namespace }}",pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",container!="POD"})
+              /
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Values.envoyProxy.namespace }}",pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",resource="memory",unit="byte"})
+            )
+          )
+        threshold: "70"
+

@@ -4,7 +4,7 @@ imagePullSecrets:
 # ===== 이미지 (환경별 핵심 값) =====
 image:
   repository: ghcr.io/hanazzang/employee_server
-  tag: "sha-98518cd"
+  tag: "sha-be4cbe7"
   pullPolicy: IfNotPresent
 
 envFrom:
@@ -14,38 +14,3 @@ envFrom:
       name: redis-config
   - secretRef:
       name: db-credentials
-
-# ===== HPA (dev 테스트용) =====
-autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 5
-  cpu:
-    averageUtilization: 50
-  memory:
-    averageUtilization: 70
-
-monitoring:
-  podMonitor:
-    enabled: true
-
-keda:
-  enabled: true
-  pollingInterval: 15
-  cooldownPeriod: 300
-  triggers:
-    - type: prometheus
-      metricType: AverageValue
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: employee_rps
-        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m]))'
-        threshold: "20"
-
-    - type: prometheus
-      metricType: AverageValue
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: employee_p95_latency_seconds
-        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[5m])) by (le))'
-        threshold: "0.3"

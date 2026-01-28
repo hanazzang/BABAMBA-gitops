@@ -8,6 +8,8 @@ spec:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: argos-test
+
+
         directories:
           - path: clusters/onprem/dev/apps/*
   template:
@@ -19,13 +21,20 @@ spec:
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: argos-test
+
+
           path: charts/{{path.basename}}
           helm:
+            ignoreMissingValueFiles: true
             valueFiles:
               - $values/{{path}}/values.yaml
+              - $values/{{path}}/values-autoscaling.yaml 
+              - $values/{{path}}/values-scenario.yaml 
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: argos-test
+
+
           ref: values
           path: clusters
 
