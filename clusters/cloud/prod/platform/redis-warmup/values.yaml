@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: jaewoozzang/redis-warmup
+  tag: "1.0"
+  pullPolicy: Always
+
+resources: {}
+
+# env:
+#   REDIS_SESSION_HOST: ""
+#   REDIS_CACHE_HOST: ""
+#   DATABASE_HOST: ""
+#   DATABASE_USER: ""
+#   DATABASE_PASSWORD: ""
+#   DATABASE_NAME: ""
+
+# resources:
+#   limits:
+#     cpu: "500m"
+#     memory: "512Mi"
+#   requests:
+#     cpu: "100m"
+#     memory: "128Mi"

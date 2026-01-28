@@ -1,0 +1,8 @@
+replicaCount: 1
+
+image:
+  repository: jaewoozzang/redis-warmup
+  tag: "1.0"
+  pullPolicy: Always
+
+resources: {}
