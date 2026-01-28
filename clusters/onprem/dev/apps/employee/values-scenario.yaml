@@ -1,4 +1,4 @@
 autoscaling:
   enabled: true
 keda:
-  enabled: true
+  enabled: false
