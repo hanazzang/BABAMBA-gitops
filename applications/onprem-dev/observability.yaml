@@ -9,7 +9,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-test
+    targetRevision: hpa2
+
 
 
 
