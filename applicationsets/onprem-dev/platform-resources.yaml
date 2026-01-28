@@ -8,6 +8,8 @@ spec:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: argos-test
+
+
         directories:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
@@ -23,13 +25,20 @@ spec:
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: argos-test
+
+
           path: platform/{{path.basename}}
           helm:
+            ignoreMissingValueFiles: true
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
+              - $values/{{path}}/values-autoscaling.yaml
+              - $values/{{path}}/values-scenario.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: argos-test
+
+
           ref: values
       destination:
         server: https://kubernetes.default.svc

@@ -1,0 +1,15 @@
+# HPA/메트릭 가용성 확인용 PrometheusRule (prom-metric-check 앱에서 배포)
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: onprem-dev-prom-metric-check
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  groups:
+    - name: prom-metric-check.rules
+      rules:
+        # metrics-server / HPA 관련 메트릭 존재 여부 확인용 recording rule
+        - record: job:up:count
+          expr: count(up == 1)

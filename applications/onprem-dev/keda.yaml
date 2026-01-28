@@ -25,6 +25,8 @@ spec:
 
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
       targetRevision: argos-test
+
+
       ref: values
 
   syncPolicy:
