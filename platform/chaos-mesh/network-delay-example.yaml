@@ -1,20 +1,20 @@
-apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
-metadata:
-  name: photo-network-delay-schedule
-  namespace: chaos-mesh
-spec:
-  schedule: '@every 1m'
-  type: 'NetworkChaos'
-  networkChaos:
-    action: delay
-    mode: one
-    selector:
-      namespaces:
-        - photo
-      labelSelectors:
-        'app.kubernetes.io/name': 'photo-service'
-    delay:
-      latency: '100ms'
-      correlation: '100'
-    duration: '30s'
+# apiVersion: chaos-mesh.org/v1alpha1
+# kind: Schedule
+# metadata:
+#   name: photo-network-delay-schedule
+#   namespace: chaos-mesh
+# spec:
+#   schedule: '@every 1m'
+#   type: 'NetworkChaos'
+#   networkChaos:
+#     action: delay
+#     mode: one
+#     selector:
+#       namespaces:
+#         - photo
+#       labelSelectors:
+#         'app.kubernetes.io/name': 'photo-service'
+#     delay:
+#       latency: '100ms'
+#       correlation: '100'
+#     duration: '30s'
