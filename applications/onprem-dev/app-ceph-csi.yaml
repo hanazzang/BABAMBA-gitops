@@ -33,6 +33,25 @@ spec:
         # [추가 4] 노드 플러그인을 'worker-in-ceph' 노드에만 강제 배정
         - name: nodeplugin.nodeSelector.kubernetes\.io/hostname
           value: "worker-in-ceph"
+        # [신규 추가] 'dedicated: monitoring' 테인트가 있어도 스케줄링 허용
+        - name: provisioner.tolerations[0].key
+          value: "dedicated"
+        - name: provisioner.tolerations[0].operator
+          value: "Equal"
+        - name: provisioner.tolerations[0].value
+          value: "monitoring"
+        - name: provisioner.tolerations[0].effect
+          value: "NoSchedule"
+
+        # [참고] 노드 플러그인(nodeplugin)도 같은 노드에 뜬다면 이것도 추가 필요
+        - name: nodeplugin.tolerations[0].key
+          value: "dedicated"
+        - name: nodeplugin.tolerations[0].operator
+          value: "Equal"
+        - name: nodeplugin.tolerations[0].value
+          value: "monitoring"
+        - name: nodeplugin.tolerations[0].effect
+          value: "NoSchedule"
   destination:
     server: https://kubernetes.default.svc
     namespace: ceph-csi
