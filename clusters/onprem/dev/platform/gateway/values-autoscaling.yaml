@@ -10,9 +10,9 @@ monitoring:
 autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 8
+  maxReplicas: 13
   cpu:
-    averageUtilization: 60
+    averageUtilization: 85
   memory:
     averageUtilization: 70
 

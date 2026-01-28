@@ -14,9 +14,9 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 15
   cpu:
-    averageUtilization: 50
+    averageUtilization: 85
   memory:
     averageUtilization: 70
 
