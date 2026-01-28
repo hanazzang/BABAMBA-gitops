@@ -7,9 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-test
-
-
+    targetRevision: argos-cloud
     path: .
     directory:
       recurse: true
