@@ -45,10 +45,6 @@ storageClass:
     csi.storage.k8s.io/controller-expand-secret-namespace: "ceph-csi"
     csi.storage.k8s.io/node-stage-secret-name: "csi-rbd-secret"
     csi.storage.k8s.io/node-stage-secret-namespace: "ceph-csi"
-    
-    # [수정됨] 키 값이 아니라 Secret 내부의 "Key 이름"을 적어야 함
-    csi.storage.k8s.io/provisioner-secret-share-key: "userKey"
-    csi.storage.k8s.io/node-stage-secret-share-key: "userKey"
 
 ingress:
   host: api.yongun.shop

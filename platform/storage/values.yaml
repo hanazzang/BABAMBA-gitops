@@ -22,10 +22,6 @@ storageClass:
     csi.storage.k8s.io/controller-expand-secret-namespace: "ceph-csi"
     csi.storage.k8s.io/node-stage-secret-name: "csi-rbd-secret"
     csi.storage.k8s.io/node-stage-secret-namespace: "ceph-csi"
-    
-    # Secret 내의 Key 매핑 (userID, userKey 사용)
-    csi.storage.k8s.io/provisioner-secret-share-key: "userKey"
-    csi.storage.k8s.io/node-stage-secret-share-key: "userKey"
 
 # [애플리케이션 PVC 설정]
 persistence:
