@@ -15,7 +15,7 @@ spec:
     path: platform/kps-crds/crds # 공용 CRD 경로 재사용
   destination:
     # 온프 ArgoCD가 EKS 원격 관리 시 ips.env 의 EKS_CLUSTER_URL 로 채움 (ipctl apply)
-    server: <EKS-CLUSTER-URL>
+    server: https://44.234.135.248
     namespace: monitoring
   syncPolicy:
     automated:

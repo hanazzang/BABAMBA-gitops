@@ -151,6 +151,7 @@ bash scripts/fix-argocd-revisions.sh hpa2 --apply
 ### 하드코딩된 ip 변수로 적용 
 - ips.env 수정 후
 ```
+bash scripts/ipctl.sh scan   #  # 현재 값 확인
 bash scripts/ipctl.sh apply
 ```
 

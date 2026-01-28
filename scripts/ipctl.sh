@@ -163,7 +163,21 @@ if rw_file.exists():
                 write_text(rw_file, new)
                 print(f"[apply] {rw_file}: {n} replacements")
 
-# 3) onprem gateway LoadBalancerIP (MetalLB 쓸 때만)
+# 3) onprem MetalLB 풀 주소
+metallb_ip = env("ONPREM_METALLB_POOL_IP")
+metallb_file = repo_root / "clusters/onprem/dev/platform/metallb-system/values.yaml"
+if metallb_file.exists():
+    if mode == "scan":
+        txt = read_text(metallb_file)
+        m = re.search(r"addresses:\s*\n\s*-\s*([0-9.]+)/32", txt)
+        print_kv(metallb_file, "onprem MetalLB pool address", m.group(1) if m else None)
+    elif metallb_ip:
+        n, old, new = apply_regex(metallb_file, r"^(\s*-\s*)([0-9.]+)(/32\s*)$", rf"\g<1>{metallb_ip}\g<3>")
+        if n:
+            write_text(metallb_file, new)
+            print(f"[apply] {metallb_file}: {n} replacements")
+
+# 4) onprem gateway LoadBalancerIP (MetalLB 쓸 때만, 풀에 있는 IP여야 함)
 gw_ip = env("ONPREM_GATEWAY_LB_IP")
 gw_file = repo_root / "clusters/onprem/dev/platform/gateway/values.yaml"
 if gw_file.exists():
@@ -177,7 +191,7 @@ if gw_file.exists():
             write_text(gw_file, new)
             print(f"[apply] {gw_file}: {n} replacements")
 
-# 4) onprem photo NFS 서버 (chart 기본값 + onprem-dev override)
+# 5) onprem photo NFS 서버 (chart 기본값 + onprem-dev override)
 nfs_ip = env("ONPREM_NFS_SERVER_IP")
 photo_chart = repo_root / "charts/photo/values.yaml"
 photo_onprem = repo_root / "clusters/onprem/dev/apps/photo/values.yaml"
@@ -208,7 +222,7 @@ if redis_file.exists():
             write_text(redis_file, new)
             print(f"[apply] {redis_file}: {n} replacements")
 
-# 6) proxysql connector IP
+# 7) proxysql connector IP
 px_ip = env("PROXYSQL_IP")
 px_file = repo_root / "platform/proxysql/db-connector.yaml"
 if px_file.exists():
@@ -222,7 +236,7 @@ if px_file.exists():
             write_text(px_file, new)
             print(f"[apply] {px_file}: {n} replacements")
 
-# 7) Loki NFS values (옵션)
+# 8) Loki NFS values (옵션)
 loki_nfs_ip = env("LOKI_NFS_SERVER_IP")
 loki_nfs_file = repo_root / "platform/loki/values-nfs.yaml"
 if loki_nfs_file.exists():

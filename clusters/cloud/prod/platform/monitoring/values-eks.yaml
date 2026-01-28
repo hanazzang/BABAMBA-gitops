@@ -21,7 +21,7 @@ prometheus:
         memory: 2Gi
 
     remoteWrite:
-      - url: "http://192.168.13.144:9090/api/v1/write" # 온프 ip
+      - url: "http://192.168.1.147:9090/api/v1/write" # 온프 ip
         queueConfig:
           maxSamplesPerSend: 10000
           maxShards: 200
