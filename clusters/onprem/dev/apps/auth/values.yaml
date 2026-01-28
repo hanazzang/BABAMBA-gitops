@@ -4,7 +4,7 @@ replicaCount: 1
 # ===== 이미지 (환경별 핵심 값) =====
 image:
   repository: ghcr.io/hanazzang/auth_server
-  tag: "sha-45b1443"
+  tag: "sha-470276d"
   pullPolicy: IfNotPresent
 
 # ===== 서비스 계정 =====
