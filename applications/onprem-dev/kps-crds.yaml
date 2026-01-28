@@ -25,10 +25,10 @@ spec:
 
 
   syncPolicy:
-  # 처음 한번만 한 번 배포. CRD는 자주 안 바뀜.
-  # 잘못 적용되면 기존 리소스까지 다 영향 주니까 autoSync는 비활성화.
-  # (필요 시 수동 sync: argocd app sync onprem-dev-kps-crds)
-  # automated: {}  # 주석 처리: CRD는 수동 sync 권장
+    # CRD가 없으면 PrometheusRule/ServiceMonitor 등 사용 앱이 SyncFailed 함 → 최소 1회 자동 sync 필요
+    automated:
+      prune: false   # CRD는 prune 비권장(기존 리소스 영향)
+      selfHeal: true
     syncOptions:
       - ServerSideApply=true
       - Replace=true
