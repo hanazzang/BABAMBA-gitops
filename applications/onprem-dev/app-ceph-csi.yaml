@@ -11,13 +11,13 @@ spec:
     targetRevision: 3.16.0
     helm:
       parameters:
-        - name: csiConfig.clusterID
+        - name: csiConfig[0].clusterID
           value: "491b725b-d483-48ea-855a-b78b5b1bdc91"
-        - name: csiConfig.monitors[0]
+        - name: csiConfig[0].monitors[0]
           value: "10.10.10.101:6789" # Proxmox Node 1
-        - name: csiConfig.monitors[1]
+        - name: csiConfig[0].monitors[1]
           value: "10.10.10.102:6789" # Proxmox Node 2
-        - name: csiConfig.monitors[2]
+        - name: csiConfig[0].monitors[2]
           value: "10.10.10.103:6789" # Proxmox Node 2
   destination:
     server: https://kubernetes.default.svc
