@@ -26,12 +26,12 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ dig "autoscaling" "cpu" "averageUtilization" 60 .Values }}
+          averageUtilization: {{ .Values.autoscaling.cpu.averageUtilization | default 60 }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ dig "autoscaling" "memory" "averageUtilization" 70 .Values }}
+          averageUtilization: {{ .Values.autoscaling.memory.averageUtilization | default 70 }}
 {{- end }}
 
