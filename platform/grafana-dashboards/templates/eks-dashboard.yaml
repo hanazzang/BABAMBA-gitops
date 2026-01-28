@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-eks-monitoring
+  namespace: monitoring
+  labels:
+    # sidecar.dashboards.label 설정과 일치해야 함
+    grafana_dashboard: "1" 
+  annotations:
+    # sidecar.dashboards.folderAnnotation 설정 활용
+    grafana_folder: "EKS-Remote-Monitoring"
+data:
+  eks-cluster-overview.json: |-
+    {
+      "title": "EKS Remote Write Overview",
+      "tags": ["eks", "remote-write"],
+      "timezone": "browser",
+      "panels": [
+        {
+          "title": "Cluster CPU Usage (Remote)",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"})",
+              "legendFormat": "CPU Usage"
+            }
+          ]
+        },
+        {
+          "title": "EKS Ingestion Rate",
+          "type": "stat",
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "rate(prometheus_remote_storage_samples_in_total[5m])",
+              "legendFormat": "Samples/sec"
+            }
+          ]
+        }
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "cluster",
+            "type": "query",
+            "query": "label_values(up, cluster)",
+            "refresh": 1
+          }
+        ]
+      }
+    }
