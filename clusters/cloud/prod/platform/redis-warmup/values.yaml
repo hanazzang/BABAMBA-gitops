@@ -7,13 +7,9 @@ image:
 
 resources: {}
 
-# env:
-#   REDIS_SESSION_HOST: ""
-#   REDIS_CACHE_HOST: ""
-#   DATABASE_HOST: ""
-#   DATABASE_USER: ""
-#   DATABASE_PASSWORD: ""
-#   DATABASE_NAME: ""
+envFrom:
+  - configMapRef:
+      name: db-config
 
 # resources:
 #   limits:

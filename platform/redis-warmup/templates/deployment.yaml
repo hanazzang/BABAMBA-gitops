@@ -17,5 +17,7 @@ spec:
         - name: warmup
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
