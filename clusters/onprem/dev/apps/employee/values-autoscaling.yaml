@@ -59,7 +59,7 @@ keda:
               sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="cpu",unit="core"})
             )
           )
-        threshold: "60"
+        threshold: "85"
 
     - type: prometheus
       metricType: Value
