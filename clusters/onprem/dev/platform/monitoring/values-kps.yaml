@@ -101,14 +101,14 @@ prometheusOperator:
 
 prometheus:
   prometheusSpec:
-    # # 노드 격리 설정 (Taint + NodeSelector)
-    # nodeSelector:
-    #   dedicated: "monitoring"
-    # tolerations:
-    # - key: "dedicated"
-    #   operator: "Equal"
-    #   value: "monitoring"
-    #   effect: "NoSchedule"
+    # 노드 격리 설정 (Taint + NodeSelector) — dedicated=monitoring 노드에 스케줄되려면 둘 다 필요
+    nodeSelector:
+      dedicated: "monitoring"
+    tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "monitoring"
+      effect: "NoSchedule"
 
     # EKS 데이터를 받기 위한 필수 설정
     enableFeatures:
