@@ -15,21 +15,40 @@ service:
   port: 5003
   targetPort: 5003
 
-# [스토리지 설정]
+# [스토리지 설정 - CephFS]
 persistence:
   enabled: true
-  # 앞서 생성한 StorageClass 이름
   storageClass: "csi-cephfs-sc"
-  # CephFS는 다중 접속(RWX) 가능
-  accessMode: "ReadWriteMany"
+  accessMode: "ReadWriteMany" # CephFS의 핵심 (다중 쓰기 지원)
   size: "2Gi"
   mountPath: "/app/static/uploads"
 
-# [NFS 상세 정보]
-pvName: "photo-service-pv"
-size: "1Gi"
-nfsServer: "192.168.13.187"
-nfsPath: "/data/nfs/photo"
+# [StorageClass 생성 정보]
+storageClass:
+  name: csi-cephfs-sc
+  isDefault: true
+  provisioner: cephfs.csi.ceph.com
+  reclaimPolicy: Delete
+  bindingMode: Immediate
+  allowVolumeExpansion: true
+  
+  parameters:
+    # [중요] ceph fsid 명령어로 확인한 UUID를 아래에 넣으세요!
+    clusterID: "a7f64266-0894-4f1e-a635-d0aeaca0e993" 
+    
+    fsName: "cephfs"
+    
+    # Secret 정보 (기존 csi-rbd-secret 재사용)
+    csi.storage.k8s.io/provisioner-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/provisioner-secret-namespace: "ceph-csi"
+    csi.storage.k8s.io/controller-expand-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/controller-expand-secret-namespace: "ceph-csi"
+    csi.storage.k8s.io/node-stage-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/node-stage-secret-namespace: "ceph-csi"
+    
+    # [수정됨] 키 값이 아니라 Secret 내부의 "Key 이름"을 적어야 함
+    csi.storage.k8s.io/provisioner-secret-share-key: "userKey"
+    csi.storage.k8s.io/node-stage-secret-share-key: "userKey"
 
 ingress:
   host: api.yongun.shop
