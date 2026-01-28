@@ -5,7 +5,7 @@ metadata:
   name: onprem-dev-kube-prometheus-stack
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "-5"
 
 spec:
   project: default
