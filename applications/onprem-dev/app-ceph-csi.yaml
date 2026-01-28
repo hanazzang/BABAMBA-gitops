@@ -21,6 +21,16 @@ spec:
           value: "10.10.10.102:6789" # Proxmox Node 2
         - name: csiConfig[0].monitors[2]
           value: "10.10.10.103:6789" # Proxmox Node 2
+        # [추가 1] Provisioner가 파드 망 말고 '호스트(노드) 망'을 직접 쓰도록 설정
+        - name: provisioner.hostNetwork
+          value: "true"
+        # [추가 2] 노드 플러그인도 호스트 망 사용 (마운트 성능/안정성 향상)
+        - name: nodeplugin.hostNetwork
+          value: "true"
+        # [추가 3] Provisioner를 'worker-in-ceph' 노드에만 강제 배정
+        # (주의: 노드 라벨 이름이 정확해야 함. 아래 명령어 참고)
+        - name: provisioner.nodeSelector.kubernetes\.io/hostname
+          value: "worker-in-ceph"
   destination:
     server: https://kubernetes.default.svc
     namespace: ceph-csi
