@@ -35,7 +35,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
           "id": 99,
-          "title": "🧠 컨트롤 타워 및 클러스터 현황 (Cluster Health KPI)",
+          "title": "컨트롤 타워 및 클러스터 현황 (Cluster Health KPI)",
           "type": "row",
           "collapsed": false
         },
@@ -191,7 +191,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
           "id": 98,
-          "title": "🏗️ 노드 자원 상태 (Node Infrastructure)",
+          "title": "노드 자원 상태 (Node Infrastructure)",
           "type": "row",
           "collapsed": false
         },
@@ -244,7 +244,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
           "id": 97,
-          "title": "🚨 워크로드 안정성 (App Stability - SLI)",
+          "title": "워크로드 안정성 (App Stability - SLI)",
           "type": "row",
           "collapsed": false
         },
@@ -273,7 +273,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "🔥 파드 재시작 횟수 (Restarts)",
+          "title": "파드 재시작 횟수 (Restarts)",
           "type": "timeseries",
           "description": "★핵심: 그래프가 튀면 앱이 죽었다 살아난 것. 즉시 로그 확인 필요."
         },
@@ -304,7 +304,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "💀 OOM Killed (메모리 초과 사망)",
+          "title": "OOM Killed (메모리 초과 사망)",
           "type": "bargauge",
           "description": "메모리 부족으로 강제 종료된 파드 목록"
         }
