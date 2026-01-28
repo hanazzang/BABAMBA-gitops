@@ -7,12 +7,12 @@ spec:
   project: default
   source:
     repoURL: https://ceph.github.io/csi-charts
-    chart: ceph-csi-rbd
+    chart: ceph-csi-cephfs
     targetRevision: 3.16.0
     helm:
       parameters:
         - name: csiConfig.clusterID
-          value: "ceph-cluster"
+          value: "491b725b-d483-48ea-855a-b78b5b1bdc91
         - name: csiConfig.monitors[0]
           value: "10.10.10.101:6789" # Proxmox Node 1
         - name: csiConfig.monitors[1]
