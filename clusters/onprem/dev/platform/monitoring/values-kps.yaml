@@ -134,20 +134,12 @@ prometheus:
         cpu: "1000m"
         memory: "2Gi"
 
-    # # 스토리지 쓰려면 아래 주석 해제
-    # storageSpec:
-    #   # 데모용 임시 디렉터리 
-    #   emptyDir:
-    #     medium: ""
     # 저장소 볼륨 설정
+    # - 현재 클러스터에서 PVC(StorageClass/PV) 바인딩 이슈로 Prometheus가 못 뜨는 상태라
+    #   우선 emptyDir로 구동(데모/테스트용)해서 KEDA 트리거 검증이 가능하게 합니다.
     storageSpec:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: "local-storage" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 70Gi
+      emptyDir:
+        medium: ""
 
     # 모든 네임스페이스의 ServiceMonitor 자동 감지
     serviceMonitorSelectorNilUsesHelmValues: false
