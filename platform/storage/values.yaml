@@ -9,8 +9,8 @@ storageClass:
   allowVolumeExpansion: true
   
   parameters:
-    # [중요] 실제 Ceph 클러스터 ID 입력 (ceph mon map)
-    clusterID: "ceph-cluster"
+    # [중요] 실제 Ceph 클러스터 ID 입력 (ceph fsid)
+    clusterID: "491b725b-d483-48ea-855a-b78b5b1bdc91"
     
     # [중요] 방금 연결에 성공한 파일 시스템 이름
     fsName: "cephfs"
