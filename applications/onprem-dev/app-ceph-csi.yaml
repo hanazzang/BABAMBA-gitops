@@ -13,45 +13,36 @@ spec:
     targetRevision: 3.16.0
     helm:
       parameters:
+        # 1. 기본 접속 정보
         - name: csiConfig[0].clusterID
           value: "491b725b-d483-48ea-855a-b78b5b1bdc91"
         - name: csiConfig[0].monitors[0]
-          value: "10.10.10.101:6789" # Proxmox Node 1
+          value: "10.10.10.101:6789"
         - name: csiConfig[0].monitors[1]
-          value: "10.10.10.102:6789" # Proxmox Node 2
+          value: "10.10.10.102:6789"
         - name: csiConfig[0].monitors[2]
-          value: "10.10.10.103:6789" # Proxmox Node 2
-        # [추가 1] Provisioner가 파드 망 말고 '호스트(노드) 망'을 직접 쓰도록 설정
-        - name: provisioner.hostNetwork
+          value: "10.10.10.103:6789"
+
+        # 2. [중요] 호스트 네트워크 사용 (변수명 수정됨!)
+        # 아까 덤프에서 확인된 정확한 변수명입니다.
+        - name: provisioner.enableHostNetwork
           value: "true"
-        # [추가 2] 노드 플러그인도 호스트 망 사용 (마운트 성능/안정성 향상)
-        - name: nodeplugin.hostNetwork
-          value: "true"
-        # [추가 3] Provisioner를 'worker-in-ceph' 노드에만 강제 배정
+        
+        # 3. [중요] 파드 개수 1개로 고정
+        # 노드가 1개인데 3개를 띄우려 해서 Pending이 떴던 겁니다.
+        - name: provisioner.replicaCount
+          value: "1"
+
+        # 4. 특정 노드에만 배포 (Worker-in-ceph)
         - name: provisioner.nodeSelector.kubernetes\.io/hostname
           value: "worker-in-ceph"
-        # [추가 4] 노드 플러그인을 'worker-in-ceph' 노드에만 강제 배정
         - name: nodeplugin.nodeSelector.kubernetes\.io/hostname
           value: "worker-in-ceph"
-        # [신규 추가] 'dedicated: monitoring' 테인트가 있어도 스케줄링 허용
-        - name: provisioner.tolerations[0].key
-          value: "dedicated"
-        - name: provisioner.tolerations[0].operator
-          value: "Equal"
-        - name: provisioner.tolerations[0].value
-          value: "monitoring"
-        - name: provisioner.tolerations[0].effect
-          value: "NoSchedule"
 
-        # [참고] 노드 플러그인(nodeplugin)도 같은 노드에 뜬다면 이것도 추가 필요
-        - name: nodeplugin.tolerations[0].key
-          value: "dedicated"
-        - name: nodeplugin.tolerations[0].operator
-          value: "Equal"
-        - name: nodeplugin.tolerations[0].value
-          value: "monitoring"
-        - name: nodeplugin.tolerations[0].effect
-          value: "NoSchedule"
+        # 5. 파일시스템 이름 명시 (안전장치)
+        - name: storageClass.fsName
+          value: "cephfs"
+          
   destination:
     server: https://kubernetes.default.svc
     namespace: ceph-csi
