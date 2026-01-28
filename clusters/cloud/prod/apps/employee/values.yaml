@@ -17,7 +17,7 @@ envFrom:
 
 # ===== HPA (dev 테스트용) =====
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
   maxReplicas: 5
   cpu:
