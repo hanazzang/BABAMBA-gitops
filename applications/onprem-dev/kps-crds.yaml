@@ -17,7 +17,8 @@ spec:
 
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: hpa2
+    targetRevision: argos-test
+
 
     path: platform/kps-crds/crds
     directory:

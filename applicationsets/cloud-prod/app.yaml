@@ -7,7 +7,8 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: hpa2
+        revision: argos-test
+
 
         directories:
           - path: clusters/cloud/prod/apps/*
@@ -19,7 +20,8 @@ spec:
 
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: hpa2
+          targetRevision: argos-test
+
 
           path: charts/{{path.basename}}
           helm:
@@ -27,7 +29,8 @@ spec:
               - $values/{{path}}/values.yaml
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: hpa2
+          targetRevision: argos-test
+
 
           ref: values
           path: clusters
