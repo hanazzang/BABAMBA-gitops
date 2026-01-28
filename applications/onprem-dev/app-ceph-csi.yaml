@@ -36,8 +36,6 @@ spec:
         # 4. 특정 노드에만 배포 (Worker-in-ceph)
         - name: provisioner.nodeSelector.kubernetes\.io/hostname
           value: "worker-in-ceph"
-        - name: nodeplugin.nodeSelector.kubernetes\.io/hostname
-          value: "worker-in-ceph"
 
         # 5. 파일시스템 이름 명시 (안전장치)
         - name: storageClass.fsName
