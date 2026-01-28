@@ -143,7 +143,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: "local-storage" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
+          storageClassName: "nfs-client"  # "local-storage" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
