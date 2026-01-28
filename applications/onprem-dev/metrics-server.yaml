@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: metrics-server
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # kps-crds(0) 다음, HPA용 메트릭 조기 배포
 spec:
   project: default
   destination:

@@ -96,7 +96,11 @@ prometheusOperator:
 
 prometheus:
   prometheusSpec:
+<<<<<<< HEAD
     # 노드 격리 설정 (Taint + NodeSelector)
+=======
+    # 노드 격리 설정 (Taint + NodeSelector) — dedicated=monitoring 노드에 스케줄되려면 둘 다 필요
+>>>>>>> hpa2
     nodeSelector:
       dedicated: "monitoring"
     tolerations:

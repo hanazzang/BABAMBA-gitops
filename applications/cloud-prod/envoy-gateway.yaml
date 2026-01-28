@@ -18,6 +18,7 @@ spec:
                 deploy:
                   type: GatewayNamespace
   destination:
+    # 온프 ArgoCD가 EKS 원격 관리 시 ips.env 의 EKS_CLUSTER_URL 로 채움 (ipctl apply)
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
   syncPolicy:
@@ -25,5 +26,6 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true   # EKS 등 원격 클러스터에 namespace 없을 때 Argo가 생성
       - ServerSideApply=true
 
