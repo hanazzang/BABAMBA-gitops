@@ -47,15 +47,17 @@ spec:
             - name: hashring
               mountPath: /etc/thanos
       volumes:
+        - name: data
+          emptyDir: {}
         - name: hashring
           configMap:
             name: thanos-receive-hashring
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: local-storage
-        resources:
-          requests:
-            storage: 50Gi
+  # volumeClaimTemplates:
+  #   - metadata:
+  #       name: data
+  #     spec:
+  #       accessModes: ["ReadWriteOnce"]
+  #       storageClassName: local-storage
+  #       resources:
+  #         requests:
+  #           storage: 50Gi
