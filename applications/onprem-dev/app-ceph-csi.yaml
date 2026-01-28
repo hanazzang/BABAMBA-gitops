@@ -28,8 +28,10 @@ spec:
         - name: nodeplugin.hostNetwork
           value: "true"
         # [추가 3] Provisioner를 'worker-in-ceph' 노드에만 강제 배정
-        # (주의: 노드 라벨 이름이 정확해야 함. 아래 명령어 참고)
         - name: provisioner.nodeSelector.kubernetes\.io/hostname
+          value: "worker-in-ceph"
+        # [추가 4] 노드 플러그인을 'worker-in-ceph' 노드에만 강제 배정
+        - name: nodeplugin.nodeSelector.kubernetes\.io/hostname
           value: "worker-in-ceph"
   destination:
     server: https://kubernetes.default.svc
