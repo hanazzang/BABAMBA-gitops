@@ -87,6 +87,10 @@ prometheus:
     # EKS 데이터를 받기 위한 필수 설정
     enableRemoteWriteReceiver: true
 
+    # 위 옵션 안 먹어서 remote_write receiver 강제 ON
+    additionalArgs:
+      - --web.enable-remote-write-receiver
+
     # 튜닝 적용: 수집 주기 완화 및 보존 기간 최적화
     scrapeInterval: "20s"
     evaluationInterval: "30s"
