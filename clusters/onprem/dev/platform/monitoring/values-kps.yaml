@@ -71,7 +71,7 @@ prometheusOperator:
   - key: "dedicated"
     operator: "Equal"
     value: "monitoring"
-    effect: "NoSchedule"
+    # effect: "NoSchedule"
 
 prometheus:
   prometheusSpec:
