@@ -23,14 +23,14 @@ prometheus:
       - url: "http://192.168.1.41:30090/api/v1/write" # 온프 ip
         queueConfig:
           maxSamplesPerSend: 10000
-          maxShards: 200
+          maxShards: 20
           batchSendDeadline: 10s # 네트워크 지연 고려
         # 부하 테스트에 필요한 핵심 메트릭만 필터링하여 전송료 절감
-        writeRelabelConfigs:
-          - sourceLabels: [__name__]
-            # prometheus_remote_storage_.* 지표 추가
-            regex: '(http_.*|node_.*|container_.*|kube_pod_status_phase|kube_hpa_.*|prometheus_remote_storage_.*)' 
-            action: keep
+        # writeRelabelConfigs:
+        #   - sourceLabels: [__name__]
+        #     # prometheus_remote_storage_.* 지표 추가
+        #     regex: '(http_.*|node_.*|container_.*|kube_pod_status_phase|kube_hpa_.*|prometheus_remote_storage_.*)' 
+        #     action: keep
 
     # 임시 디스크 사용
     storageSpec:
