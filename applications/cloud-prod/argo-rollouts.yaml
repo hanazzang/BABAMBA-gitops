@@ -7,7 +7,7 @@ spec:
   project: default
   destination:
     # 온프 ArgoCD가 EKS 원격 관리 시 ips.env 의 EKS_CLUSTER_URL 로 채움 (ipctl apply)
-    server: https://44.234.135.248
+    server: https://kubernetes.default.svc
     namespace: argo-rollouts
   source:
     repoURL: https://argoproj.github.io/argo-helm

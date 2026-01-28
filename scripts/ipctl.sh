@@ -103,9 +103,9 @@ if cloud_prod_dir.exists():
         if mode == "scan":
             print_kv(f, f"cloud-prod {f.name} destination.server", cur)
         elif eks_url:
-            # https://kubernetes.default.svc 또는 <EKS-CLUSTER-URL> → EKS_CLUSTER_URL
-            pat = r"^(\s*server:\s*)(?:https://kubernetes\.default\.svc|<EKS-CLUSTER-URL>)(\s*(#.*)?)$"
-            new_txt, n = re.subn(pat, rf"\g<1>{eks_url}\g<2>", txt, flags=re.MULTILINE)
+            # destination.server 를 항상 EKS_CLUSTER_URL 로 덮어씀 (기존 값 무관)
+            pat = r"^(\s*server:\s*)(.+?)(\s*(#.*)?)$"
+            new_txt, n = re.subn(pat, rf"\g<1>{eks_url}\g<3>", txt, flags=re.MULTILINE)
             if n:
                 write_text(f, new_txt)
                 print(f"[apply] {f}: {n} replacements")
