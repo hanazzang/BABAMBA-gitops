@@ -12,7 +12,7 @@ spec:
     helm:
       parameters:
         - name: csiConfig.clusterID
-          value: "491b725b-d483-48ea-855a-b78b5b1bdc91
+          value: "491b725b-d483-48ea-855a-b78b5b1bdc91"
         - name: csiConfig.monitors[0]
           value: "10.10.10.101:6789" # Proxmox Node 1
         - name: csiConfig.monitors[1]
