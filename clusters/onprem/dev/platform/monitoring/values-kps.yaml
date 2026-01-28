@@ -79,7 +79,6 @@ grafana:
       access: proxy
       url: http://onprem-dev-loki-loki.loki.svc.cluster.local:3100
       isDefault: false
-      
 prometheus-node-exporter:
   tolerations:
     # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
