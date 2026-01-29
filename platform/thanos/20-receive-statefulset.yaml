@@ -37,9 +37,7 @@ spec:
             - --http-address=0.0.0.0:10902
           ports:
             - name: remote-write
-              port: 10902        # ✅ 19291에서 10902로 변경 (Thanos 수신 기본 포트)
-              targetPort: 10902  # ✅ 19291에서 10902로 변경
-              nodePort: 31291    # EKS가 쏘는 포트 (유지)
+              containerPort: 19291
             - name: grpc
               containerPort: 10901
             - name: http
