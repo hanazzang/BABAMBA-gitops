@@ -54,7 +54,7 @@ autoscaling:
           periodSeconds: 15
       selectPolicy: Max
     scaleDown:
-      stabilizationWindowSeconds: 300
+      stabilizationWindowSeconds: 60
       policies:
         - type: Percent
           value: 50

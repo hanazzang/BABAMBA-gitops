@@ -14,7 +14,7 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 13
+  maxReplicas: 100
   cpu:
     averageUtilization: 85
   memory:
@@ -23,11 +23,14 @@ autoscaling:
 monitoring:
   podMonitor:
     enabled: true
+    path: /metrics
+    interval: 5s  # 기본값 15s
+    scrapeTimeout: 10s
 
 keda:
   enabled: true
-  pollingInterval: 15
-  cooldownPeriod: 300
+  pollingInterval: 5  # 기본값 15s
+  cooldownPeriod: 60  # 기본값 300
   triggers:
     - type: prometheus
       metricType: AverageValue
@@ -35,15 +38,17 @@ keda:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: employee_rps
         query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m]))'
-        threshold: "20"
+        # 실무/발표용: "파드 1개당" 대략 60 RPS 수준에서 확장 시작
+        threshold: "60"
 
     - type: prometheus
       metricType: AverageValue
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: employee_p95_latency_seconds
-        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[5m])) by (le))'
-        threshold: "0.3"
+        # p95는 "품질 지표(SLO)"로 자주 사용. 데모에서는 1m 윈도우로 민감하게 반응.
+        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m])) by (le))'
+        threshold: "0.5"
 
     - type: prometheus
       metricType: Value
