@@ -1,7 +1,7 @@
 apiVersion: k6.io/v1alpha1
 kind: TestRun
 metadata:
-  name: k6-load-test
+  name: k6-load-test-2
   namespace: k6
 spec:
   parallelism: 2  # 부하를 분산할 Pod 개수
