@@ -19,3 +19,64 @@ data:
       check(res, { 'status is 200': (r) => r.status === 200 });
       sleep(1);
     }
+
+  employee-load-test.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+    import { Rate, Trend } from 'k6/metrics';
+
+    const errors = new Rate('errors');
+    const latencyMs = new Trend('latency_ms');
+
+    // 기본값은 gateway LB + /employee (유저 트래픽과 동일한 경로)
+    // 필요 시 아래 ENV로 바꿔서 바로 사용 가능:
+    // - BASE_URL=http://192.168.13.199
+    // - ENDPOINT=/employee
+    // - HOST_HEADER=api.yongun.shop   (HTTPRoute hostnames 매칭용)
+    const BASE_URL = __ENV.BASE_URL || 'http://192.168.13.199';
+    const ENDPOINT = __ENV.ENDPOINT || '/employee';
+    const HOST_HEADER = __ENV.HOST_HEADER || 'api.yongun.shop';
+
+    const START_RPS = Number(__ENV.START_RPS || 5);
+    const TARGET_RPS = Number(__ENV.TARGET_RPS || 50);
+    const RAMP_DURATION = __ENV.RAMP_DURATION || '1m';
+    const HOLD_DURATION = __ENV.HOLD_DURATION || '3m';
+    const COOLDOWN_DURATION = __ENV.COOLDOWN_DURATION || '30s';
+
+    export const options = {
+      scenarios: {
+        employee: {
+          executor: 'ramping-arrival-rate',
+          startRate: START_RPS,
+          timeUnit: '1s',
+          stages: [
+            { target: TARGET_RPS, duration: RAMP_DURATION },
+            { target: TARGET_RPS, duration: HOLD_DURATION },
+            { target: 0, duration: COOLDOWN_DURATION },
+          ],
+          preAllocatedVUs: Number(__ENV.PREALLOCATED_VUS || 50),
+          maxVUs: Number(__ENV.MAX_VUS || 300),
+        },
+      },
+      thresholds: {
+        http_req_failed: ['rate<0.01'],
+      },
+    };
+
+    export default function () {
+      const url = `${BASE_URL}${ENDPOINT}`;
+      const params = { headers: {} };
+      if (HOST_HEADER) params.headers['Host'] = HOST_HEADER;
+
+      const res = http.get(url, params);
+      const ok = check(res, {
+        'status is < 500': (r) => r.status < 500,
+      });
+
+      errors.add(!ok);
+      latencyMs.add(res.timings.duration);
+
+      // arrival-rate executor에서는 sleep이 필수는 아니지만,
+      // 요청 루프가 너무 타이트해지는 걸 막고 싶으면 ENV로 조절하세요.
+      sleep(Number(__ENV.SLEEP || 0));
+    }
