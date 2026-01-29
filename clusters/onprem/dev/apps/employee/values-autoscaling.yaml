@@ -32,8 +32,30 @@ keda:
   pollingInterval: 15
   cooldownPeriod: 60
 
+  # 🔥 체감 속도 핵심
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+          policies:
+            - type: Percent
+              value: 200        # 한 번에 2배
+              periodSeconds: 15
+            - type: Pods
+              value: 4          # 15초에 최대 +4
+              periodSeconds: 15
+          selectPolicy: Max
+        scaleDown:
+          stabilizationWindowSeconds: 120
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 60
+          selectPolicy: Min
+
   triggers:
-    # 1️⃣ RPS (유령 트래픽 제거)
+    # 1️⃣ RPS (빠른 반응 트리거)
     - type: prometheus
       metricType: AverageValue
       metadata:
@@ -46,11 +68,11 @@ keda:
               app="{{ include "employee-server.name" . }}",
               status=~"2..",
               path!~"/(metrics|health|ready)"
-            }[2m])
+            }[30s])
           )
         threshold: "60"
 
-    # 2️⃣ p95 latency (요청 있을 때만 의미 있게)
+    # 2️⃣ p95 latency (안정성 트리거, 조건부)
     - type: prometheus
       metricType: AverageValue
       metadata:
@@ -75,10 +97,10 @@ keda:
               status=~"2..",
               path!~"/(metrics|health|ready)"
             }[2m])
-          ) > 5
+          ) > 10
         threshold: "0.5"
 
-    # 3️⃣ CPU (보조 트리거)
+    # 3️⃣ CPU (보조, 참고용)
     - type: prometheus
       metricType: Value
       metadata:
@@ -108,7 +130,7 @@ keda:
           )
         threshold: "85"
 
-    # 4️⃣ Memory (보조 트리거)
+    # 4️⃣ Memory (보조)
     - type: prometheus
       metricType: Value
       metadata:
