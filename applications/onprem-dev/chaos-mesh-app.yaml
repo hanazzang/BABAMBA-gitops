@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-ceph
+    targetRevision: argos-cloud
     path: platform/chaos-mesh # Chaos Mesh 관련 YAML이 있는 경로
   destination:
     server: https://kubernetes.default.svc

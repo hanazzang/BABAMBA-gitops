@@ -8,7 +8,7 @@ spec:
   sources:
     # 1. k6 실행 명령(K6 CRD)과 ConfigMap(JS파일)이 있는 내 Git 경로
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: argos-ceph
+      targetRevision: argos-cloud
       path: platform/k6 # kustomization.yaml과 k6-run.yaml이 있는 곳
   destination:
     server: https://kubernetes.default.svc

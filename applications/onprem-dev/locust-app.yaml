@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-ceph
+    targetRevision: argos-cloud
     path: platform/locust
 
   destination:
