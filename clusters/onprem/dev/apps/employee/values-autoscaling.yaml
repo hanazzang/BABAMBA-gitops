@@ -25,7 +25,7 @@ monitoring:
   podMonitor:
     enabled: true
     path: /metrics
-    interval: 15s
+    interval: 10s
     scrapeTimeout: 10s
 
 keda:
@@ -72,7 +72,7 @@ keda:
               path!~"/(metrics|health|ready)"
             }[30s])
           )
-        threshold: "60"
+        threshold: "40"
 
     # 2️⃣ p95 latency (안정성 트리거, 조건부)
     - type: prometheus
