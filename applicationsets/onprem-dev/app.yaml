@@ -67,6 +67,18 @@ spec:
             - /data/REDIS_CACHE_PORT
             - /data/REDIS_MASTER_NAME
             - /data/REDIS_PASSWORD
+        # 데모/임시 우회용: employee 네임스페이스의 redis-config도 운영 중 수동 패치가 있을 수 있어
+        - group: ""
+          kind: ConfigMap
+          name: redis-config
+          namespace: employee
+          jsonPointers:
+            - /data/REDIS_SENTINEL_HOST
+            - /data/REDIS_SENTINEL_PORT
+            - /data/REDIS_CACHE_HOST
+            - /data/REDIS_CACHE_PORT
+            - /data/REDIS_MASTER_NAME
+            - /data/REDIS_PASSWORD
 
       syncPolicy:
         automated:
