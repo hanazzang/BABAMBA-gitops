@@ -15,7 +15,7 @@ autoscaling:
   enabled: true
   minReplicas: 1
   # 데모/발표용: 폭주 방지 상한선
-  maxReplicas: 30
+  maxReplicas: 100
   cpu:
     averageUtilization: 85
   memory:
@@ -72,7 +72,7 @@ keda:
               path!~"/(metrics|health|ready)"
             }[30s])
           )
-        threshold: "40"
+        threshold: "20"
 
     # 2️⃣ p95 latency (안정성 트리거, 조건부)
     - type: prometheus
