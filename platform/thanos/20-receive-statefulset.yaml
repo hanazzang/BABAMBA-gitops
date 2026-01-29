@@ -25,7 +25,7 @@ spec:
             - --tsdb.path=/data
             - --receive.hashrings-file=/etc/thanos/hashring.json
             - --receive.replication-factor=1
-            - --label=receive_replica="0"
+            - --label=receive_replica=0
 
             # ✅ EKS Prometheus agent가 remote_write로 보내는 엔드포인트
             - --remote-write.address=0.0.0.0:19291
@@ -47,6 +47,13 @@ spec:
               mountPath: /data
             - name: hashring
               mountPath: /etc/thanos
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
       volumes:
         - name: data
           emptyDir: {}
