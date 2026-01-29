@@ -6,27 +6,6 @@ grafana:
   service:
     type: NodePort
     nodePort: 32300
-  # 사이드카 설정(커스텀한 대시보드 사용)
-  sidecar:
-    dashboards:
-      enabled: true
-      # 라벨 키(해당 라벨이 있는 configmap 스캔)
-      label: grafana_dashboard
-
-      # ConfigMap에 grafana_dashboard: "1" 로 붙일 거라면 값도 맞춰주는 게 안전
-      labelValue: "1"
-
-      # (권장) RBAC 꼬임 방지: Grafana가 있는 네임스페이스만 스캔
-      # 보통 kube-prometheus-stack grafana도 monitoring에 있으니 monitoring 추천
-      searchNamespace: monitoring
-
-      # (권장) 폴더 분리하고 싶으면 ConfigMap에 이 annotation 달면 폴더가 나뉨
-      folderAnnotation: grafana_folder
-
-      # (권장) Grafana provisioning provider 설정
-      provider:
-        allowUiUpdates: false
-        foldersFromFilesStructure: true
 
   # 사이드카 설정(커스텀한 대시보드 사용)
   sidecar:
@@ -92,7 +71,7 @@ prometheusOperator:
   - key: "dedicated"
     operator: "Equal"
     value: "monitoring"
-    effect: "NoSchedule"
+    # effect: "NoSchedule"
 
 prometheus:
   prometheusSpec:
@@ -106,11 +85,7 @@ prometheus:
       effect: "NoSchedule"
 
     # EKS 데이터를 받기 위한 필수 설정
-    # enableRemoteWriteReceiver: true
-
-    # 위 옵션 안 먹어서 remote_write receiver 강제 ON
-    additionalArgs:
-      - web.enable-remote-write-receiver
+    enableRemoteWriteReceiver: true
 
     # 튜닝 적용: 수집 주기 완화 및 보존 기간 최적화
     scrapeInterval: "20s"
@@ -141,7 +116,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: "local-storage" # 로컬 디렉토리를 쓸 것이므로 비워둡니다.
+          storageClassName: "local-storage"
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
