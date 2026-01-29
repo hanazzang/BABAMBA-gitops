@@ -8,8 +8,6 @@ spec:
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
     targetRevision: argos-cloud
-
-
     path: .
     directory:
       recurse: true
