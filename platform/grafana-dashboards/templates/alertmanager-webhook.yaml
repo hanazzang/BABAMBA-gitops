@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: cloud-bursting-webhook
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  route:
+    receiver: cloud-bursting-webhook
+    groupWait: 10s
+    matchers:
+      - name: alertname
+        value: HostHighCpuLoad
+        matchType: "="
+  receivers:
+    - name: cloud-bursting-webhook
+      webhookConfigs:
+        - url: 'http://<PROMETHEUS_NODE_IP>:5000/webhook'
+          sendResolved: true

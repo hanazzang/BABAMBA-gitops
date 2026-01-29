@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-root-app
+  name: cloud-prod-root-app
   namespace: argocd
 spec:
   project: default

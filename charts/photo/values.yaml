@@ -59,3 +59,15 @@ resources:
 
 autoscaling:
   enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70
+
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers: []
