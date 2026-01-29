@@ -2,5 +2,5 @@ metallb:
   namespace: metallb-system
   poolName: onprem-dev-pool
   addresses:
-    - 192.168.13.199/32
+     - 192.168.1.199/32
   l2AdvertisementName: onprem-dev-l2
