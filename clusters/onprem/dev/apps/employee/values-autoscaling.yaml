@@ -24,12 +24,12 @@ monitoring:
   podMonitor:
     enabled: true
     path: /metrics
-    interval: 5s  # 기본값 15s
+    interval: 15s  # 기본값 15s
     scrapeTimeout: 10s
 
 keda:
   enabled: true
-  pollingInterval: 5  # 기본값 15s
+  pollingInterval: 15  # 기본값 15s
   cooldownPeriod: 60  # 기본값 300
   triggers:
     - type: prometheus
