@@ -31,7 +31,6 @@ spec:
             - --receive.hashrings-file=/etc/thanos/hashring.json
             - --receive.replication-factor=1
             - --label=receive_cluster=onprem-dev
-            - --label=receive_replica=$(POD_NAME)
 
             # EKS Prometheus agent가 remote_write로 보내는 엔드포인트
             - --remote-write.address=0.0.0.0:19291
