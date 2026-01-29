@@ -1,9 +1,70 @@
-# clusters/onprem/dev/platform/namespaces/values.yaml
+namespaces:
+  - name: gateway
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+      argocd.argoproj.io/sync-options: Prune=false
+    labels:
+      purpose: envoy-proxy
 
-namespaces:  # <--- 이 부모 키가 반드시 있어야 합니다!
+  - name: auth
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      gateway: user
+
+  - name: employee
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      gateway: user
+
+  - name: photo
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      gateway: user
+
+  - name: argo-rollouts
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: infra
+
+  - name: envoy-gateway-system
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: gateway-control-plane
+  
   - name: metallb-system
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
       argocd.argoproj.io/sync-options: Prune=false
     labels:
       purpose: infra
+
+  # observability/logging
+  - name: monitoring
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: observability
+
+  - name: loki
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: logging
+
+  - name: fluent-bit
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: logging
+
+  - name: common
+    annotations:
+      argocd.argoproj.io/sync-wave: "-10"
+    labels:
+      purpose: redis
+
