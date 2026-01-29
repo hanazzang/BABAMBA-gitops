@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos-test
+        revision: argos-cloud
 
 
         directories:
@@ -20,7 +20,7 @@ spec:
 
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: argos-cloud
 
 
           path: charts/{{path.basename}}
@@ -32,7 +32,7 @@ spec:
               - $values/{{path}}/values-scenario.yaml 
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: argos-cloud
 
 
           ref: values
