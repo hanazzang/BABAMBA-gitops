@@ -12,8 +12,8 @@ spec:
   ports:
     # ✅ EKS가 이 포트로 remote_write 보냄
     - name: remote-write
-      port: 10902
-      targetPort: 10902
+      port: 19291
+      targetPort: 19291
       nodePort: 31291
 
     # ✅ Thanos Query가 StoreAPI로 붙는 gRPC (클러스터 내부용)
