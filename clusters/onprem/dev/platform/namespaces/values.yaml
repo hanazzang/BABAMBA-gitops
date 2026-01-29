@@ -1,4 +1,6 @@
-# onprem-dev overrides (empty is OK)
+# clusters/onprem/dev/platform/namespaces/values.yaml
+
+namespaces:  # <--- 이 부모 키가 반드시 있어야 합니다!
   - name: metallb-system
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
