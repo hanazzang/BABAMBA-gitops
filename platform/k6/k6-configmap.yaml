@@ -28,14 +28,28 @@ data:
     const errors = new Rate('errors');
     const latencyMs = new Trend('latency_ms');
 
-    // 기본값은 gateway LB + /employee (유저 트래픽과 동일한 경로)
-    // 필요 시 아래 ENV로 바꿔서 바로 사용 가능:
-    // - BASE_URL=http://192.168.13.199
-    // - ENDPOINT=/employee
-    // - HOST_HEADER=api.yongun.shop   (HTTPRoute hostnames 매칭용)
-    const BASE_URL = __ENV.BASE_URL || 'http://192.168.13.199';
-    const ENDPOINT = __ENV.ENDPOINT || '/employee';
+    // 실무/데모 권장 기본값:
+    // - 헤어핀(클러스터 내부 -> LB 외부IP) 타임아웃을 피하기 위해 gateway "내부 DNS(ClusterIP)"로 호출
+    // - HTTPRoute hostnames 매칭을 위해 Host 헤더를 반드시 세팅
+    //
+    // 아래 ENV로 언제든 교체 가능:
+    // - BASE_URL=http://service-gateway.gateway.svc.cluster.local
+    // - ENDPOINT=/employee/employees
+    // - HOST_HEADER=api.yongun.shop
+    // - TOKEN=<JWT>  (없으면 AUTH_*로 로그인해서 자동 발급)
+    //
+    // Auth 자동 로그인(토큰 자동 발급):
+    // - AUTH_BASE=http://auth-server-stable.auth.svc:5001
+    // - AUTH_USER=kosa_demo
+    // - AUTH_PASS=********
+    const BASE_URL = __ENV.BASE_URL || 'http://service-gateway.gateway.svc.cluster.local';
+    const ENDPOINT = __ENV.ENDPOINT || '/employee/employees';
     const HOST_HEADER = __ENV.HOST_HEADER || 'api.yongun.shop';
+
+    const AUTH_BASE = __ENV.AUTH_BASE || 'http://auth-server-stable.auth.svc:5001';
+    const AUTH_USER = __ENV.AUTH_USER || '';
+    const AUTH_PASS = __ENV.AUTH_PASS || '';
+    const STATIC_TOKEN = __ENV.TOKEN || '';
 
     const START_RPS = Number(__ENV.START_RPS || 5);
     const TARGET_RPS = Number(__ENV.TARGET_RPS || 50);
@@ -63,10 +77,36 @@ data:
       },
     };
 
-    export default function () {
+    function getToken() {
+      if (STATIC_TOKEN && STATIC_TOKEN.length > 20) return STATIC_TOKEN;
+      if (!AUTH_USER || !AUTH_PASS) {
+        throw new Error(
+          'TOKEN is empty and AUTH_USER/AUTH_PASS not provided. Provide either TOKEN or AUTH_USER/AUTH_PASS.'
+        );
+      }
+
+      const payload = JSON.stringify({ username: AUTH_USER, password: AUTH_PASS });
+      const res = http.post(`${AUTH_BASE}/auth/login`, payload, {
+        timeout: '10s',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      check(res, { 'auth login status < 400': (r) => r.status < 400 });
+      const body = res.json();
+      const token = body && (body.token || body.access_token || body.jwt);
+      if (!token) throw new Error(`auth token missing. body=${res.body}`);
+      return token;
+    }
+
+    export function setup() {
+      const token = getToken();
+      return { token };
+    }
+
+    export default function (data) {
       const url = `${BASE_URL}${ENDPOINT}`;
       const params = { headers: {} };
       if (HOST_HEADER) params.headers['Host'] = HOST_HEADER;
+      params.headers['Authorization'] = `Bearer ${data.token}`;
 
       const res = http.get(url, params);
       const ok = check(res, {
