@@ -4,8 +4,8 @@ import { check, sleep } from 'k6';
 export const options = {
     // 테스트 시나리오 (필요에 따라 수정)
     stages: [
-    { duration: '30s', target: 50 },  // 10초 동안 5명까지 증가
-    { duration: '60s', target: 200 },  // 30초 유지
+    { duration: '30s', target: 100 },  // 10초 동안 5명까지 증가
+    { duration: '60s', target: 500 },  // 30초 유지
     { duration: '30s', target: 0 },  // 10초 동안 감소
     ],
 };
