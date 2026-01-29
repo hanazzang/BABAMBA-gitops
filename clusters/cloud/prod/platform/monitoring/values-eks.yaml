@@ -22,9 +22,9 @@ prometheus:
     remoteWrite:
       - url: "http://192.168.1.41:31291/api/v1/receive" # 온프 ip, prometheus-write/thanos-receive
         queueConfig:
-          maxSamplesPerSend: 10000
-          maxShards: 20
-          batchSendDeadline: 10s # 네트워크 지연 고려
+          maxSamplesPerSend: 2000
+          maxShards: 5
+          batchSendDeadline: 20s # 네트워크 지연 고려
         # 부하 테스트에 필요한 핵심 메트릭만 필터링하여 전송료 절감
         # writeRelabelConfigs:
         #   - sourceLabels: [__name__]
