@@ -15,7 +15,7 @@ input:
 output:
   loki:
     # onprem Loki gateway(NodePort)로 전송
-    host: 192.168.1.147
+    host: 192.168.1.173
     port: 31000
     uri: /loki/api/v1/push
     tls: false
