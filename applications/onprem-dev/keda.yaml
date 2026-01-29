@@ -24,7 +24,7 @@ spec:
           - $values/clusters/onprem/dev/platform/keda/values.yaml
 
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: monitoring2-cloud
+      targetRevision: argos-test
 
 
       ref: values

@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring2-cloud
+    targetRevision: argos-test
     path: platform/thanos
   destination:
     server: https://kubernetes.default.svc
