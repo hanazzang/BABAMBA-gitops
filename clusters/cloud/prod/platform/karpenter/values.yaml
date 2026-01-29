@@ -1,0 +1,9 @@
+clusterName: hana-eks-dev-usw2
+
+aws:
+  nodeRole: hana-eks-dev-usw2-karpenter-node-role
+
+nodePool:
+  capacityType:
+    - spot
+    - on-demand

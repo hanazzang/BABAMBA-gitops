@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-root-app
+  name: cloud-prod-root-app
   namespace: argocd
 spec:
   project: default
@@ -11,7 +11,7 @@ spec:
     path: .
     directory:
       recurse: true
-      include: '{applications/onprem-dev/*.yaml}'
+      include: '{applicationsets/cloud-prod/*.yaml}'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

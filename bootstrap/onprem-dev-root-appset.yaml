@@ -11,7 +11,7 @@ spec:
     path: .
     directory:
       recurse: true
-      include: '{applications/onprem-dev/*.yaml}'
+      include: '{applicationsets/onprem-dev/*.yaml}'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
