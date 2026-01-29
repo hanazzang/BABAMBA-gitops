@@ -1,18 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: storage-config
+  name: onprem-dev-thanos
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    path: platform/storage # 실제 StorageClass 야물이 있는 경로
-    targetRevision: argos-test
+    targetRevision: argos-cloud
+    path: platform/thanos
   destination:
     server: https://kubernetes.default.svc
-    namespace: default # SC는 전역 리소스지만 앱 등록을 위해 지정 (보통 default)
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

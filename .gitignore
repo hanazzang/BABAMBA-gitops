@@ -1,3 +1,3 @@
 secret.yaml
-bootstrap/argocd-repo-babamba-gitops.yaml
-bootstrap/argocd-repo-babamba-gitops.example.yaml
+yongun.shop.origin.crt
+yongun.shop.origin.key

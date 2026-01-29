@@ -36,7 +36,7 @@ envoyProxy:
   service:
     # ✅ 환경별(clusters)에서만 설정하도록 비워둠
     type: null
-    loadBalancerIP: null
+    loadBalancerIP: 192.168.1.199
     annotations: null
 
   podLabels:
@@ -53,7 +53,13 @@ envoyProxy:
 autoscaling:
   enabled: false
   minReplicas: 2
-  maxReplicas: 10
+  maxReplicas: 20
+  cpu:
+    # HPA(metrics-server) 기준: requests 대비 평균 CPU 사용률(%)
+    averageUtilization: 85
+  memory:
+    # HPA(metrics-server) 기준: requests 대비 평균 Memory 사용률(%)
+    averageUtilization: 70
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0

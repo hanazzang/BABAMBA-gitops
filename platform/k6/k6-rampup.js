@@ -1,0 +1,26 @@
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+    // 테스트 시나리오 (필요에 따라 수정)
+    stages: [
+    { duration: '30s', target: 100 },  // 10초 동안 5명까지 증가
+    { duration: '60s', target: 500 },  // 30초 유지
+    { duration: '30s', target: 0 },  // 10초 동안 감소
+    ],
+};
+
+export default function () {
+    const params = {
+    headers: {
+        'Host': 'api.yongun.shop', // [필수] 도메인 명찰
+    },
+    };
+
+    // ▼▼▼ Employee 서비스의 Swagger 페이지 공격! ▼▼▼
+    // 실제 API를 테스트하고 싶다면 '/employee/docs' 대신 '/employee/api/v1/users' 등으로 바꾸세요.
+    const res = http.get('http://192.168.1.199/employee/docs', params); 
+
+    check(res, { 'status was 200': (r) => r.status == 200 });
+    sleep(1);
+}

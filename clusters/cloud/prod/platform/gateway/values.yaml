@@ -8,7 +8,7 @@ envoyProxy:
 
 monitoring:
   podMonitor:
-    enabled: true
+    enabled: false
 
 autoscaling:
   enabled: false

@@ -36,7 +36,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
           "id": 99,
-          "title": "🏥 클러스터 건강 상태 (Cluster Health)",
+          "title": "클러스터 건강 상태 (Cluster Health)",
           "type": "row",
           "collapsed": false
         },
@@ -142,7 +142,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
           "id": 98,
-          "title": "🚑 자가 치유 및 성능 (Self-Healing & Performance)",
+          "title": "자가 치유 및 성능 (Self-Healing & Performance)",
           "type": "row",
           "collapsed": false
         },
@@ -175,7 +175,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "♻️ 자동 복구 속도 (Recovery Throughput)",
+          "title": "자동 복구 속도 (Recovery Throughput)",
           "type": "timeseries",
           "description": "★핵심: 장애 발생 시 이 그래프가 치솟아야 정상입니다. (자가 치유 중이라는 뜻)"
         },
@@ -213,7 +213,7 @@ data:
               "refId": "B"
             }
           ],
-          "title": "⚡ 스토리지 처리 성능 (Cluster IOPS)",
+          "title": "스토리지 처리 성능 (Cluster IOPS)",
           "type": "timeseries",
           "description": "클러스터 전체의 읽기/쓰기 작업량"
         }

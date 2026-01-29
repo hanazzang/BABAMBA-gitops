@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos-test
+        revision: argos-cloud
         directories:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
@@ -22,14 +22,17 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: argos-cloud
           path: platform/{{path.basename}}
           helm:
+            ignoreMissingValueFiles: true
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
+              - $values/{{path}}/values-autoscaling.yaml
+              - $values/{{path}}/values-scenario.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-test
+          targetRevision: argos-cloud
           ref: values
       destination:
         server: https://kubernetes.default.svc

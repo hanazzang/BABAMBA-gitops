@@ -9,10 +9,10 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring2
+    targetRevision: argos-cloud
     path: workloads/monitoring/eks # EKS용 모니터링 리소스 경로
   destination:
-    server: <EKS-클러스터-서버-주소>
+    server: https://kubernetes.default.svc
     namespace: monitoring
   syncPolicy:
     automated:

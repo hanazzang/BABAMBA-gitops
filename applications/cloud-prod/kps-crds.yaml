@@ -10,10 +10,10 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring2
+    targetRevision: argos-cloud
     path: platform/kps-crds/crds # 공용 CRD 경로 재사용
   destination:
-    server: <EKS-CLUSTER-URL> # eks클러스터 주소
+    server: https://kubernetes.default.svc # eks클러스터 주소
     namespace: monitoring
   syncPolicy:
     automated:

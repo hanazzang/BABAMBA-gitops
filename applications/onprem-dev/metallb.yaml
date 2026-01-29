@@ -29,4 +29,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true   # EKS 등 원격 클러스터에 namespace 없을 때 Argo가 생성
       - ServerSideApply=true

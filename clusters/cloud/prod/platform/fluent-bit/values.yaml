@@ -1,0 +1,21 @@
+# cloud-prod (EKS): Fluent Bit(에이전트) 배포 → 온프레미스 Loki로 전송
+namespace: fluent-bit
+
+extraEnv:
+  - name: ENV
+    value: cloud
+  - name: CLUSTER_NAME
+    value: eks-cloud-prod
+
+input:
+  tail:
+    # EKS는 containerd(CRI) 로그 포맷이 기본
+    parser: cri
+
+output:
+  loki:
+    # onprem Loki gateway(NodePort)로 전송
+    host: 192.168.1.173
+    port: 31000
+    uri: /loki/api/v1/push
+    tls: false

@@ -7,11 +7,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-test
+    targetRevision: argos-cloud
     path: .
     directory:
       recurse: true
-      include: '{applications/onprem-dev/*.yaml,applicationsets/onprem-dev/*.yaml}'
+      include: '{applications/onprem-dev/*.yaml}'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

@@ -1,0 +1,6 @@
+nodeClass:
+  amiFamily: AL2
+
+nodePool:
+  capacityType:
+    - on-demand

@@ -5,7 +5,7 @@ metadata:
   name: onprem-dev-kube-prometheus-stack
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "-5"
 
 spec:
   project: default
@@ -26,7 +26,7 @@ spec:
 
     # values 파일을 제공하는 Git 소스
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: argos-test
+      targetRevision: argos-cloud
       ref: values
   
   ignoreDifferences:
@@ -42,4 +42,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      # - ServerSideApply=true

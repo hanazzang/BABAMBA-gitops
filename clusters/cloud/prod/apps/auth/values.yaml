@@ -4,7 +4,7 @@ replicaCount: 1
 # ===== 이미지 (환경별 핵심 값) =====
 image:
   repository: ghcr.io/hanazzang/auth_server
-  tag: "sha-45b1443"
+  tag: "sha-9f53352"
   pullPolicy: IfNotPresent
 
 # ===== 서비스 계정 =====
@@ -47,7 +47,7 @@ autoscaling:
 # /metrics 스크랩 + Prometheus 기반 오토스케일(KEDA)
 monitoring:
   podMonitor:
-    enabled: true
+    enabled: false
 
 keda:
   enabled: false

@@ -15,18 +15,36 @@ service:
   port: 5003
   targetPort: 5003
 
-# [스토리지 설정]
+# [스토리지 설정 - CephFS]
 persistence:
   enabled: true
-  storageClassName: "nfs-client"
-  size: 1Gi
-  mountPath: /app/static/uploads
+  storageClass: "csi-cephfs-sc"
+  accessMode: "ReadWriteMany" # CephFS의 핵심 (다중 쓰기 지원)
+  size: "2Gi"
+  mountPath: "/app/static/uploads"
 
-# [NFS 상세 정보]
-pvName: "photo-service-pv"
-size: "1Gi"
-nfsServer: "192.168.13.187"
-nfsPath: "/data/nfs/photo"
+# [StorageClass 생성 정보]
+storageClass:
+  name: csi-cephfs-sc
+  isDefault: true
+  provisioner: cephfs.csi.ceph.com
+  reclaimPolicy: Delete
+  bindingMode: Immediate
+  allowVolumeExpansion: true
+  
+  parameters:
+    # [중요] ceph fsid 명령어로 확인한 UUID를 아래에 넣으세요!
+    clusterID: "491b725b-d483-48ea-855a-b78b5b1bdc91" 
+    
+    fsName: "cephfs"
+    
+    # Secret 정보 (기존 csi-rbd-secret 재사용)
+    csi.storage.k8s.io/provisioner-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/provisioner-secret-namespace: "ceph-csi"
+    csi.storage.k8s.io/controller-expand-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/controller-expand-secret-namespace: "ceph-csi"
+    csi.storage.k8s.io/node-stage-secret-name: "csi-rbd-secret"
+    csi.storage.k8s.io/node-stage-secret-namespace: "ceph-csi"
 
 ingress:
   host: api.yongun.shop
@@ -41,3 +59,15 @@ resources:
 
 autoscaling:
   enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  cpu:
+    averageUtilization: 50
+  memory:
+    averageUtilization: 70
+
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers: []

@@ -2,7 +2,6 @@ apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyProxy
 metadata:
   name: {{ .Values.envoyProxy.name | quote }}
-  namespace: {{ .Values.envoyProxy.namespace | quote }}
   annotations:
     argocd.argoproj.io/sync-wave: "-6"
 spec:
@@ -27,7 +26,7 @@ spec:
         {{- with .Values.envoyProxy.deploymentName }}
         name: {{ . | quote }}
         {{- end }}
-        {{- if not .Values.keda.enabled }}
+        {{- if and (not .Values.keda.enabled) (not .Values.autoscaling.enabled) }}
         replicas: {{ .Values.envoyProxy.replicas }}
         {{- end }}
         pod:
