@@ -59,9 +59,9 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",container!="POD"}[2m]))
+              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",container!="POD"}[2m]))
               /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="cpu",unit="core"})
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",resource="cpu",unit="core"})
             )
           )
         threshold: "85"
@@ -75,9 +75,9 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",container!="POD"})
+              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",container!="POD"})
               /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="memory",unit="byte"})
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",resource="memory",unit="byte"})
             )
           )
         threshold: "70"
