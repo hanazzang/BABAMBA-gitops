@@ -1,0 +1,11 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: k6-load-test
+  namespace: k6
+spec:
+  parallelism: 2  # 부하를 분산할 Pod 개수
+  script:
+    configMap:
+      name: k6-scenario-config
+      file: k6-rampup.js
