@@ -14,7 +14,8 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 100
+  # 데모/발표용: 폭주 방지 상한선
+  maxReplicas: 30
   cpu:
     averageUtilization: 85
   memory:
@@ -29,7 +30,7 @@ monitoring:
 
 keda:
   enabled: true
-  pollingInterval: 15
+  pollingInterval: 5
   cooldownPeriod: 60
 
   # 🔥 체감 속도 핵심
@@ -57,7 +58,8 @@ keda:
   triggers:
     # 1️⃣ RPS (빠른 반응 트리거)
     - type: prometheus
-      metricType: AverageValue
+      # 중요: query가 "전체 RPS(sum)"이므로 Value로 두어야 폭주(곱셈) 스케일이 안 납니다.
+      metricType: Value
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: employee_rps
@@ -74,7 +76,8 @@ keda:
 
     # 2️⃣ p95 latency (안정성 트리거, 조건부)
     - type: prometheus
-      metricType: AverageValue
+      # p95도 "전체 1개 값"이라 Value가 자연스럽습니다.
+      metricType: Value
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: employee_p95_latency_seconds
