@@ -19,7 +19,10 @@ spec:
     - path: {{ .Values.monitoring.podMonitor.path | default "/metrics" }}
       interval: {{ .Values.monitoring.podMonitor.interval | default "15s" }}
       scrapeTimeout: {{ .Values.monitoring.podMonitor.scrapeTimeout | default "10s" }}
-      targetPort: {{ .Values.containerPort }}
+      # NOTE: Prometheus Operator는 pod의 declared containerPort를 기반으로 타겟을 만들기 때문에
+      # Rollout 템플릿에 ports(containerPort)가 반드시 존재해야 합니다.
+      # (targetPort는 deprecated라 경고가 뜰 수 있지만, 현재 CRD/환경과 호환되는 방식입니다.)
+      targetPort: {{ .Values.service.targetPort }}
       relabelings:
         - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
           targetLabel: app
