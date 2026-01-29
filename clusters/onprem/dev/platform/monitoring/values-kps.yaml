@@ -86,7 +86,7 @@ prometheus:
 
     # EKS 데이터를 받기 위한 필수 설정
 
-    # enableRemoteWriteReceiver: true
+    enableRemoteWriteReceiver: true
     # 위 옵션 안 먹어서 remote_write receiver 강제 ON
     additionalArgs:
       - web.enable-remote-write-receiver

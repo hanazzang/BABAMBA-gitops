@@ -14,7 +14,7 @@ spec:
 
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-test
+    targetRevision: argos-cloud
 
     path: platform/prom-metric-check/templates
     directory:
