@@ -24,32 +24,61 @@ monitoring:
   podMonitor:
     enabled: true
     path: /metrics
-    interval: 15s  # 기본값 15s
+    interval: 15s
     scrapeTimeout: 10s
 
 keda:
   enabled: true
-  pollingInterval: 15  # 기본값 15s
-  cooldownPeriod: 60  # 기본값 300
+  pollingInterval: 15
+  cooldownPeriod: 60
+
   triggers:
+    # 1️⃣ RPS (유령 트래픽 제거)
     - type: prometheus
       metricType: AverageValue
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: employee_rps
-        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m]))'
-        # 실무/발표용: "파드 1개당" 대략 60 RPS 수준에서 확장 시작
+        query: >
+          sum(
+            rate(http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              app="{{ include "employee-server.name" . }}",
+              status=~"2..",
+              path!~"/(metrics|health|ready)"
+            }[2m])
+          )
         threshold: "60"
 
+    # 2️⃣ p95 latency (요청 있을 때만 의미 있게)
     - type: prometheus
       metricType: AverageValue
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: employee_p95_latency_seconds
-        # p95는 "품질 지표(SLO)"로 자주 사용. 데모에서는 1m 윈도우로 민감하게 반응.
-        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m])) by (le))'
+        query: >
+          histogram_quantile(
+            0.95,
+            sum(
+              rate(http_request_duration_seconds_bucket{
+                namespace="{{ .Release.Namespace }}",
+                app="{{ include "employee-server.name" . }}",
+                path!~"/(metrics|health|ready)"
+              }[2m])
+            ) by (le)
+          )
+          and
+          sum(
+            rate(http_requests_total{
+              namespace="{{ .Release.Namespace }}",
+              app="{{ include "employee-server.name" . }}",
+              status=~"2..",
+              path!~"/(metrics|health|ready)"
+            }[2m])
+          ) > 5
         threshold: "0.5"
 
+    # 3️⃣ CPU (보조 트리거)
     - type: prometheus
       metricType: Value
       metadata:
@@ -59,13 +88,27 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",container!="POD"}[2m]))
+              sum by (pod) (
+                rate(container_cpu_usage_seconds_total{
+                  namespace="{{ .Release.Namespace }}",
+                  pod=~"{{ include "employee-server.fullname" . }}-.*",
+                  container!="POD"
+                }[2m])
+              )
               /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",resource="cpu",unit="core"})
+              sum by (pod) (
+                kube_pod_container_resource_requests{
+                  namespace="{{ .Release.Namespace }}",
+                  pod=~"{{ include "employee-server.fullname" . }}-.*",
+                  resource="cpu",
+                  unit="core"
+                }
+              )
             )
           )
         threshold: "85"
 
+    # 4️⃣ Memory (보조 트리거)
     - type: prometheus
       metricType: Value
       metadata:
@@ -75,10 +118,22 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",container!="POD"})
+              sum by (pod) (
+                container_memory_working_set_bytes{
+                  namespace="{{ .Release.Namespace }}",
+                  pod=~"{{ include "employee-server.fullname" . }}-.*",
+                  container!="POD"
+                }
+              )
               /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.fullname" . }}-.*",resource="memory",unit="byte"})
+              sum by (pod) (
+                kube_pod_container_resource_requests{
+                  namespace="{{ .Release.Namespace }}",
+                  pod=~"{{ include "employee-server.fullname" . }}-.*",
+                  resource="memory",
+                  unit="byte"
+                }
+              )
             )
           )
         threshold: "70"
-
