@@ -1,21 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-root-app
+  name: onprem-dev-thanos
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: argos-cloud
-    path: .
-    directory:
-      recurse: true
-      include: '{applications/onprem-dev/*.yaml}'
+    targetRevision: argos-test
+    path: platform/thanos
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
