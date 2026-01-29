@@ -4,7 +4,7 @@ imagePullSecrets:
 # ===== 이미지 (환경별 핵심 값) =====
 image:
   repository: ghcr.io/hanazzang/employee_server
-  tag: "sha-98518cd"
+  tag: "demo-accesslog-6a00ac4"
   pullPolicy: IfNotPresent
 
 envFrom:
