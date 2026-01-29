@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: cloud-prod-apps
+  name: onprem-prod-apps
   namespace: argocd
 spec:
   generators:
@@ -9,23 +9,24 @@ spec:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: refactor/gitops-structure
         directories:
-          - path: clusters/cloud/prod/apps/*
+          - path: clusters/onprem/prod/apps/*
   template:
     metadata:
-      name: 'cloud-prod-{{path.basename}}'
+      name: 'onprem-prod-{{path.basename}}'
     spec:
       project: default
 
       sources:
-        # 1) 앱 Helm Chart (charts/<app>)
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
           path: charts/{{path.basename}}
           helm:
             valueFiles:
+              # (선택) 공통값(앱별 기본 values)을 repo에 두는 구조라면 유지
+              - $values/charts/{{path.basename}}/values.yaml
+              # 환경별 오버레이
               - $values/{{path}}/values.yaml
 
-        # 2) values repo ref (clusters)
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
           ref: values
@@ -40,6 +41,10 @@ spec:
           kind: PodMonitor
           jqPathExpressions:
             - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
         - group: argoproj.io
           kind: Rollout
           jsonPointers:

@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: platform-resources
+  name: cloud-prod-platform
   namespace: argocd
 spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos-cloud
+        revision: refactor/gitops-structure
         directories:
           - path: clusters/cloud/prod/platform/*
           - path: clusters/cloud/prod/platform/keda
@@ -20,20 +20,24 @@ spec:
       name: 'cloud-prod-{{path.basename}}'
     spec:
       project: default
+
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-cloud
+          targetRevision: refactor/gitops-structure
           path: platform/{{path.basename}}
           helm:
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-cloud
+          targetRevision: refactor/gitops-structure
           ref: values
+          path: .
+
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{path.basename}}'
+        namespace: '{{path.basename}}'  # ✅ 폴더명을 네임스페이스로 맞추는 방식(B)
+
       ignoreDifferences:
         - group: monitoring.coreos.com
           kind: PodMonitor
@@ -43,7 +47,15 @@ spec:
           kind: Deployment
           jsonPointers:
             - /spec/replicas
+        - group: argoproj.io
+          kind: Rollout
+          jsonPointers:
+            - /spec/replicas
+
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
