@@ -1,5 +1,0 @@
-apiVersion: v2
-name: karpenter-crds
-version: 1.0.5
-type: application
-appVersion: 1.0.5   # 이 CRD 패키지가 대응하는 Karpenter 릴리즈 버전(참고용)

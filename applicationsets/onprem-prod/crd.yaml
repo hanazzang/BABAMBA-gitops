@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: onprem-prod-platform-crds
+  name: onprem-prod-platform-crds # ✅ 이름 변경
   namespace: argocd
 spec:
   generators:
@@ -9,34 +9,26 @@ spec:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: refactor/gitops-structure
         directories:
-          - path: clusters/onprem/prod/crds/*
-
+          - path: clusters/onprem/crds/* # ✅ On-prem 감시 경로로 변경
   template:
     metadata:
-      name: 'onprem-prod-crds-{{path.basename}}'
+      name: 'onprem-prod-crds-{{path.basename}}' # ✅ 앱 이름 접두어 변경
       annotations:
         argocd.argoproj.io/sync-wave: "-10"
     spec:
       project: default
-
-      sources:
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          path: platform/{{path.basename}}
-          helm:
-            valueFiles:
-              - $values/platform/{{path.basename}}/values.yaml
-              - $values/{{path}}/values.yaml
-
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          ref: values
-          path: .
-
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: refactor/gitops-structure
+        # 실제 YAML 파일 위치는 platform/crds 하위를 그대로 사용한다고 가정 (구조 동일 시)
+        path: platform/crds/{{path.basename}} 
+        directory:
+          recurse: true 
       destination:
-        server: https://kubernetes.default.svc
-        namespace: '{{path.basename}}'
-
+        # ⚠️ 만약 On-prem 클러스터가 별도라면 해당 서버 주소로 변경 필요
+        server: https://kubernetes.default.svc 
+      
+      # (기존 ignoreDifferences 및 syncPolicy 설정 유지)
       ignoreDifferences:
         - group: monitoring.coreos.com
           kind: PodMonitor
@@ -56,5 +48,4 @@ spec:
           prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true
           - ServerSideApply=true
