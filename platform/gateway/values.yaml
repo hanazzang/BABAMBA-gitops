@@ -36,7 +36,7 @@ envoyProxy:
   service:
     # ✅ 환경별(clusters)에서만 설정하도록 비워둠
     type: null
-    loadBalancerIP: 192.168.1.199
+    loadBalancerIP: null
     annotations: null
 
   podLabels:
