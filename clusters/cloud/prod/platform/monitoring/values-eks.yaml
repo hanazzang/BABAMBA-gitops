@@ -21,6 +21,7 @@ prometheus:
 
     remoteWrite:
       - url: "http://192.168.1.41:31291/api/v1/receive" # 온프 ip, prometheus-write/thanos-receive
+        sendExemplars: true
         queueConfig:
           maxSamplesPerSend: 1000
           maxShards: 5

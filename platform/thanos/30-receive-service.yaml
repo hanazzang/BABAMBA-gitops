@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: thanos-receive
 spec:
-  type: NodePort
+  clusterIP: None
   selector:
     app.kubernetes.io/name: thanos-receive
   ports:
@@ -14,8 +14,6 @@ spec:
     - name: remote-write
       port: 19291
       targetPort: 19291
-      nodePort: 31291
-
     # ✅ Thanos Query가 StoreAPI로 붙는 gRPC (클러스터 내부용)
     - name: grpc
       port: 10901

@@ -7,6 +7,6 @@ data:
   hashring.json: |
     [
       {
-        "endpoints": ["thanos-receive.monitoring.svc.cluster.local:10901"]
+        "endpoints": ["thanos-receive-0.thanos-receive.monitoring.svc.cluster.local:10901"]
       }
     ]
