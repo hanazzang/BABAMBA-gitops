@@ -9,9 +9,7 @@ spec:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: refactor/gitops-structure
         directories:
-          # clusters/.../crds/ 하위에 폴더(keda-crds 등)가 있어야 합니다.
           - path: clusters/cloud/prod/crds/*
-
   template:
     metadata:
       name: 'cloud-prod-crds-{{path.basename}}'
@@ -22,16 +20,13 @@ spec:
       source:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         targetRevision: refactor/gitops-structure
-        # 실제 CRD 파일들이 모여있는 경로
         path: platform/crds/{{path.basename}}
-        # ✅ Helm 설정을 버리고 Directory 설정을 사용합니다.
+        # ✅ 이 부분이 핵심입니다! 헬름 대신 디렉토리 모드 사용
         directory:
-          recurse: true # 하위 폴더까지 싹 긁어옵니다.
-      
+          recurse: true 
       destination:
         server: https://kubernetes.default.svc
-        namespace: argocd # 네임스페이스는 하나로 통일하는 게 관리하기 편합니다.
-
+        namespace: argocd
       syncPolicy:
         automated:
           prune: true
