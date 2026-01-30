@@ -1,9 +1,9 @@
-clusterName: hana-eks-dev-usw2
+upstream:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/<KARPENTER_CONTROLLER_ROLE>
 
-aws:
-  nodeRole: hana-eks-dev-usw2-karpenter-node-role
-
-nodePool:
-  capacityType:
-    - spot
-    - on-demand
+  settings:
+    clusterName: "hana-eks-dev-usw2"
+    clusterEndpoint: "https://<EKS_ENDPOINT>"
+    interruptionQueue: "<KARPENTER_INTERRUPTION_QUEUE_NAME>"

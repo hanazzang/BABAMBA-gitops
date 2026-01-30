@@ -26,11 +26,24 @@ spec:
           recurse: true 
       destination:
         server: https://kubernetes.default.svc
-        namespace: argocd
+
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+        - group: argoproj.io
+          kind: Rollout
+          jsonPointers:
+            - /spec/replicas
+
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true
           - ServerSideApply=true
