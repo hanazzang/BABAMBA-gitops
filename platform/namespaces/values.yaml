@@ -1,63 +1,71 @@
 namespaces:
-  - name: gateway
+  gateway:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
       argocd.argoproj.io/sync-options: Prune=false
     labels:
       purpose: envoy-proxy
 
-  - name: auth
+  auth:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       gateway: user
 
-  - name: employee
+  employee:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       gateway: user
 
-  - name: photo
+  photo:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       gateway: user
 
-  - name: argo-rollouts
+  argo-rollouts:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: infra
 
-  - name: envoy-gateway-system
+  envoy-gateway-system:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: gateway-control-plane
 
-  # observability/logging
-  - name: monitoring
+  monitoring:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: observability
 
-  - name: loki
+  loki:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: logging
 
-  - name: fluent-bit
+  fluent-bit:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: logging
 
-  - name: common
+  common:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
     labels:
       purpose: redis
-
