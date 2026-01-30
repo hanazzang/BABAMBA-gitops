@@ -12,11 +12,11 @@ spec:
   {{ end }}
   selector:
     matchLabels:
-      app: {{ include "auth-server.fullname" . }}
+      app: auth-server
   template:
     metadata:
       labels:
-        app: {{ include "auth-server.fullname" . }}
+        app: auth-server
         {{- include "auth-server.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
