@@ -9,6 +9,7 @@ spec:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: refactor/gitops-structure
         directories:
+          # 1. 여기서 하위 폴더들을 찾습니다 (keda-crds, monitoring 등)
           - path: clusters/cloud/prod/crds/*
 
   template:
@@ -22,12 +23,13 @@ spec:
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
-          path: platform/{{path.basename}}
+          # ✅ [수정 포인트 1] 경로에 'crds/'를 추가했습니다. 
+          # 실제 위치: platform/crds/keda-crds
+          path: platform/crds/{{path.basename}}
           helm:
             valueFiles:
-              # (선택) 공통값도 같이 쓰고 싶다면 platform 쪽 values 유지
+              # ✅ [수정 포인트 2] values 경로도 실제 구조에 맞게 보정했습니다.
               - $values/platform/crds/{{path.basename}}/values.yaml
-              # 환경별 CRD values (clusters/.../crds/<name>/values.yaml)
               - $values/{{path}}/values.yaml
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
@@ -37,6 +39,9 @@ spec:
 
       destination:
         server: https://kubernetes.default.svc
+        # ✅ [수정 포인트 3] CRD는 보통 Cluster-scoped라 네임스페이스가 무의미하지만,
+        # 에러 방지를 위해 기본적으로 argocd나 공통 네임스페이스를 쓰는 게 안전할 수 있습니다.
+        # 그대로 두셔도 되지만, 관리 편의상 'argocd'로 고정하는 것을 추천하기도 합니다.
         namespace: '{{path.basename}}'
 
       ignoreDifferences:
