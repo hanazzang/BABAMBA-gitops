@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloud-prod-all-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10" # 가장 먼저 실행되도록 보장
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: refactor/gitops-structure
+    path: platform/crds  # 👈 하위 폴더(keda-crds, monitoring 등)가 있는 루트 경로
+    directory:
+      recurse: true      # 👈 중요! 하위 폴더 안의 모든 YAML을 다 찾아옵니다.
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd    # CRD는 클러스터 공용이라 어디든 상관없지만 관례상 argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true # 대용량 CRD(Envoy, KPS 등) 설치 시 필수
