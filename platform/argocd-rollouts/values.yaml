@@ -1,0 +1,15 @@
+argo-rollouts:
+  installCRDs: false
+
+  controller:
+    replicas: 2
+
+  # metrics + ServiceMonitor 생성 (Prometheus Operator 사용 기준)
+  metrics:
+    enabled: true
+
+  serviceMonitor:
+    enabled: true
+    #  나중에 monitoring 쪽 릴리즈 라벨 필요하면 아래만 채우면 됨
+    # additionalLabels:
+    #   release: monitoring
