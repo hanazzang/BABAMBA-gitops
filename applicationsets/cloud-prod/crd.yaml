@@ -26,7 +26,7 @@ spec:
           helm:
             valueFiles:
               # (선택) 공통값도 같이 쓰고 싶다면 platform 쪽 values 유지
-              - $values/platform/{{path.basename}}/values.yaml
+              - $values/platform/crds/{{path.basename}}/values.yaml
               # 환경별 CRD values (clusters/.../crds/<name>/values.yaml)
               - $values/{{path}}/values.yaml
 
