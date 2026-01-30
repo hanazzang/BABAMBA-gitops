@@ -34,10 +34,9 @@ envoyProxy:
   replicas: 2
 
   service:
-    # ✅ 환경별(clusters)에서만 설정하도록 비워둠
-    type: null
-    loadBalancerIP: null
-    annotations: null
+    type: LoadBalancer
+    # loadBalancerIP 항목은 아예 삭제하세요. (공통에서는 필요 없음)
+    annotations: {}
 
   podLabels:
     app: envoy-gw-dataplane
