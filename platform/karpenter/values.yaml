@@ -1,6 +1,23 @@
-nodeClass:
-  amiFamily: AL2
+upstream:
+  replicaCount: 2
 
-nodePool:
-  capacityType:
-    - on-demand
+  serviceAccount:
+    create: true
+    name: karpenter
+    annotations: {}
+
+  settings:
+    clusterName: ""
+    clusterEndpoint: ""
+    interruptionQueue: ""
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+crds:
+  enabled: false

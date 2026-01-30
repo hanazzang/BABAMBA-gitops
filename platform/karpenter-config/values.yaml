@@ -1,0 +1,11 @@
+clusterName: ""
+
+aws:
+  nodeRole: ""
+
+nodeClass:
+  amiFamily: AL2
+
+nodePool:
+  capacityType:
+    - on-demand

@@ -39,10 +39,6 @@ spec:
 
       destination:
         server: https://kubernetes.default.svc
-        # ✅ [수정 포인트 3] CRD는 보통 Cluster-scoped라 네임스페이스가 무의미하지만,
-        # 에러 방지를 위해 기본적으로 argocd나 공통 네임스페이스를 쓰는 게 안전할 수 있습니다.
-        # 그대로 두셔도 되지만, 관리 편의상 'argocd'로 고정하는 것을 추천하기도 합니다.
-        namespace: '{{path.basename}}'
 
       ignoreDifferences:
         - group: monitoring.coreos.com
@@ -63,5 +59,4 @@ spec:
           prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true
           - ServerSideApply=true
