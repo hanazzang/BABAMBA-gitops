@@ -9,9 +9,7 @@ spec:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: refactor/gitops-structure
         directories:
-          # 1. 여기서 하위 폴더들을 찾습니다 (keda-crds, monitoring 등)
           - path: clusters/cloud/prod/crds/*
-
   template:
     metadata:
       name: 'cloud-prod-crds-{{path.basename}}'
@@ -19,24 +17,13 @@ spec:
         argocd.argoproj.io/sync-wave: "-10"
     spec:
       project: default
-
-      sources:
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          # ✅ [수정 포인트 1] 경로에 'crds/'를 추가했습니다. 
-          # 실제 위치: platform/crds/keda-crds
-          path: platform/crds/{{path.basename}}
-          helm:
-            valueFiles:
-              # ✅ [수정 포인트 2] values 경로도 실제 구조에 맞게 보정했습니다.
-              - $values/platform/crds/{{path.basename}}/values.yaml
-              - $values/{{path}}/values.yaml
-
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          ref: values
-          path: .
-
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: refactor/gitops-structure
+        path: platform/crds/{{path.basename}}
+        # ✅ 이 부분이 핵심입니다! 헬름 대신 디렉토리 모드 사용
+        directory:
+          recurse: true 
       destination:
         server: https://kubernetes.default.svc
 
