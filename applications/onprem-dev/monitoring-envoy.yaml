@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/hanazzang/BABAMBA-gitops.git
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
     targetRevision: argos-cloud
     path: platform/monitoring/envoy
     helm:
