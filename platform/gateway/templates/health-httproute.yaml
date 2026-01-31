@@ -1,0 +1,19 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gateway-health
+  namespace: gateway
+spec:
+  parentRefs:
+    - name: service-gateway
+      namespace: gateway
+  hostnames:
+    - api.yongun.shop
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /health
+      backendRefs:
+        - name: gateway-health
+          port: 8080
