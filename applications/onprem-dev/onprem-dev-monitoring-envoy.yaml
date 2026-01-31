@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onprem-dev-monitoring-envoy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops.git
+    targetRevision: argos-cloud
+    path: platform/monitoring/envoy
+    helm:
+      releaseName: onprem-dev-monitoring-envoy
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
