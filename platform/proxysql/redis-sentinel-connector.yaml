@@ -1,0 +1,88 @@
+---
+# auth 네임스페이스: "클러스터 내부" Redis Sentinel
+# - auth-server는 Sentinel을 통해 master 주소를 조회한 뒤 master에 직접 연결한다.
+# - 외부 Sentinel(192.168.1.x)을 그대로 쓰면, master 주소도 외부 IP로 내려오는 경우가 많아
+#   Pod CIDR(192.168.0.0/16)과 대역이 겹치는 환경에서 연결이 타임아웃 될 수 있다.
+# - 그래서 클러스터 내부의 `redis-cache-service.common.svc.cluster.local:6379`를 master로 바라보는
+#   Sentinel을 auth 네임스페이스에 띄우고, auth는 `redis-sentinel-service:26379`로만 붙게 한다.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-sentinel-config
+  namespace: auth
+data:
+  sentinel.conf: |
+    port 26379
+    # Sentinel은 런타임에 config를 rewrite 하므로, writable 디렉토리를 사용
+    dir /data
+
+    # masterName은 auth 서비스의 REDIS_MASTER_NAME(default: mymaster)와 동일해야 함
+    # NOTE: 일부 환경에서 redis 프로세스가 기동 시점에 DNS 해석에 실패하는 케이스가 있어,
+    #       redis-cache-service의 ClusterIP를 사용한다.
+    sentinel monitor mymaster 10.96.101.117 6379 1
+    # redis-cache가 requirepass를 쓰는 경우(현재: kosa1004)
+    sentinel auth-pass mymaster kosa1004
+    sentinel down-after-milliseconds mymaster 5000
+    sentinel failover-timeout mymaster 60000
+    sentinel parallel-syncs mymaster 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sentinel-service
+  namespace: auth
+spec:
+  selector:
+    app: redis-sentinel
+  ports:
+    - name: redis-sentinel
+      protocol: TCP
+      port: 26379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-sentinel
+  namespace: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-sentinel
+  template:
+    metadata:
+      labels:
+        app: redis-sentinel
+    spec:
+      containers:
+        - name: redis-sentinel
+          image: redis:7
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -lc
+            - |
+              set -e
+              cp /etc/redis-ro/sentinel.conf /data/sentinel.conf
+              exec redis-server /data/sentinel.conf --sentinel
+          ports:
+            - name: redis-sentinel
+              containerPort: 26379
+          volumeMounts:
+            - name: cfg
+              mountPath: /etc/redis-ro/sentinel.conf
+              subPath: sentinel.conf
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            tcpSocket:
+              port: 26379
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+      volumes:
+        - name: cfg
+          configMap:
+            name: redis-sentinel-config
+        - name: data
+          emptyDir: {}

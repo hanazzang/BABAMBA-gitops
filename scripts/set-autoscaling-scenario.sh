@@ -35,31 +35,138 @@ apply_app_switch() {
 
   case "${scenario}" in
     0)
-      # HPA off
-      write_file "${dst}" <<'EOF'
+      if [[ "${app}" == "employee" ]]; then
+        # 시나리오 0: "체감 최악" (고정 1 pod + 낮은 CPU limit로 쉽게 포화)
+        write_file "${dst}" <<'EOF'
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "128Mi"
+  limits:
+    cpu: "150m"
+    memory: "256Mi"
+
 autoscaling:
   enabled: false
 keda:
   enabled: false
 EOF
+      else
+        # HPA/KEDA off (기본 replicas 유지)
+        write_file "${dst}" <<'EOF'
+autoscaling:
+  enabled: false
+keda:
+  enabled: false
+EOF
+      fi
       ;;
     1)
-      # HPA on (cpu/memory), KEDA off
-      write_file "${dst}" <<'EOF'
+      if [[ "${app}" == "employee" ]]; then
+        # 시나리오 1: "개선" (HPA만, maxReplicas 제한 + 보수적 scaleUp)
+        write_file "${dst}" <<'EOF'
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: "150m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  cpu:
+    averageUtilization: 80
+  memory:
+    averageUtilization: 75
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
+
+keda:
+  enabled: false
+EOF
+      else
+        # HPA on (cpu/memory), KEDA off
+        write_file "${dst}" <<'EOF'
 autoscaling:
   enabled: true
 keda:
   enabled: false
 EOF
+      fi
       ;;
     2)
-      # KEDA on (RPS/p95). photo는 KEDA 템플릿이 없을 수 있어도 ignoreMissingValueFiles라 안전.
-      write_file "${dst}" <<'EOF'
+      if [[ "${app}" == "employee" ]]; then
+        # 시나리오 2: "체감 최적" (KEDA: RPS/p95 기반 빠른 확장 + 충분한 리소스/최소 레플리카)
+        # 목표: 동일 부하에서 p95 <= ~0.95s
+        write_file "${dst}" <<'EOF'
+replicaCount: 4
+
+resources:
+  requests:
+    cpu: "300m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1024Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 4
+  maxReplicas: 30
+  # KEDA에서도 HPA behavior로 반영됨 (charts/employee/templates/scaledobject.yaml)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 200
+          periodSeconds: 15
+        - type: Pods
+          value: 6
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
+
+keda:
+  enabled: true
+  pollingInterval: 5
+  cooldownPeriod: 60
+EOF
+      else
+        # KEDA on (RPS/p95). photo는 KEDA 템플릿이 없을 수 있어도 ignoreMissingValueFiles라 안전.
+        write_file "${dst}" <<'EOF'
 autoscaling:
   enabled: true
 keda:
   enabled: true
 EOF
+      fi
       ;;
   esac
 

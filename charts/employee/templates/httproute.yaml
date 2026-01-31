@@ -17,7 +17,8 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /employee
+            # /employee/* 를 / 로 rewrite 할 때 //prefix 버그 방지
+            value: /employee/
       filters:
         - type: URLRewrite
           urlRewrite:

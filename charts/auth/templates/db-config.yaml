@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+data:
+  # auth/employee 모두 employee-mysql을 공유
+  DATABASE_HOST: "employee-mysql.employee.svc.cluster.local"
+  DATABASE_PORT: "3306"
+  DATABASE_DB_NAME: "employees"

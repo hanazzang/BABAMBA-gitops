@@ -72,7 +72,10 @@ keda:
               path!~"/(metrics|health|ready)"
             }[30s])
           )
-        threshold: "20"
+        # 시나리오 2 기준 권장값:
+        # - "pod 당 목표 RPS"로 잡으면, 전체 RPS/threshold 만큼으로 스케일되는 효과가 납니다.
+        # - 예: 800 RPS를 0.95s 이하로 유지하려면 pod당 50 RPS 가정 → 16 pods 수준 목표.
+        threshold: "50"
 
     # 2️⃣ p95 latency (안정성 트리거, 조건부)
     - type: prometheus
@@ -101,7 +104,8 @@ keda:
               path!~"/(metrics|health|ready)"
             }[2m])
           ) > 10
-        threshold: "0.5"
+        # 시나리오 2 목표(p95 <= 0.95s)보다 약간 보수적으로 잡아, 체감 0.95s 이하로 안정화되게 유도
+        threshold: "0.8"
 
     # 3️⃣ CPU (보조, 참고용)
     - type: prometheus

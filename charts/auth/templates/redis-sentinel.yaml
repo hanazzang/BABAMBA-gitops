@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sentinel-service
+spec:
+  selector:
+    app: redis-sentinel
+  ports:
+    - name: sentinel
+      port: 26379
+      targetPort: 26379
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-sentinel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-sentinel
+  template:
+    metadata:
+      labels:
+        app: redis-sentinel
+    spec:
+      containers:
+        - name: redis-sentinel
+          image: redis:7
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDIS_MASTER_DNS
+              value: "redis-cache-service.common.svc.cluster.local"
+            - name: REDIS_MASTER_PORT
+              value: "6379"
+            - name: REDIS_MASTER_NAME
+              value: "mymaster"
+            - name: REDIS_PASSWORD
+              value: "kosa1004"
+          command:
+            - sh
+            - -lc
+            - |
+              set -e
+              # redis가 config 로딩 시점에 hostname 해석 실패하는 케이스가 있어, 먼저 IP를 resolve 후 파일 생성
+              until getent hosts "$REDIS_MASTER_DNS" >/dev/null 2>&1; do
+                echo "[redis-sentinel] waiting for DNS: $REDIS_MASTER_DNS"
+                sleep 1
+              done
+              MASTER_IP="$(getent hosts "$REDIS_MASTER_DNS" | awk 'NR==1{print $1}')"
+              cat > /data/sentinel.conf <<EOF
+              port 26379
+              dir /data
+
+              sentinel monitor ${REDIS_MASTER_NAME} ${MASTER_IP} ${REDIS_MASTER_PORT} 1
+              sentinel auth-pass ${REDIS_MASTER_NAME} ${REDIS_PASSWORD}
+              sentinel down-after-milliseconds ${REDIS_MASTER_NAME} 5000
+              sentinel failover-timeout ${REDIS_MASTER_NAME} 60000
+              sentinel parallel-syncs ${REDIS_MASTER_NAME} 1
+              EOF
+              exec redis-server /data/sentinel.conf --sentinel
+          ports:
+            - containerPort: 26379
+              name: sentinel
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            tcpSocket:
+              port: 26379
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+      volumes:
+        - name: data
+          emptyDir: {}
