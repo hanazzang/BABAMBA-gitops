@@ -30,7 +30,7 @@ argo-rollouts:
           "location": "file:///plugins/rollouts-plugin-trafficrouter-gatewayapi"
         }
       ]
-
+      
   metrics:
     enabled: true
   serviceMonitor:
