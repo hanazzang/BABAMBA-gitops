@@ -3,6 +3,9 @@ argo-rollouts:
 
   controller:
     replicas: 2
+    trafficRouterPlugins:
+      - name: "argoproj-labs/gatewayAPI"
+        location: "https://github.com/argoproj-labs/rollouts-trafficrouter-gatewayapi/releases/download/v0.1.0/gatewayapi-plugin-linux-amd64"
 
   # metrics + ServiceMonitor 생성 (Prometheus Operator 사용 기준)
   metrics:
