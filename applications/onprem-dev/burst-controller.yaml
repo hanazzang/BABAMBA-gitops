@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onprem-dev-burst-controller
+  namespace: argocd
+  annotations:
+    # AlertmanagerConfig / PrometheusRule 보다 먼저 떠야
+    # webhook endpoint가 준비된 상태에서 알람을 받을 수 있음
+    argocd.argoproj.io/sync-wave: "-6"
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: argos-cloud
+    path: clusters/onprem/dev/platform/monitoring/burst-controller
+    directory:
+      recurse: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
