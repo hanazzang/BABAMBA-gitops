@@ -2,7 +2,7 @@ argo-rollouts:
   installCRDs: false
   controller:
     replicas: 2
-    # 아래와 같이 | 기호를 써서 문자열(String)로 정의해야 합니다.
+    # 파이프(|) 기호를 써서 아래 내용을 하나의 '문자열'로 취급하게 만듭니다.
     trafficRouterPlugins: |
       [
         {
@@ -10,12 +10,10 @@ argo-rollouts:
           "location": "https://github.com/argoproj-labs/rollouts-trafficrouter-gatewayapi/releases/download/v0.1.0/gatewayapi-plugin-linux-amd64"
         }
       ]
-  # metrics + ServiceMonitor 생성 (Prometheus Operator 사용 기준)
+
   metrics:
     enabled: true
-
   serviceMonitor:
     enabled: true
-    #  나중에 monitoring 쪽 릴리즈 라벨 필요하면 아래만 채우면 됨
     # additionalLabels:
     #   release: monitoring
