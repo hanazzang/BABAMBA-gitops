@@ -22,9 +22,10 @@ argo-rollouts:
           - name: trafficrouter-plugins
             mountPath: /plugins
 
-    # 3. 컨트롤러에게 "다운로드 받지 말고 창고(file://)에서 꺼내 써"라고 지시
-    trafficRouterPlugins: '[{"name":"argoproj-labs/gatewayAPI","location":"file:///plugins/rollouts-plugin-trafficrouter-gatewayapi"}]'
-      
+    trafficRouterPlugins:
+      trafficRouterPlugins: |-
+        - name: "argoproj-labs/gatewayAPI"
+          location: "file:///plugin-bin/rollouts-plugin-trafficrouter-gatewayapi"
   metrics:
     enabled: true
   serviceMonitor:
