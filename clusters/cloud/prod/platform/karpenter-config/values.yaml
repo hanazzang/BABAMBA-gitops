@@ -1,12 +1,12 @@
-clusterName: "hana-eks-dev-usw2"
+clusterName: hana-eks-dev-usw2
 
 aws:
-  nodeRole: "hana-eks-dev-usw2-karpenter-node-role"
+  nodeRole: karpenter_node_role
 
 nodeClass:
   amiFamily: AL2
 
 nodePool:
   capacityType:
-    - spot
-    - on-demand
+    # - on-demand
+     - spot
