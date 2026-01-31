@@ -25,9 +25,11 @@ argo-rollouts:
     trafficRouterPlugins:
       trafficRouterPlugins: |-
         - name: "argoproj-labs/gatewayAPI"
-          location: "file:///plugin-bin/rollouts-plugin-trafficrouter-gatewayapi"
+          location: "file:///plugins/rollouts-plugin-trafficrouter-gatewayapi"
+  
   metrics:
     enabled: true
+
   serviceMonitor:
     enabled: true
     # additionalLabels:
