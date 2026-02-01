@@ -9,11 +9,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{ include "employee-server.selectorLabels.write" . }}
+      {{ include "employee-server.selectorLabels.write" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{ include "employee-server.selectorLabels.write" . }}
+        {{ include "employee-server.selectorLabels.write" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -28,8 +28,8 @@ spec:
 
   strategy:
     canary:
-      stableService: {{ include "employee-server.fullname" . }}-stable
-      canaryService: {{ include "employee-server.fullname" . }}-canary
+      stableService: {{ include "employee-server.fullname" . }}-write-stable
+      canaryService: {{ include "employee-server.fullname" . }}-write-canary
 
       trafficRouting:
         plugins:

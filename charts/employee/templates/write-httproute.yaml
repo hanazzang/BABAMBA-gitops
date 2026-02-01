@@ -44,11 +44,11 @@ spec:
         # ✅ WRITE도 stable/canary로 분배할 수 있게 구성 (Rollouts가 weight를 패치)
         - group: ""
           kind: Service
-          name: {{ include "employee-server.fullname" . }}-stable
+          name: {{ include "employee-server.fullname" . }}-write-stable
           port: {{ .Values.service.port }}
           weight: 100
         - group: ""
           kind: Service
-          name: {{ include "employee-server.fullname" . }}-canary
+          name: {{ include "employee-server.fullname" . }}-write-canary
           port: {{ .Values.service.port }}
           weight: 0

@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "employee-server.fullname" . }}-write-hpa
+  name: {{ include "employee-server.fullname" . }}-write
   annotations:
     argocd.argoproj.io/sync-wave: "3"
   labels:

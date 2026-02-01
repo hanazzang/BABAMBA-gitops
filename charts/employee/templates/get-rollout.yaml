@@ -9,11 +9,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{ include "employee-server.selectorLabels.get" . }}
+      {{- include "employee-server.selectorLabels.get" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{ include "employee-server.selectorLabels.get" . }}
+        {{- include "employee-server.selectorLabels.get" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -29,8 +29,8 @@ spec:
   strategy:
     canary:
       # ✅ Rollouts가 stable/canary 서비스 weight를 조정
-      stableService: {{ include "employee-server.fullname" . }}-stable
-      canaryService: {{ include "employee-server.fullname" . }}-canary
+      stableService: {{ include "employee-server.fullname" . }}-get-stable
+      canaryService: {{ include "employee-server.fullname" . }}-get-canary
 
       trafficRouting:
         plugins:
@@ -42,7 +42,7 @@ spec:
       # ✅ 수동 프로모트: 각 단계에서 멈추고, 직접 promote 해야 다음 단계로 진행
       steps:
         - setWeight: 5
-        - pause: {}   # kubectl argo rollouts promote ... 로 다음 단계
+        - pause: {}
         - setWeight: 10
         - pause: {}
         - setWeight: 30
