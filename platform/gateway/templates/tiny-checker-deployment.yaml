@@ -80,12 +80,6 @@ spec:
               port: {{ .Values.tinyChecker.port }}
             initialDelaySeconds: 1
             periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: {{ .Values.tinyChecker.port }}
-            initialDelaySeconds: 3
-            periodSeconds: 10
           resources:
             requests:
               cpu: 10m
