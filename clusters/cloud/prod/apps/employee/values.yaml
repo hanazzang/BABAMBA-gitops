@@ -20,10 +20,19 @@ autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 5
-  cpu:
-    averageUtilization: 50
-  memory:
-    averageUtilization: 70
+# get-hpa.yaml에서 참조할 값
+  get:
+    cpu:
+      averageUtilization: 50
+    memory:
+      averageUtilization: 70
+      
+  # write-hpa.yaml에서 참조할 값
+  write:
+    cpu:
+      averageUtilization: 40
+    memory:
+      averageUtilization: 60
 
 monitoring:
   podMonitor:
