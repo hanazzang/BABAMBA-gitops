@@ -8,9 +8,6 @@ spec:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: hpa2
-
-
-
         directories:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
