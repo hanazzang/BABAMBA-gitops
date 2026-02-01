@@ -109,7 +109,7 @@ tinyChecker:
       - name: auth
         url: http://auth.auth.svc.cluster.local:5001/health
       - name: employee
-        url: http://employee.employee.svc.cluster.local:8000/health
+        url: http://employee.employee.svc.cluster.local:5002/health
       - name: photo
         url: http://photo.photo.svc.cluster.local:5003/health
 
