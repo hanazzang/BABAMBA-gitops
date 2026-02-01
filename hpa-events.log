@@ -1,0 +1,11 @@
+LAST SEEN   TYPE     REASON              OBJECT                                                            MESSAGE
+20m         Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 3; reason: memory resource utilization (percentage of request) above target
+18m         Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 2; reason: All metrics below target
+13m         Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 3; reason: cpu resource utilization (percentage of request) above target
+13m         Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 8; reason: cpu resource utilization (percentage of request) above target
+12m         Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 11; reason: cpu resource utilization (percentage of request) above target
+12m         Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 14; reason: cpu resource utilization (percentage of request) above target
+8m42s       Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 12; reason: All metrics below target
+8m27s       Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 7; reason: All metrics below target
+7m42s       Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   New size: 6; reason: All metrics below target
+3m42s       Normal   SuccessfulRescale   horizontalpodautoscaler/onprem-dev-employee-employee-server-hpa   (combined from similar events): New size: 19; reason: All metrics below target

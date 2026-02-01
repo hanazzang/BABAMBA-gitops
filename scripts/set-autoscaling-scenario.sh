@@ -65,7 +65,8 @@ EOF
       ;;
     1)
       if [[ "${app}" == "employee" ]]; then
-        # 시나리오 1: "개선" (HPA만, maxReplicas 제한 + 보수적 scaleUp)
+        # 시나리오 1: HPA만 켬 (cpu/memory, metrics-server 기반)
+        # - KEDA와 "조건(상한/behavior)"을 맞춰 HPA vs KEDA 비교가 가능하게 함
         write_file "${dst}" <<'EOF'
 replicaCount: 2
 
@@ -80,7 +81,7 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 8
+  maxReplicas: 30
   cpu:
     averageUtilization: 80
   memory:
@@ -89,9 +90,12 @@ autoscaling:
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
+        - type: Percent
+          value: 200
+          periodSeconds: 15
         - type: Pods
-          value: 1
-          periodSeconds: 30
+          value: 6
+          periodSeconds: 15
       selectPolicy: Max
     scaleDown:
       stabilizationWindowSeconds: 120
@@ -116,10 +120,11 @@ EOF
       ;;
     2)
       if [[ "${app}" == "employee" ]]; then
-        # 시나리오 2: "체감 최적" (KEDA: RPS/p95 기반 빠른 확장 + 충분한 리소스/최소 레플리카)
+        # 시나리오 2: KEDA(RPS/p95) 기반 빠른 확장 + 충분한 리소스
+        # - HPA(시나리오1)와 공정 비교를 위해 minReplicaCount를 2로 맞춤
         # 목표: 동일 부하에서 p95 <= ~0.95s
         write_file "${dst}" <<'EOF'
-replicaCount: 4
+replicaCount: 2
 
 resources:
   requests:
@@ -131,7 +136,7 @@ resources:
 
 autoscaling:
   enabled: true
-  minReplicas: 4
+  minReplicas: 2
   maxReplicas: 30
   # KEDA에서도 HPA behavior로 반영됨 (charts/employee/templates/scaledobject.yaml)
   behavior:

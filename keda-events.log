@@ -1,0 +1,3 @@
+LAST SEEN   TYPE      REASON                OBJECT                                             MESSAGE
+53m         Normal    KEDAScalersStopped    scaledobject/onprem-dev-employee-employee-server   Stopped scalers watch
+19m         Warning   ScaledObjectDeleted   scaledobject/onprem-dev-employee-employee-server   ScaledObject was deleted
