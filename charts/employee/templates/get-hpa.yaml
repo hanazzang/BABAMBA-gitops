@@ -1,0 +1,38 @@
+{{- if and .Values.autoscaling.enabled (not .Values.keda.enabled) }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "employee-server.fullname" . }}-get-hpa
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    # ✅ GET 롤아웃을 스케일 타겟으로
+    name: {{ include "employee-server.fullname" . }}-get
+
+  # ✅ GET은 더 많이 늘릴 수 있게(예시)
+  minReplicas: {{ .Values.autoscaling.get.minReplicas | default .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.get.maxReplicas | default .Values.autoscaling.maxReplicas }}
+
+  {{- with .Values.autoscaling.get.behavior | default .Values.autoscaling.behavior }}
+  behavior:{{ toYaml . | nindent 4 }}
+  {{- end }}
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.get.cpu.averageUtilization | default .Values.autoscaling.cpu.averageUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.get.memory.averageUtilization | default .Values.autoscaling.memory.averageUtilization }}
+{{- end }}

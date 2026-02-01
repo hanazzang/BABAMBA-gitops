@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: {{ include "employee-server.fullname" . }}
+  name: {{ include "employee-server.fullname" . }}-write
   namespace: employee
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -9,11 +9,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "employee-server.selectorLabels" . | nindent 6 }}
+      {{ include "employee-server.selectorLabels.write" . }}
   template:
     metadata:
       labels:
-        {{- include "employee-server.selectorLabels" . | nindent 8 }}
+        {{ include "employee-server.selectorLabels.write" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -25,17 +25,30 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             {{- toYaml .Values.envFrom | nindent 12 }}
+
   strategy:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-stable
       canaryService: {{ include "employee-server.fullname" . }}-canary
+
       trafficRouting:
         plugins:
           argoproj-labs/gatewayAPI:
-            httpRoute: employee-route
+            # ✅ WRITE 전용 HTTPRoute만 패치
+            httpRoute: employee-write-route
             namespace: employee
+
       steps:
+        - setWeight: 5
+        - pause: {}
         - setWeight: 10
-        - pause:
-            duration: 30s
+        - pause: {}
+        - setWeight: 30
+        - pause: {}
+        - setWeight: 50
+        - pause: {}
+        - setWeight: 70
+        - pause: {}
+        - setWeight: 90
+        - pause: {}
         - setWeight: 100

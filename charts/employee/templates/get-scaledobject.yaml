@@ -2,9 +2,8 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: {{ include "employee-server.fullname" . }}
+  name: {{ include "employee-server.fullname" . }}-get
   annotations:
-    # KEDA(CRD 설치) 이후에 생성되도록 순서를 뒤로 미룹니다.
     argocd.argoproj.io/sync-wave: "7"
   labels:
     {{- include "employee-server.labels" . | nindent 4 }}
@@ -12,21 +11,21 @@ spec:
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
-    name: {{ include "employee-server.fullname" . }}
+    name: {{ include "employee-server.fullname" . }}-get
 
   pollingInterval: {{ .Values.keda.pollingInterval | default 15 }}
   cooldownPeriod: {{ .Values.keda.cooldownPeriod | default 300 }}
-  minReplicaCount: {{ .Values.autoscaling.minReplicas }}
-  maxReplicaCount: {{ .Values.autoscaling.maxReplicas }}
+  minReplicaCount: {{ .Values.autoscaling.get.minReplicas | default .Values.autoscaling.minReplicas }}
+  maxReplicaCount: {{ .Values.autoscaling.get.maxReplicas | default .Values.autoscaling.maxReplicas }}
 
   advanced:
     horizontalPodAutoscalerConfig:
-      {{- with .Values.autoscaling.behavior }}
+      {{- with .Values.autoscaling.get.behavior | default .Values.autoscaling.behavior }}
       behavior:{{ toYaml . | nindent 8 }}
       {{- end }}
 
   triggers:
-    {{- range $t := .Values.keda.triggers }}
+    {{- range $t := .Values.keda.get.triggers | default .Values.keda.triggers }}
     - type: {{ $t.type | quote }}
       {{- with $t.metricType }}
       metricType: {{ . | quote }}

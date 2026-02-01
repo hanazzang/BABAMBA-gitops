@@ -63,6 +63,16 @@ autoscaling:
           value: 1
           periodSeconds: 60
       selectPolicy: Min
+  get:
+    maxReplicas: 10
+    cpu:
+      averageUtilization: 40
+
+  write:
+    maxReplicas: 3
+    cpu:
+      averageUtilization: 60
+
 
 # Prometheus 스크랩 설정 (/metrics)
 monitoring:
@@ -78,4 +88,11 @@ keda:
   enabled: false
   pollingInterval: 15
   cooldownPeriod: 300
+  # GET / WRITE 각각 트리거를 다르게 줄 수 있게 분리 (선택)
+  get:
+    triggers: []
+  write:
+    triggers: []
+  
+  # (호환용) 기존 구조도 남겨둠: get/write가 비어있으면 triggers를 fallback으로 사용
   triggers: []
