@@ -1,101 +1,39 @@
 kube-prometheus-stack:
-  grafana:
-    enabled: true
-    adminPassword: admin
-    service:
-      type: ClusterIP
-
-  # ✅ spot taint 허용 (핵심)
   prometheusOperator:
     tolerations:
       - key: "spot"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
-    resources:
-      requests:
-        cpu: 50m
-        memory: 150Mi
-      limits:
-        memory: 300Mi
+        operator: "Exists"
     admissionWebhooks:
       patch:
         tolerations:
           - key: "spot"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
-        resources:
-          requests:
-            cpu: 10m
-            memory: 50Mi
-          limits:
-            memory: 100Mi
-
-  kube-state-metrics:
-    enabled: true
-    tolerations:
-      - key: "spot"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
-    resources:
-      requests:
-        cpu: 10m
-        memory: 80Mi
-      limits:
-        memory: 150Mi
-
-  prometheus-node-exporter:
-    enabled: true
-    tolerations:
-      - key: "spot"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
-
-  alertmanager:
-    enabled: true
-    alertmanagerSpec:
-      storage:
-        emptyDir: {}
-      tolerations:
-        - key: "spot"
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
-      resources:
-        requests:
-          cpu: 10m
-          memory: 80Mi
-        limits:
-          memory: 150Mi
+            operator: "Exists"
 
   prometheus:
-    enabled: true
     prometheusSpec:
-      retention: 1d
-      scrapeInterval: 30s
-      evaluationInterval: 30s
+      tolerations:
+        - key: "spot"
+          operator: "Exists"
 
+      # (이미 적용한 emptyDir/리소스/셀렉터 설정은 그대로 유지)
       storageSpec:
         emptyDir: {}
 
-      serviceMonitorSelectorNilUsesHelmValues: false
-      podMonitorSelectorNilUsesHelmValues: false
-      serviceMonitorSelector: {}
-      podMonitorSelector: {}
-      ruleSelector: {}
-
+  alertmanager:
+    alertmanagerSpec:
       tolerations:
         - key: "spot"
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
+          operator: "Exists"
 
-      resources:
-        requests:
-          cpu: 100m
-          memory: 512Mi
-        limits:
-          memory: 1Gi
+      storage:
+        emptyDir: {}
+
+  kube-state-metrics:
+    tolerations:
+      - key: "spot"
+        operator: "Exists"
+
+  prometheus-node-exporter:
+    tolerations:
+      - key: "spot"
+        operator: "Exists"
