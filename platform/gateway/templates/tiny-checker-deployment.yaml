@@ -44,6 +44,14 @@ spec:
 
               class Handler(BaseHTTPRequestHandler):
                 def do_GET(self):
+                  # ✅ liveness: 프로세스 살아있으면 무조건 200
+                  if self.path == "/live":
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(b"alive")
+                    return
+
+                  # ✅ readiness/external health: 의존성 체크
                   if self.path != "/health":
                     self.send_response(404); self.end_headers(); return
 
@@ -74,12 +82,34 @@ spec:
                 HTTPServer(("0.0.0.0", port), Handler).serve_forever()
               PY
               python /app.py
+
+          # ✅ (중요) 포트가 열릴 때까지 기다려서 connection refused 방지
+          startupProbe:
+            tcpSocket:
+              port: {{ .Values.tinyChecker.port }}
+            periodSeconds: 2
+            failureThreshold: 30
+
+          # ✅ (중요) 백엔드 죽어도 컨테이너는 죽지 않게 분리
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: {{ .Values.tinyChecker.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+
+          # ✅ readiness는 의존성 체크 유지 (백엔드 하나라도 죽으면 Ready=0)
           readinessProbe:
             httpGet:
               path: /health
               port: {{ .Values.tinyChecker.port }}
-            initialDelaySeconds: 1
+            initialDelaySeconds: 2
             periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 6
+
           resources:
             requests:
               cpu: 10m
