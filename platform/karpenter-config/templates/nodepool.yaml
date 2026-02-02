@@ -18,6 +18,26 @@ spec:
             - {{ . | quote }}
 {{- end }}
 
+        # ✅ 최소비용: 작은 인스턴스만 허용 (us-west-2 기준 예시)
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values:
+            - "t3a.small"
+            - "t3.small"
+
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+
+  # ✅ 폭증 방지(최대 노드 수를 사실상 고정)
+  limits:
+    cpu: "4"
+    memory: "8Gi"
+
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized
     consolidateAfter: 30s
