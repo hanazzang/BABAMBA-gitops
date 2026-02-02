@@ -40,15 +40,15 @@ spec:
 
       steps:
         - setWeight: 5
-        - pause: {}
+        - pause: { duration: 5m }
         - setWeight: 10
-        - pause: {}
+        - pause: { duration: 5m }
         - setWeight: 30
-        - pause: {}
+        - pause: { duration: 10m }
         - setWeight: 50
-        - pause: {}
+        - pause: { duration: 10m }
         - setWeight: 70
-        - pause: {}
+        - pause: { duration: 10m }
         - setWeight: 90
-        - pause: {}
+        - pause: { duration: 10m }
         - setWeight: 100
