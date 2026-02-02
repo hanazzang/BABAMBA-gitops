@@ -1,48 +1,4 @@
-fullnameOverride: prometheus-stack
-
-grafana:
-  enabled: true
-
-  adminUser: admin
-  adminPassword: admin123
-
-  persistence:
-    enabled: false
-
-  service:
-    type: ClusterIP
-
-  defaultDashboardsEnabled: true
-
-  sidecar:
-    dashboards:
-      enabled: true
-      label: grafana_dashboard
-      labelValue: "1"
-      searchNamespace: ALL
-      folder: /var/lib/grafana/dashboards
-
-prometheus:
-  enabled: true
-
-  prometheusSpec:
-    retention: 6h
-
-    serviceMonitorSelectorNilUsesHelmValues: false
-    podMonitorSelectorNilUsesHelmValues: false
-    ruleSelectorNilUsesHelmValues: false
-
-alertmanager:
-  enabled: true
-
-kubeStateMetrics:
-  enabled: true
-
-nodeExporter:
-  enabled: true
-
-
-
+{}
 # global:
 #   clusterName: "eks-cloud-prod"
 
