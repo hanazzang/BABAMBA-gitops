@@ -1,6 +1,4 @@
-# clusters/onprem/dev/platform/envoy-gateway/values.yaml
-
 envoyProxy:
   service:
-    type: LoadBalancer
-    loadBalancerIP: 192.168.1.199
+    annotations:
+      metallb.universe.tf/loadBalancerIPs: "192.168.1.100"

@@ -6,6 +6,7 @@ namespaces:
       argocd.argoproj.io/sync-options: Prune=false
     labels:
       purpose: envoy-proxy
+      gateway: user
 
   auth:
     enabled: true

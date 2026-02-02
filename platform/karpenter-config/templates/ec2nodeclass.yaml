@@ -5,6 +5,9 @@ metadata:
 spec:
   amiFamily: {{ .Values.nodeClass.amiFamily | default "AL2" | quote }}
 
+  amiSelectorTerms:
+    - alias: {{ .Values.nodeClass.amiAlias | default "al2@latest" | quote }}
+
   role: {{ required "aws.nodeRole is required" .Values.aws.nodeRole | quote }}
 
   subnetSelectorTerms:

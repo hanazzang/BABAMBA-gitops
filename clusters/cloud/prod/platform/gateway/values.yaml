@@ -14,5 +14,5 @@ autoscaling:
   enabled: false
 
 keda:
-  enabled: false
+  enabled: true
   triggers: []

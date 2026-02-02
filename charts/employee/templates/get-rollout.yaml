@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "employee-server.fullname" . }}-get
+  namespace: employee
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "employee-server.selectorLabels.get" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "employee-server.selectorLabels.get" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
+
+  strategy:
+    canary:
+      # ✅ Rollouts가 stable/canary 서비스 weight를 조정
+      stableService: {{ include "employee-server.fullname" . }}-get-stable
+      canaryService: {{ include "employee-server.fullname" . }}-get-canary
+
+      trafficRouting:
+        plugins:
+          argoproj-labs/gatewayAPI:
+            # ✅ GET 전용 HTTPRoute만 패치하도록 변경
+            httpRoute: employee-get-route
+            namespace: employee
+
+      # ✅ 수동 프로모트: 각 단계에서 멈추고, 직접 promote 해야 다음 단계로 진행
+      steps:
+        - setWeight: 5
+        - pause: {}
+        - setWeight: 10
+        - pause: {}
+        - setWeight: 30
+        - pause: {}
+        - setWeight: 50
+        - pause: {}
+        - setWeight: 70
+        - pause: {}
+        - setWeight: 90
+        - pause: {}
+        - setWeight: 100

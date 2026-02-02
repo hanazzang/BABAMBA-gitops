@@ -1,9 +1,9 @@
 upstream:
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/<KARPENTER_CONTROLLER_ROLE>
+      eks.amazonaws.com/role-arn: arn:aws:iam::438296477852:role/karpenter_controller_role
 
   settings:
-    clusterName: "hana-eks-dev-usw2"
-    clusterEndpoint: "https://<EKS_ENDPOINT>"
-    interruptionQueue: "<KARPENTER_INTERRUPTION_QUEUE_NAME>"
+    clusterName: hana-eks-dev-usw2
+    clusterEndpoint: https://2FD466A991DCC56D2DACF3840C6858AA.gr7.us-west-2.eks.amazonaws.com
+    interruptionQueue: karpenter-interruption-queue
