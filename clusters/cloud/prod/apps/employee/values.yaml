@@ -36,10 +36,10 @@ autoscaling:
 
 monitoring:
   podMonitor:
-    enabled: false
+    enabled: true
 
 keda:
-  enabled: false
+  enabled: true
   pollingInterval: 15
   cooldownPeriod: 300
   triggers:
