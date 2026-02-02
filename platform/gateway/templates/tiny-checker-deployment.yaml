@@ -1,0 +1,94 @@
+{{- if .Values.tinyChecker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tiny-checker
+  namespace: gateway
+  labels:
+    app: tiny-checker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tiny-checker
+  template:
+    metadata:
+      labels:
+        app: tiny-checker
+    spec:
+      containers:
+        - name: tiny-checker
+          image: python:3.12-alpine
+          ports:
+            - containerPort: {{ .Values.tinyChecker.port }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              cat >/app.py <<'PY'
+              import json, urllib.request
+              from http.server import BaseHTTPRequestHandler, HTTPServer
+
+              CFG="/config/endpoints.json"
+
+              def load_cfg():
+                with open(CFG, "r") as f:
+                  return json.load(f)
+
+              def check_url(url, timeout):
+                req = urllib.request.Request(url, method="GET")
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                  return 200 <= resp.status < 300
+
+              class Handler(BaseHTTPRequestHandler):
+                def do_GET(self):
+                  if self.path != "/health":
+                    self.send_response(404); self.end_headers(); return
+
+                  cfg = load_cfg()
+                  timeout = cfg.get("timeoutSeconds", 2)
+
+                  for ep in cfg.get("endpoints", []):
+                    name = ep.get("name"); url = ep.get("url")
+                    try:
+                      ok = check_url(url, timeout)
+                    except Exception:
+                      ok = False
+                    if not ok:
+                      self.send_response(503)
+                      self.end_headers()
+                      self.wfile.write(f"FAIL:{name}".encode())
+                      return
+
+                  self.send_response(200)
+                  self.end_headers()
+                  self.wfile.write(b"ok")
+
+                def log_message(self, fmt, *args):
+                  return
+
+              if __name__ == "__main__":
+                port = {{ .Values.tinyChecker.port }}
+                HTTPServer(("0.0.0.0", port), Handler).serve_forever()
+              PY
+              python /app.py
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.tinyChecker.port }}
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: tiny-checker-config
+{{- end }}
