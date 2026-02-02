@@ -1,39 +1,35 @@
 kube-prometheus-stack:
+  # 🔴 지금 sync 막던 admission webhook은 끈다 (목표와 무관)
   prometheusOperator:
-    tolerations:
-      - key: "spot"
-        operator: "Exists"
     admissionWebhooks:
+      enabled: false
       patch:
-        tolerations:
-          - key: "spot"
-            operator: "Exists"
+        enabled: false
 
+  # ✅ Prometheus만 확실히 스케줄되게 하면 목표 달성
   prometheus:
     prometheusSpec:
-      tolerations:
-        - key: "spot"
-          operator: "Exists"
-
-      # (이미 적용한 emptyDir/리소스/셀렉터 설정은 그대로 유지)
       storageSpec:
         emptyDir: {}
 
-  alertmanager:
-    alertmanagerSpec:
       tolerations:
-        - key: "spot"
-          operator: "Exists"
+        - key: spot
+          operator: Exists
 
-      storage:
-        emptyDir: {}
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          memory: 1Gi
 
+  # ✅ HPA 메트릭의 핵심
   kube-state-metrics:
+    enabled: true
     tolerations:
-      - key: "spot"
-        operator: "Exists"
+      - key: spot
+        operator: Exists
 
-  prometheus-node-exporter:
-    tolerations:
-      - key: "spot"
-        operator: "Exists"
+  # ❌ 목표 달성에는 불필요 → 끔
+  alertmanager:
+    enabled: false
