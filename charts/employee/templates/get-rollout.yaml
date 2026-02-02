@@ -42,15 +42,15 @@ spec:
       # ✅ 수동 프로모트: 각 단계에서 멈추고, 직접 promote 해야 다음 단계로 진행
       steps:
         - setWeight: 5
-        - pause: {}
+          duration: 5m
         - setWeight: 10
-        - pause: {}
+          duration: 5m
         - setWeight: 30
-        - pause: {}
+          duration: 10m
         - setWeight: 50
-        - pause: {}
+          duration: 10m
         - setWeight: 70
-        - pause: {}
+          duration: 10m
         - setWeight: 90
-        - pause: {}
+          duration: 10m
         - setWeight: 100
