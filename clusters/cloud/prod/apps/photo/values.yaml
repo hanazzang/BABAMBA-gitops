@@ -1,4 +1,4 @@
 image:
   repository: ghcr.io/hanazzang/photo_service
-  tag: "sha-03c8b84"
+  tag: "sha-a76ad4e"
   pullPolicy: IfNotPresent
