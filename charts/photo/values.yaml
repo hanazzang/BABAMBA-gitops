@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/hanazzang/photo_service
-  tag: "sha-36c997e"
+  tag: "sha-a8685dc"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
