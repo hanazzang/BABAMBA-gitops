@@ -4,7 +4,7 @@ replicaCount: 1
 # ===== 이미지 (환경별 핵심 값) =====
 image:
   repository: ghcr.io/hanazzang/photo_service
-  tag: "sha-a8685dc"
+  tag: "sha-a16c15b"
   pullPolicy: IfNotPresent
 
 # ===== 서비스 계정 =====
