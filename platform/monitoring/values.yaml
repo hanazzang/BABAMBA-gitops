@@ -1,4 +1,6 @@
 kube-prometheus-stack:
+  # Grafana는 이미 Running이니까 굳이 건드릴 필요 없지만,
+  # 급하면 로그인 비번/서비스 타입만 유지
   grafana:
     enabled: true
     adminPassword: admin
@@ -7,20 +9,50 @@ kube-prometheus-stack:
 
   kube-state-metrics:
     enabled: true
+    resources:
+      requests:
+        cpu: 20m
+        memory: 100Mi
+      limits:
+        memory: 200Mi
 
   prometheus-node-exporter:
     enabled: true
 
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      # ✅ PV 없이 기동 (데이터 영속성 X)
+      storage:
+        emptyDir: {}
+      resources:
+        requests:
+          cpu: 50m
+          memory: 200Mi
+        limits:
+          memory: 500Mi
+
   prometheus:
+    enabled: true
     prometheusSpec:
-      retention: 7d
+      retention: 2d
       scrapeInterval: 15s
       evaluationInterval: 15s
+
+      # ✅ PV 없이 기동 (데이터 영속성 X)
+      storageSpec:
+        emptyDir: {}
+
+      # ✅ 'No data' 방지 핵심(클러스터 전반 ServiceMonitor/PodMonitor 수용)
       serviceMonitorSelectorNilUsesHelmValues: false
       podMonitorSelectorNilUsesHelmValues: false
       serviceMonitorSelector: {}
       podMonitorSelector: {}
       ruleSelector: {}
 
-  alertmanager:
-    enabled: true
+      resources:
+        requests:
+          cpu: 200m
+          memory: 1Gi
+        limits:
+          memory: 2Gi
