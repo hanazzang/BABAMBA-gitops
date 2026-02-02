@@ -1,0 +1,4 @@
+mapRoles:
+  - rolearn: arn:aws:iam::438296477852:role/ondemand-eks-node-group-20260201093453075900000001
+  - rolearn: arn:aws:iam::438296477852:role/spot-eks-node-group-20260201093453080700000003
+  - rolearn: arn:aws:iam::438296477852:role/karpenter_node_role
