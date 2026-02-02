@@ -18,7 +18,7 @@ envFrom:
 # ===== HPA (dev 테스트용) =====
 autoscaling:
   enabled: true
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 5
 # get-hpa.yaml에서 참조할 값
   get:
@@ -36,10 +36,10 @@ autoscaling:
 
 monitoring:
   podMonitor:
-    enabled: true
+    enabled: false
 
 keda:
-  enabled: true
+  enabled: false
   pollingInterval: 15
   cooldownPeriod: 300
   triggers:
