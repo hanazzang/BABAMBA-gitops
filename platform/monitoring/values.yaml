@@ -1,35 +1,46 @@
 kube-prometheus-stack:
-  # 🔴 지금 sync 막던 admission webhook은 끈다 (목표와 무관)
-  prometheusOperator:
-    admissionWebhooks:
-      enabled: false
-      patch:
-        enabled: false
-
-  # ✅ Prometheus만 확실히 스케줄되게 하면 목표 달성
-  prometheus:
-    prometheusSpec:
-      storageSpec:
-        emptyDir: {}
-
-      tolerations:
-        - key: spot
-          operator: Exists
-
-      resources:
-        requests:
-          cpu: 200m
-          memory: 512Mi
-        limits:
-          memory: 1Gi
-
-  # ✅ HPA 메트릭의 핵심
-  kube-state-metrics:
-    enabled: true
+  grafana:
+    # ✅ 새 grafana가 spot으로 스케줄되게
     tolerations:
       - key: spot
         operator: Exists
 
-  # ❌ 목표 달성에는 불필요 → 끔
-  alertmanager:
-    enabled: false
+    # ✅ 교체용 새 파드가 뜰 때 리소스 줄여서 스케줄링 가능성↑
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+
+  kube-state-metrics:
+    tolerations:
+      - key: spot
+        operator: Exists
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+
+  prometheus:
+    prometheusSpec:
+      # ✅ 제일 중요한 부분: Prometheus 메모리 낮추기
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 1024Mi
+
+      # ✅ Prometheus가 쓸 TSDB 메모리/스토리지 압박을 줄이는 안전장치
+      retention: 6h
+      retentionSize: 2GB
+
+      # ✅ 이미 들어가있지만 명시
+      tolerations:
+        - key: spot
+          operator: Exists
+      storageSpec:
+        emptyDir: {}
