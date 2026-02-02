@@ -1,58 +1,101 @@
 kube-prometheus-stack:
-  # Grafana는 이미 Running이니까 굳이 건드릴 필요 없지만,
-  # 급하면 로그인 비번/서비스 타입만 유지
   grafana:
     enabled: true
     adminPassword: admin
     service:
       type: ClusterIP
 
-  kube-state-metrics:
-    enabled: true
+  # ✅ spot taint 허용 (핵심)
+  prometheusOperator:
+    tolerations:
+      - key: "spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
     resources:
       requests:
-        cpu: 20m
-        memory: 100Mi
+        cpu: 50m
+        memory: 150Mi
       limits:
-        memory: 200Mi
+        memory: 300Mi
+    admissionWebhooks:
+      patch:
+        tolerations:
+          - key: "spot"
+            operator: "Equal"
+            value: "true"
+            effect: "NoSchedule"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+          limits:
+            memory: 100Mi
+
+  kube-state-metrics:
+    enabled: true
+    tolerations:
+      - key: "spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 80Mi
+      limits:
+        memory: 150Mi
 
   prometheus-node-exporter:
     enabled: true
+    tolerations:
+      - key: "spot"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
 
   alertmanager:
     enabled: true
     alertmanagerSpec:
-      # ✅ PV 없이 기동 (데이터 영속성 X)
       storage:
         emptyDir: {}
+      tolerations:
+        - key: "spot"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
       resources:
         requests:
-          cpu: 50m
-          memory: 200Mi
+          cpu: 10m
+          memory: 80Mi
         limits:
-          memory: 500Mi
+          memory: 150Mi
 
   prometheus:
     enabled: true
     prometheusSpec:
-      retention: 2d
-      scrapeInterval: 15s
-      evaluationInterval: 15s
+      retention: 1d
+      scrapeInterval: 30s
+      evaluationInterval: 30s
 
-      # ✅ PV 없이 기동 (데이터 영속성 X)
       storageSpec:
         emptyDir: {}
 
-      # ✅ 'No data' 방지 핵심(클러스터 전반 ServiceMonitor/PodMonitor 수용)
       serviceMonitorSelectorNilUsesHelmValues: false
       podMonitorSelectorNilUsesHelmValues: false
       serviceMonitorSelector: {}
       podMonitorSelector: {}
       ruleSelector: {}
 
+      tolerations:
+        - key: "spot"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+
       resources:
         requests:
-          cpu: 200m
-          memory: 1Gi
+          cpu: 100m
+          memory: 512Mi
         limits:
-          memory: 2Gi
+          memory: 1Gi
