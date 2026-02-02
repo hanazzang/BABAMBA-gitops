@@ -299,7 +299,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kube_pod_container_status_terminated_reason{reason=\"OOMKilled\"}) by (pod) > 0",
+              "expr": sum by (namespace, pod, container) (kube_pod_container_status_terminated_reason{reason="OOMKilled"}) OR vector(0)",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }

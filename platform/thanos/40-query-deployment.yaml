@@ -23,9 +23,7 @@ spec:
             - --log.level=info
             - --http-address=0.0.0.0:9090
             - --grpc-address=0.0.0.0:10901
-
-            # ✅ Receive의 StoreAPI(gRPC)를 store로 등록
-            - --store=thanos-receive.monitoring.svc.cluster.local:10901
+            - --store=thanos-receive-hl.monitoring.svc.cluster.local:10901
           ports:
             - name: http
               containerPort: 9090

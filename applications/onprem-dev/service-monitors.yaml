@@ -1,14 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-thanos
+  name: onprem-dev-service-monitors
   namespace: argocd
+  annotations:
+    # ServiceMonitor도 보통 Rule과 비슷하거나 살짝 앞(또는 뒤)로 둠
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
     targetRevision: argos-cloud
-    path: platform/thanos
+    path: platform/service-monitors/templates
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -18,4 +21,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      # - ServerSideApply=true
+      - ServerSideApply=true

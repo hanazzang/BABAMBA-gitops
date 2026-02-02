@@ -16,5 +16,5 @@ spec:
   receivers:
     - name: cloud-bursting-webhook
       webhookConfigs:
-        - url: 'http://<PROMETHEUS_NODE_IP>:5000/webhook'
+        - url: http://burst-controller.monitoring.svc.cluster.local:5000/webhook
           sendResolved: true

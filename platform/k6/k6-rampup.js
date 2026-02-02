@@ -19,7 +19,7 @@ export default function () {
 
     // ▼▼▼ Employee 서비스의 Swagger 페이지 공격! ▼▼▼
     // 실제 API를 테스트하고 싶다면 '/employee/docs' 대신 '/employee/api/v1/users' 등으로 바꾸세요.
-    const res = http.get('http://192.168.1.199/employee/docs', params); 
+    const res = http.get('http://192.168.1.199/employee/employees', params); 
 
     check(res, { 'status was 200': (r) => r.status == 200 });
     sleep(1);

@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: thanos-receive
 spec:
-  serviceName: thanos-receive
+  serviceName: thanos-receive-hl
   replicas: 1
   selector:
     matchLabels:
@@ -19,21 +19,21 @@ spec:
       containers:
         - name: thanos
           image: quay.io/thanos/thanos:v0.37.2
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           args:
             - receive
             - --log.level=info
             - --tsdb.path=/data
             - --receive.hashrings-file=/etc/thanos/hashring.json
             - --receive.replication-factor=1
-            # - --label=receive_replica="0"
-
-            # ✅ EKS Prometheus agent가 remote_write로 보내는 엔드포인트
+            - --label=receive_cluster="onprem-dev"
+            - --label=receive_replica="$(POD_NAME)"
             - --remote-write.address=0.0.0.0:19291
-
-            # ✅ Query가 붙는 StoreAPI(gRPC)
             - --grpc-address=0.0.0.0:10901
-
-            # (옵션) Receive 자체 상태 페이지/metrics
             - --http-address=0.0.0.0:10902
           ports:
             - name: remote-write
@@ -60,12 +60,3 @@ spec:
         - name: hashring
           configMap:
             name: thanos-receive-hashring
-  # volumeClaimTemplates:
-  #   - metadata:
-  #       name: data
-  #     spec:
-  #       accessModes: ["ReadWriteOnce"]
-  #       storageClassName: local-storage
-  #       resources:
-  #         requests:
-  #           storage: 50Gi

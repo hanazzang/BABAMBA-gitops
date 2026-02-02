@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: bursting-rules
+  namespace: monitoring
+  labels:
+  re  lease: onprem-dev-kube-prometheus-stack
+spec:
+  groups:
+  - name: bursting
+    rules:
+    - alert: BurstOnLatency
+      expr: |
+        histogram_quantile(0.95, sum(rate(envoy_http_downstream_rq_time_bucket[2m])) by (le)) > 0.8
+      for: 3m
+      labels:
+        severity: warning
+        burst: "on"
+      annotations:
+        summary: "p95 latency high => burst on"
+    - alert: BurstOffLatency
+      expr: |
+        histogram_quantile(0.95, sum(rate(envoy_http_downstream_rq_time_bucket[2m])) by (le)) < 0.5
+      for: 10m
+      labels:
+        severity: warning
+        burst: "off"
+      annotations:
+        summary: "p95 latency recovered => burst off"

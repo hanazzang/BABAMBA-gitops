@@ -1,0 +1,17 @@
+{{- if .Values.tinyChecker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.tinyChecker.serviceName }}
+  namespace: gateway
+  labels:
+    app: tiny-checker
+spec:
+  selector:
+    app: tiny-checker
+  ports:
+    - name: http
+      port: {{ .Values.tinyChecker.port }}
+      targetPort: {{ .Values.tinyChecker.port }}
+  type: ClusterIP
+{{- end }}

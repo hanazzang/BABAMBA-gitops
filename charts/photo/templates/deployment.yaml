@@ -18,11 +18,12 @@ spec:
         {{- include "photo-service.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      
+      # [선택] S3는 네트워크만 되면 되므로 특정 노드 고정 불필요 (필요시 유지)
+      # nodeSelector:
+      #   kubernetes.io/hostname: worker-in-ceph
+
       {{- with .Values.imagePullSecrets }}
-
-      nodeSelector:
-        kubernetes.io/hostname: worker-in-ceph
-
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -35,24 +36,34 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           
-          # [스토리지 마운트]
-          {{- if .Values.persistence.enabled }}
-          volumeMounts:
-            - name: photo-storage
-              mountPath: {{ .Values.persistence.mountPath | default "/app/static/uploads" }}
-          {{- end }}
-      
-      # [볼륨 정의]
-      volumes:
-        - name: photo-storage
-          {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "photo-service.fullname" . }}-pvc
-          {{- else }}
-          emptyDir: {}
+          # [신규] S3 접속 정보 주입 (환경변수)
+          {{- if .Values.s3.enabled }}
+          env:
+            - name: STORAGE_TYPE
+              value: "s3"
+            - name: AWS_REGION
+              value: {{ .Values.s3.region | quote }}
+            - name: AWS_S3_BUCKET
+              value: {{ .Values.s3.bucketName | quote }}
+            # Secret에서 Access Key 가져오기
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3.secretName }}
+                  key: access-key
+            # Secret에서 Secret Key 가져오기
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3.secretName }}
+                  key: secret-key
           {{- end }}
 
-  # [Blue/Green 전략]
+          # [삭제됨] volumeMounts 섹션 전체 삭제
+      
+      # [삭제됨] volumes 섹션 전체 삭제
+  
+  # [Blue/Green 전략 유지]
   strategy:
     blueGreen:
       activeService: {{ include "photo-service.fullname" . }}-active

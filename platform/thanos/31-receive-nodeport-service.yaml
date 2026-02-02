@@ -10,18 +10,13 @@ spec:
   selector:
     app.kubernetes.io/name: thanos-receive
   ports:
-    # ✅ EKS가 이 포트로 remote_write 보냄
     - name: remote-write
       port: 19291
       targetPort: 19291
       nodePort: 31291
-
-    # ✅ Thanos Query가 StoreAPI로 붙는 gRPC (클러스터 내부용)
     - name: grpc
       port: 10901
       targetPort: 10901
-
-    # ✅ 상태 페이지/metrics
     - name: http
       port: 10902
       targetPort: 10902

@@ -161,6 +161,8 @@ alertmanager:
       matchLabels:
         release: onprem-dev-kube-prometheus-stack
 
+    
+
 # 데모 환경에서 불필요한 고부하 수집기 비활성화
 kubeProxy:
   enabled: false

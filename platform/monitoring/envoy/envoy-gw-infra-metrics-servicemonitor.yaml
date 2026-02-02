@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: envoy-gw-infra-metrics
+  namespace: monitoring
+  labels:
+    release: onprem-dev-kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - gateway
+  selector:
+    matchLabels:
+      app: envoy-gw-infra-metrics
+  endpoints:
+    - port: metrics
+      path: /stats/prometheus
+      interval: 15s

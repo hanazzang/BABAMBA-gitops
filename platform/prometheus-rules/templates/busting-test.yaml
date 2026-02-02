@@ -1,0 +1,16 @@
+# apiVersion: monitoring.coreos.com/v1
+# kind: PrometheusRule
+# metadata:
+#   name: burst-test-rule
+#   namespace: monitoring
+# spec:
+#   groups:
+#     - name: burst-test
+#       rules:
+#         - alert: HostHighCpuLoad
+#           expr: vector(1)
+#           for: 30s
+#           labels:
+#             severity: warning
+#           annotations:
+#             summary: "test alert for cloud-bursting webhook"

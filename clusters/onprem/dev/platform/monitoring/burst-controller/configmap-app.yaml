@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: burst-controller-app
+  namespace: monitoring
+data:
+  app.py: |
+    import os
+    import time
+    from typing import Any, Dict, List, Optional
+
+    import requests
+    from fastapi import FastAPI, Request, HTTPException
+
+    app = FastAPI()
+
+    # --- Config (env) ---
+    CF_API_TOKEN = os.getenv("CF_API_TOKEN", "")
+    CF_ACCOUNT_ID = os.getenv("CF_ACCOUNT_ID", "")
+
+    CF_POOL_ONPREM_ID = os.getenv("CF_POOL_ONPREM_ID", "")
+    CF_POOL_EKS_ID = os.getenv("CF_POOL_EKS_ID", "")
+
+    # weights for burst on/off
+    ONPREM_WEIGHT_ON = float(os.getenv("ONPREM_WEIGHT_ON", "0.7"))
+    EKS_WEIGHT_ON = float(os.getenv("EKS_WEIGHT_ON", "0.3"))
+    ONPREM_WEIGHT_OFF = float(os.getenv("ONPREM_WEIGHT_OFF", "1.0"))
+    EKS_WEIGHT_OFF = float(os.getenv("EKS_WEIGHT_OFF", "0.0"))
+
+    COOL_DOWN_SECONDS = int(os.getenv("COOL_DOWN_SECONDS", "300"))
+
+    # --- In-memory state ---
+    last_change_ts = 0.0
+    current_mode = "unknown"  # "burst_on" | "burst_off" | "unknown"
+
+    def _headers() -> Dict[str, str]:
+      if not CF_API_TOKEN:
+        raise RuntimeError("CF_API_TOKEN is empty")
+      return {
+        "Authorization": f"Bearer {CF_API_TOKEN}",
+        "Content-Type": "application/json",
+      }
+
+    def update_pool_weight(pool_id: str, weight: float) -> None:
+      """
+      Update Cloudflare Load Balancer pool weight.
+      API: PUT /accounts/{account_id}/load_balancers/pools/{pool_id}
+      We only send the fields we care about; Cloudflare accepts partial update in many clients,
+      but safest is to PATCH. Cloudflare supports PATCH for pools in practice; if your env requires PUT,
+      we can switch once you confirm.
+      """
+      url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/load_balancers/pools/{pool_id}"
+      payload = {"weight": weight}
+
+      r = requests.patch(url, headers=_headers(), json=payload, timeout=10)
+      if not r.ok:
+        raise RuntimeError(f"Cloudflare API error: {r.status_code} {r.text}")
+
+    def set_burst(mode: str) -> Dict[str, Any]:
+      """
+      mode: "on" or "off"
+      """
+      global last_change_ts, current_mode
+      now = time.time()
+      if now - last_change_ts < COOL_DOWN_SECONDS:
+        return {"changed": False, "reason": "cooldown", "current_mode": current_mode}
+
+      if mode == "on":
+        update_pool_weight(CF_POOL_ONPREM_ID, ONPREM_WEIGHT_ON)
+        update_pool_weight(CF_POOL_EKS_ID, EKS_WEIGHT_ON)
+        current_mode = "burst_on"
+      elif mode == "off":
+        update_pool_weight(CF_POOL_ONPREM_ID, ONPREM_WEIGHT_OFF)
+        update_pool_weight(CF_POOL_EKS_ID, EKS_WEIGHT_OFF)
+        current_mode = "burst_off"
+      else:
+        raise ValueError("mode must be on/off")
+
+      last_change_ts = now
+      return {"changed": True, "current_mode": current_mode}
+
+    @app.get("/health")
+    def health():
+      return {"ok": True, "mode": current_mode}
+
+    @app.post("/webhook")
+    async def webhook(req: Request):
+      # Basic config validation
+      if not (CF_API_TOKEN and CF_ACCOUNT_ID and CF_POOL_ONPREM_ID and CF_POOL_EKS_ID):
+        raise HTTPException(status_code=500, detail="Cloudflare env vars missing")
+
+      body = await req.json()
+      status = body.get("status")  # "firing" | "resolved"
+      alerts: List[Dict[str, Any]] = body.get("alerts") or []
+
+      # We accept if ANY alert matches HostHighCpuLoad
+      matched = False
+      for a in alerts:
+        labels = a.get("labels") or {}
+        if labels.get("alertname") == "HostHighCpuLoad":
+          matched = True
+          break
+
+      if not matched:
+        return {"accepted": False, "reason": "no matching alertname"}
+
+      if status == "firing":
+        result = set_burst("on")
+        return {"accepted": True, "action": "burst_on", **result}
+      elif status == "resolved":
+        result = set_burst("off")
+        return {"accepted": True, "action": "burst_off", **result}
+      else:
+        return {"accepted": False, "reason": f"unknown status: {status}"}

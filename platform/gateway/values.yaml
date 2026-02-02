@@ -34,10 +34,8 @@ envoyProxy:
   replicas: 2
 
   service:
-    # ✅ 환경별(clusters)에서만 설정하도록 비워둠
-    type: null
-    loadBalancerIP: 192.168.1.199
-    annotations: null
+    type: LoadBalancer
+    annotations: {}
 
   podLabels:
     app: envoy-gw-dataplane
@@ -96,3 +94,28 @@ keda:
   pollingInterval: 15
   cooldownPeriod: 300
   triggers: []
+
+
+
+# 나중에 리팩토링 작업 필요 따로 tiny-checker 뺴야됨
+tinyChecker:
+  enabled: true
+  serviceName: tiny-checker
+  port: 8080
+
+  checks:
+    timeoutSeconds: 2
+    endpoints:
+      - name: auth
+        url: http://auth-server-stable.auth.svc.cluster.local:5001/health
+
+      - name: employee
+        url: http://cloud-prod-employee-employee-server-get-stable.employee.svc.cluster.local:5002/health
+
+      - name: photo
+        url: http://photo-service-active.photo.svc.cluster.local:5003/health
+        
+gatewayHealthEcho:
+  enabled: true
+  serviceName: gateway-health
+  port: 8080

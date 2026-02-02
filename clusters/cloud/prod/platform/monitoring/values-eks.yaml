@@ -8,7 +8,7 @@ prometheus:
     enableFeatures:
       - agent # 에이전트 모드 활성화
     externalLabels:
-      cluster: "eks-prod"  # 모든 지표에 이 라벨이 추가됨
+      cluster: "eks-cloud-prod"  # 모든 지표에 이 라벨이 추가됨
 
     # 부하 테스트 중 에이전트가 죽지 않도록 리소스 할당량 명시
     resources:
@@ -20,7 +20,8 @@ prometheus:
         memory: 2Gi
 
     remoteWrite:
-      - url: "http://192.168.1.41:31291/api/v1/receive" # 온프 ip, prometheus-write/thanos-receive
+      - url: "http://192.168.1.174:31291/api/v1/receive" # prom-server ip, prometheus-write/thanos-receive
+        sendExemplars: true
         queueConfig:
           maxSamplesPerSend: 1000
           maxShards: 5

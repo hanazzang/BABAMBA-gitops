@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/hanazzang/photo_service
-  tag: "sha-36c997e"
+  tag: "sha-a76ad4e"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -15,36 +15,16 @@ service:
   port: 5003
   targetPort: 5003
 
-# [스토리지 설정 - CephFS]
+# [스토리지 설정 - CephFS 비활성화]
 persistence:
-  enabled: true
-  storageClass: "csi-cephfs-sc"
-  accessMode: "ReadWriteMany" # CephFS의 핵심 (다중 쓰기 지원)
-  size: "2Gi"
-  mountPath: "/app/static/uploads"
+  enabled: false
 
-# [StorageClass 생성 정보]
-storageClass:
-  name: csi-cephfs-sc
-  isDefault: true
-  provisioner: cephfs.csi.ceph.com
-  reclaimPolicy: Delete
-  bindingMode: Immediate
-  allowVolumeExpansion: true
-  
-  parameters:
-    # [중요] ceph fsid 명령어로 확인한 UUID를 아래에 넣으세요!
-    clusterID: "491b725b-d483-48ea-855a-b78b5b1bdc91" 
-    
-    fsName: "cephfs"
-    
-    # Secret 정보 (기존 csi-rbd-secret 재사용)
-    csi.storage.k8s.io/provisioner-secret-name: "csi-rbd-secret"
-    csi.storage.k8s.io/provisioner-secret-namespace: "ceph-csi"
-    csi.storage.k8s.io/controller-expand-secret-name: "csi-rbd-secret"
-    csi.storage.k8s.io/controller-expand-secret-namespace: "ceph-csi"
-    csi.storage.k8s.io/node-stage-secret-name: "csi-rbd-secret"
-    csi.storage.k8s.io/node-stage-secret-namespace: "ceph-csi"
+# [신규] S3 설정 추가
+s3:
+  enabled: true
+  region: "us-west-2"      # AWS 리전
+  bucketName: "hana-photo-service-bucket-v1" # S3 버킷 이름
+  secretName: "photo-s3-secret" # k8s Secret 이름 (아래 설명 참고)
 
 ingress:
   host: api.yongun.shop
