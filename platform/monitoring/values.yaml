@@ -1,46 +1,44 @@
 kube-prometheus-stack:
+  ## 1. 그라파나 설정
   grafana:
-    # ✅ 새 grafana가 spot으로 스케줄되게
-    tolerations:
-      - key: spot
-        operator: Exists
+    enabled: true
+    # 대시보드 사이드카 설정: 레이블이 grafana_dashboard: "1"인 ConfigMap을 자동 스캔
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL # 모든 네임스페이스의 대시보드 수집
+        multicluster:
+          global:
+            enabled: true
+            displayLabel: cluster # 대시보드에서 클러스터별 구분을 위한 레이블
 
-    # ✅ 교체용 새 파드가 뜰 때 리소스 줄여서 스케줄링 가능성↑
-    resources:
-      requests:
-        cpu: 50m
-        memory: 128Mi
-      limits:
-        memory: 256Mi
-
-  kube-state-metrics:
-    tolerations:
-      - key: spot
-        operator: Exists
-    resources:
-      requests:
-        cpu: 20m
-        memory: 64Mi
-      limits:
-        memory: 128Mi
-
+  ## 2. 프로메테우스 설정
   prometheus:
     prometheusSpec:
-      # ✅ 제일 중요한 부분: Prometheus 메모리 낮추기
-      resources:
-        requests:
-          cpu: 100m
-          memory: 512Mi
-        limits:
-          memory: 1024Mi
+      retention: 15d # 데이터 보관 주기
+      serviceMonitorSelectorNilUsesHelmValues: false # 모든 ServiceMonitor 자동 감지
+      podMonitorSelectorNilUsesHelmValues: false     # 모든 PodMonitor 자동 감지
+      
+      # 클러스터 식별을 위한 공통 레이블 (EKS/On-prem 구분용)
+      # 실제 값은 각 클러스터별 values.yaml에서 덮어쓰기 권장
+      externalLabels:
+        cluster_type: "base"
 
-      # ✅ Prometheus가 쓸 TSDB 메모리/스토리지 압박을 줄이는 안전장치
-      retention: 6h
-      retentionSize: 2GB
+  ## 3. 공통 리소스 레이블 (관리용)
+  commonLabels:
+    managed-by: gitops-monitoring-team
 
-      # ✅ 이미 들어가있지만 명시
-      tolerations:
-        - key: spot
-          operator: Exists
-      storageSpec:
-        emptyDir: {}
+  ## 4. 불필요한 기본 대시보드 비활성화 (선택 사항)
+  # 직접 만든 대시보드(k8s-basics.json 등)가 주력이라면 기본값은 끌 수 있습니다.
+  defaultDashboardsEnabled: true 
+
+  ## 5. Alertmanager 설정 (공통 알람 수신처)
+  alertmanager:
+    config:
+      global:
+        resolve_timeout: 5m
+      route:
+        group_by: ['alertname', 'cluster']
+        receiver: 'null' # 기본값은 전송 안 함 (클러스터별로 Slack/Email 연동)

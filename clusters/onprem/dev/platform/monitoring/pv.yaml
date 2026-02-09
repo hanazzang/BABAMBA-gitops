@@ -1,22 +1,22 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: prometheus-local-pv
-spec:
-  capacity:
-    storage: 70Gi
-  volumeMode: Filesystem
-  accessModes:
-  - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: local-storage
-  local:
-    path: /prometheus  # 연결하고 싶은 실제 경로
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - prom-server  # 적용될 노드 이름
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: prometheus-local-pv
+# spec:
+#   capacity:
+#     storage: 70Gi
+#   volumeMode: Filesystem
+#   accessModes:
+#   - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: local-storage
+#   local:
+#     path: /prometheus  # 연결하고 싶은 실제 경로
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - prom-server  # 적용될 노드 이름
