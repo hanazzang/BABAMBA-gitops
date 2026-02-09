@@ -5,3 +5,12 @@ gateway-helm:
         kubernetes:
           deploy:
             type: GatewayNamespace
+# ✅ 컨트롤러 자체에 대한 리소스 제한 추가
+  controller:
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "400m"
+        memory: "512Mi"

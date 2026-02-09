@@ -2,6 +2,15 @@ argo-rollouts:
   installCRDs: false  # 기존 운영 방식 유지
   controller:
     replicas: 2
+
+# ✅ 리소스 제한 추가
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
     
     # 1. 플러그인 파일을 담을 임시 창고(공유 볼륨) 설정
     volumes:
