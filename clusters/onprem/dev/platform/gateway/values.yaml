@@ -1,7 +1,7 @@
 envoyProxy:
   service:
     annotations:
-      metallb.universe.tf/loadBalancerIPs: "192.168.1.100"
+      metallb.universe.tf/loadBalancerIPs: "192.168.1.220"
 
 monitoring:
   podMonitor:
