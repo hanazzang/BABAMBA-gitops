@@ -24,6 +24,10 @@ spec:
             - "{{ .Values.redis.maxmemory }}"
             - "--maxmemory-policy"
             - "{{ .Values.redis.maxmemoryPolicy }}"
+            {{- if .Values.redis.password }}
+            - "--requirepass"
+            - "{{ .Values.redis.password }}"
+            {{- end }}
             - "--save"
             - ""
             - "--appendonly"

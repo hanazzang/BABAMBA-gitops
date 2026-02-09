@@ -16,6 +16,7 @@ envFrom:
   - secretRef:
       name: db-credentials
 
+<<<<<<< HEAD
 # ===== HPA (dev 테스트용) =====
 autoscaling:
   enabled: true
@@ -59,3 +60,6 @@ keda:
         metricName: employee_p95_latency_seconds
         query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[5m])) by (le))'
         threshold: "0.3"
+=======
+containerPort: 5002
+>>>>>>> hpa2

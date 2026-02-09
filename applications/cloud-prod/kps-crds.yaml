@@ -1,18 +1,19 @@
+# applications/cloud-prod/kps-crds.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: onprem-dev-observability
+  name: cloud-prod-kps-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "0" # 가장 먼저 설치
 spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
     targetRevision: argos-cloud
-    path: platform/grafana-dashboards/templates
-
+    path: platform/kps-crds/crds # 공용 CRD 경로 재사용
   destination:
+    # 온프 ArgoCD가 EKS 원격 관리 시 ips.env 의 EKS_CLUSTER_URL 로 채움 (ipctl apply)
     server: https://kubernetes.default.svc
     namespace: monitoring
   syncPolicy:
@@ -21,7 +22,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-
-# prometheusrule, servicemonitor를 본체랑 분리
-# 자유롭게 수정해도 본체랑 분리돼서 안정적임
+      - ServerSideApply=true # CRD는 크기가 커서 필수

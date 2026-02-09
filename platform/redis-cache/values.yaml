@@ -24,3 +24,5 @@ resources:
 redis:
   maxmemory: "384mb"
   maxmemoryPolicy: "allkeys-lru"
+  # auth/employee에서 기본으로 kosa1004를 사용 (common/redis_config.py)
+  password: "kosa1004"

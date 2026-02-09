@@ -18,7 +18,8 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /photo
+            # /photo/* 를 / 로 rewrite 할 때 //prefix 버그 방지
+            value: /photo/
       filters:
         - type: URLRewrite
           urlRewrite:

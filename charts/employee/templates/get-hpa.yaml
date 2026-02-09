@@ -1,4 +1,4 @@
-{{- if and .Values.autoscaling.enabled (not .Values.keda.enabled) }}
+{{- if and .Values.autoscaling.enabled (ne (include "employee-server.kedaEnabled.get" .) "true") }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

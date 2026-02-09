@@ -6,74 +6,200 @@
 resources:
   requests:
     cpu: "100m"
-    memory: "128Mi"
+    memory: "256Mi"
   limits:
-    cpu: "200m"
+    cpu: "500m"
     memory: "512Mi"
 
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 13
+  # 데모/발표용: 폭주 방지 상한선
+  maxReplicas: 30
   cpu:
     averageUtilization: 85
   memory:
     averageUtilization: 70
+  # 🔥 체감 속도 핵심 (차트의 ScaledObject/HPA 템플릿이 이 값을 참조)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 200        # 한 번에 2배
+          periodSeconds: 15
+        - type: Pods
+          value: 4          # 15초에 최대 +4
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
+  # 역할별 상한(WRITE는 보수적으로)
+  get:
+    maxReplicas: 30
+  write:
+    maxReplicas: 5
+    cpu:
+      averageUtilization: 85
+    memory:
+      averageUtilization: 70
+    # WRITE는 DB 보호 관점에서 스케일 업을 더 보수적으로
+    behavior:
+      scaleUp:
+        stabilizationWindowSeconds: 0
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 30
+          - type: Pods
+            value: 1
+            periodSeconds: 30
+        selectPolicy: Max
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+        selectPolicy: Min
 
 monitoring:
   podMonitor:
     enabled: true
+    path: /metrics
+    interval: 10s
+    scrapeTimeout: 10s
 
 keda:
   enabled: true
-  pollingInterval: 15
-  cooldownPeriod: 300
-  triggers:
-    - type: prometheus
-      metricType: AverageValue
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: employee_rps
-        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[1m]))'
-        threshold: "20"
+  # ✅ get/write 분리 스케일링:
+  # - GET: KEDA(트래픽 기반)
+  # - WRITE: HPA(CPU/메모리, metrics-server)
+  get:
+    enabled: true
+  write:
+    enabled: false
+  pollingInterval: 5
+  cooldownPeriod: 60
 
-    - type: prometheus
-      metricType: AverageValue
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: employee_p95_latency_seconds
-        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "employee-server.name" . }}"}[5m])) by (le))'
-        threshold: "0.3"
+  # NOTE:
+  # - 이 차트의 ScaledObject(HPA behavior)는 keda.advanced가 아니라 autoscaling.behavior를 사용합니다.
+  # - (과거 테스트 값이 keda.advanced에만 있다면 autoscaling.behavior로도 옮겨주세요.)
 
-    - type: prometheus
-      metricType: Value
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: employee_cpu_util_percent
-        query: >
-          avg(
-            100 *
-            (
-              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",container!="POD"}[2m]))
-              /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="cpu",unit="core"})
+  get:
+    triggers:
+      # 1️⃣ RPS (빠른 반응 트리거) - GET 전용
+      - type: prometheus
+        # 중요: query가 "전체 RPS(sum)"이므로 Value로 두어야 폭주(곱셈) 스케일이 안 납니다.
+        metricType: Value
+        metadata:
+          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          metricName: employee_get_rps
+          query: >
+            sum(
+              rate(http_requests_total{
+                namespace="{{ .Release.Namespace }}",
+                app="{{ include "employee-server.name" . }}",
+                traffic="get",
+                status=~"2..",
+                path!~"/(metrics|health|ready)"
+              }[30s])
             )
-          )
-        threshold: "85"
+          # "pod 당 목표 RPS"로 잡으면, 전체 RPS/threshold 만큼으로 스케일되는 효과
+          threshold: "50"
 
-    - type: prometheus
-      metricType: Value
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: employee_mem_util_percent
-        query: >
-          avg(
-            100 *
-            (
-              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",container!="POD"})
-              /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "employee-server.name" . }}-.*",resource="memory",unit="byte"})
+      # 2️⃣ p95 latency (안정성 트리거, 조건부) - GET 전용
+      - type: prometheus
+        metricType: Value
+        metadata:
+          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          metricName: employee_get_p95_latency_seconds
+          query: >
+            histogram_quantile(
+              0.95,
+              sum(
+                rate(http_request_duration_seconds_bucket{
+                  namespace="{{ .Release.Namespace }}",
+                  app="{{ include "employee-server.name" . }}",
+                  traffic="get",
+                  path!~"/(metrics|health|ready)"
+                }[2m])
+              ) by (le)
             )
-          )
-        threshold: "70"
+            and
+            sum(
+              rate(http_requests_total{
+                namespace="{{ .Release.Namespace }}",
+                app="{{ include "employee-server.name" . }}",
+                traffic="get",
+                status=~"2..",
+                path!~"/(metrics|health|ready)"
+              }[2m])
+            ) > 10
+          # 목표(p95 <= 0.95s)보다 약간 보수적으로 잡아 체감 안정화 유도
+          threshold: "0.8"
 
+      # 3️⃣ CPU (보조, 참고용) - GET 파드만
+      - type: prometheus
+        metricType: Value
+        metadata:
+          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          metricName: employee_get_cpu_util_percent
+          query: >
+            avg(
+              100 *
+              (
+                sum by (pod) (
+                  rate(container_cpu_usage_seconds_total{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "employee-server.fullname" . }}-get-.*",
+                    container!="POD"
+                  }[2m])
+                )
+                /
+                sum by (pod) (
+                  kube_pod_container_resource_requests{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "employee-server.fullname" . }}-get-.*",
+                    resource="cpu",
+                    unit="core"
+                  }
+                )
+              )
+            )
+          threshold: "85"
+
+      # 4️⃣ Memory (보조) - GET 파드만
+      - type: prometheus
+        metricType: Value
+        metadata:
+          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          metricName: employee_get_mem_util_percent
+          query: >
+            avg(
+              100 *
+              (
+                sum by (pod) (
+                  container_memory_working_set_bytes{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "employee-server.fullname" . }}-get-.*",
+                    container!="POD"
+                  }
+                )
+                /
+                sum by (pod) (
+                  kube_pod_container_resource_requests{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "employee-server.fullname" . }}-get-.*",
+                    resource="memory",
+                    unit="byte"
+                  }
+                )
+              )
+            )
+          threshold: "70"

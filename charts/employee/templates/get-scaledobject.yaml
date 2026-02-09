@@ -1,4 +1,4 @@
-{{- if .Values.keda.enabled }}
+{{- if eq (include "employee-server.kedaEnabled.get" .) "true" }}
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:

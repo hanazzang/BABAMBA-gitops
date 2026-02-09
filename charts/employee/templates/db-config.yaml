@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: employee
+data:
+  DATABASE_HOST: "employee-mysql"
+  DATABASE_PORT: "3306"
+  DATABASE_DB_NAME: "employees"
