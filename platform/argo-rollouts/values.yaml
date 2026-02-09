@@ -1,0 +1,36 @@
+argo-rollouts:
+  installCRDs: false  # 기존 운영 방식 유지
+  controller:
+    replicas: 2
+    
+    # 1. 플러그인 파일을 담을 임시 창고(공유 볼륨) 설정
+    volumes:
+      - name: trafficrouter-plugins
+        emptyDir: {}
+    volumeMounts:
+      - name: trafficrouter-plugins
+        mountPath: /plugins
+
+    # 2. 컨트롤러가 뜨기 전, 이미 이미지 안에 들어있는 플러그인을 창고(/plugins)로 복사
+    initContainers:
+      - name: copy-gatewayapi-plugin
+        image: ghcr.io/argoproj-labs/rollouts-plugin-trafficrouter-gatewayapi:v0.5.0
+        command: ["/bin/sh", "-c"]
+        args:
+          - cp /bin/rollouts-plugin-trafficrouter-gatewayapi /plugins/
+        volumeMounts:
+          - name: trafficrouter-plugins
+            mountPath: /plugins
+
+    trafficRouterPlugins:
+      trafficRouterPlugins: |-
+        - name: "argoproj-labs/gatewayAPI"
+          location: "file:///plugins/rollouts-plugin-trafficrouter-gatewayapi"
+  
+  metrics:
+    enabled: true
+
+  serviceMonitor:
+    enabled: true
+    # additionalLabels:
+    #   release: monitoring # 프로메테우스 수집을 위해 주석 해제

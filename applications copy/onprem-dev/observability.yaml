@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onprem-dev-observability
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: argos-cloud
+    path: platform/grafana-dashboards/templates
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+# prometheusrule, servicemonitor를 본체랑 분리
+# 자유롭게 수정해도 본체랑 분리돼서 안정적임

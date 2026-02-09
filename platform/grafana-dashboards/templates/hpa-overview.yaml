@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-hpa-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  hpa-overview.json: |
+    {
+      "title": "HPA Overview",
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Current Replicas",
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_current_replicas",
+              "legendFormat": "{{horizontalpodautoscaler}}"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Desired Replicas",
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_desired_replicas",
+              "legendFormat": "{{horizontalpodautoscaler}}"
+            }
+          ],
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+        },
+        {
+          "type": "timeseries",
+          "title": "HPA Scaling Events",
+          "targets": [
+            {
+              "expr": "increase(kube_horizontalpodautoscaler_status_current_replicas[5m])",
+              "legendFormat": "{{horizontalpodautoscaler}}"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 }
+        }
+      ],
+      "schemaVersion": 36,
+      "version": 1
+    }

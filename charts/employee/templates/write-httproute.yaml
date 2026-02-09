@@ -1,0 +1,131 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: employee-write-route
+  namespace: employee
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: service-gateway
+      namespace: gateway
+  hostnames:
+    - api.yongun.shop
+  rules:
+    # -------------------------------
+    # WRITE: POST /employee/...  (create/update)
+    # -------------------------------
+    - name: employee-post
+      matches:
+        - path:
+            type: PathPrefix
+            value: /employee
+          method: "POST"
+      filters:
+        # /employee prefix 제거해서 백엔드(/...)로 전달
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+        # 증거 헤더
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: X-Route
+                value: employee-write-route
+              - name: X-Rule
+                value: employee-post
+              - name: X-Method
+                value: POST
+              - name: X-Service
+                value: employee
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-write-stable
+          port: {{ .Values.service.port }}
+          weight: 100
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-write-canary
+          port: {{ .Values.service.port }}
+          weight: 0
+
+    # -------------------------------
+    # WRITE: PUT /employee/...  (if used)
+    # -------------------------------
+    - name: employee-put
+      matches:
+        - path:
+            type: PathPrefix
+            value: /employee
+          method: "PUT"
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: X-Route
+                value: employee-write-route
+              - name: X-Rule
+                value: employee-put
+              - name: X-Method
+                value: PUT
+              - name: X-Service
+                value: employee
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-write-stable
+          port: {{ .Values.service.port }}
+          weight: 100
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-write-canary
+          port: {{ .Values.service.port }}
+          weight: 0
+
+    # -------------------------------
+    # WRITE: DELETE /employee/...  (delete)
+    # -------------------------------
+    - name: employee-delete
+      matches:
+        - path:
+            type: PathPrefix
+            value: /employee
+          method: "DELETE"
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: X-Route
+                value: employee-write-route
+              - name: X-Rule
+                value: employee-delete
+              - name: X-Method
+                value: DELETE
+              - name: X-Service
+                value: employee
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-write-stable
+          port: {{ .Values.service.port }}
+          weight: 100
+        - group: ""
+          kind: Service
+          name: {{ include "employee-server.fullname" . }}-write-canary
+          port: {{ .Values.service.port }}
+          weight: 0

@@ -4,14 +4,15 @@ envoyProxy:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
 
 monitoring:
   podMonitor:
-    enabled: true
+    enabled: false
 
 autoscaling:
   enabled: false
 
 keda:
-  enabled: false
+  enabled: true
   triggers: []

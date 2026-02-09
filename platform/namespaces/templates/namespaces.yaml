@@ -1,15 +1,17 @@
-{{- range .Values.namespaces }}
+{{- range $name, $ns := .Values.namespaces }}
+{{- if $ns.enabled }}
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .name | quote }}
-{{- if .annotations }}
+  name: {{ $name | quote }}
+{{- if $ns.annotations }}
   annotations:
-{{ toYaml .annotations | nindent 4 }}
+{{ toYaml $ns.annotations | nindent 4 }}
 {{- end }}
-{{- if .labels }}
+{{- if $ns.labels }}
   labels:
-{{ toYaml .labels | nindent 4 }}
+{{ toYaml $ns.labels | nindent 4 }}
 {{- end }}
 ---
+{{- end }}
 {{- end }}

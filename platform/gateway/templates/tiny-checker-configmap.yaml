@@ -1,0 +1,19 @@
+# 나중에 빼야됨
+{{- if .Values.tinyChecker.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tiny-checker-config
+  namespace: gateway
+data:
+  endpoints.json: |
+    {
+      "timeoutSeconds": {{ .Values.tinyChecker.checks.timeoutSeconds }},
+      "endpoints": [
+{{- range $i, $e := .Values.tinyChecker.checks.endpoints }}
+        {{- if $i }},{{ end }}
+        { "name": "{{ $e.name }}", "url": "{{ $e.url }}" }
+{{- end }}
+      ]
+    }
+{{- end }}

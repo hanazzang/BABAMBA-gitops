@@ -1,0 +1,38 @@
+{{- if and .Values.autoscaling.enabled (not .Values.keda.enabled) }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "employee-server.fullname" . }}-write
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    # ✅ WRITE 롤아웃을 스케일 타겟으로
+    name: {{ include "employee-server.fullname" . }}-write
+
+  # ✅ WRITE는 DB 보호를 위해 보수적으로(예시)
+  minReplicas: {{ .Values.autoscaling.write.minReplicas | default .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.write.maxReplicas | default 3 }}
+
+  {{- with .Values.autoscaling.write.behavior | default .Values.autoscaling.behavior }}
+  behavior:{{ toYaml . | nindent 4 }}
+  {{- end }}
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.write.cpu.averageUtilization | default .Values.autoscaling.cpu.averageUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.write.memory.averageUtilization | default .Values.autoscaling.memory.averageUtilization }}
+{{- end }}

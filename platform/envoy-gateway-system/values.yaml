@@ -1,0 +1,7 @@
+gateway-helm:
+  config:
+    envoyGateway:
+      provider:
+        kubernetes:
+          deploy:
+            type: GatewayNamespace

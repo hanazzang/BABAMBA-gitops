@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cloud-prod-monitoring
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: refactor/gitops-structure
+        directories:
+          # ✅ exclude된 monitoring만 따로 잡는다
+          - path: clusters/cloud/prod/platform/monitoring
+
+  template:
+    metadata:
+      name: 'cloud-prod-{{path.basename}}'   # => cloud-prod-monitoring
+    spec:
+      project: default
+
+      sources:
+        # ✅ platform/monitoring Helm chart를 설치
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          path: platform/{{path.basename}}   # => platform/monitoring
+          helm:
+            valueFiles:
+              - $values/platform/{{path.basename}}/values.yaml
+              - $values/{{path}}/values.yaml
+
+        # values ref
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          ref: values
+          path: .
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'       # => monitoring
+
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

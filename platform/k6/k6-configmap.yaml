@@ -4,119 +4,30 @@ metadata:
   name: k6-scenario-config
   namespace: k6
 data:
-  photo-load-test.js: |
+   k6-rampup.js: |
     import http from 'k6/http';
-    import { sleep, check } from 'k6';
+    import { check, sleep } from 'k6';
 
     export const options = {
-      vus: 10,
-      duration: '30s',
+        // 테스트 시나리오 (필요에 따라 수정)
+        stages: [
+        { duration: '30s', target: 100 },  // 10초 동안 5명까지 증가
+        { duration: '60s', target: 500 },  // 30초 유지
+        { duration: '30s', target: 0 },  // 10초 동안 감소
+        ],
     };
 
     export default function () {
-      // 주소 끝에 /photo가 중복되지 않는지 확인 필요
-      const res = http.get('http://photo-service.photo.svc.cluster.local:5003/photo');
-      check(res, { 'status is 200': (r) => r.status === 200 });
-      sleep(1);
-    }
-
-  employee-load-test.js: |
-    import http from 'k6/http';
-    import { check, sleep } from 'k6';
-    import { Rate, Trend } from 'k6/metrics';
-
-    const errors = new Rate('errors');
-    const latencyMs = new Trend('latency_ms');
-
-    // 실무/데모 권장 기본값:
-    // - 헤어핀(클러스터 내부 -> LB 외부IP) 타임아웃을 피하기 위해 gateway "내부 DNS(ClusterIP)"로 호출
-    // - HTTPRoute hostnames 매칭을 위해 Host 헤더를 반드시 세팅
-    //
-    // 아래 ENV로 언제든 교체 가능:
-    // - BASE_URL=http://service-gateway.gateway.svc.cluster.local
-    // - ENDPOINT=/employee/employees
-    // - HOST_HEADER=api.yongun.shop
-    // - TOKEN=<JWT>  (없으면 AUTH_*로 로그인해서 자동 발급)
-    //
-    // Auth 자동 로그인(토큰 자동 발급):
-    // - AUTH_BASE=http://auth-server-stable.auth.svc:5001
-    // - AUTH_USER=kosa_demo
-    // - AUTH_PASS=********
-    const BASE_URL = __ENV.BASE_URL || 'http://service-gateway.gateway.svc.cluster.local';
-    const ENDPOINT = __ENV.ENDPOINT || '/employee/employees';
-    const HOST_HEADER = __ENV.HOST_HEADER || 'api.yongun.shop';
-
-    const AUTH_BASE = __ENV.AUTH_BASE || 'http://auth-server-stable.auth.svc:5001';
-    const AUTH_USER = __ENV.AUTH_USER || '';
-    const AUTH_PASS = __ENV.AUTH_PASS || '';
-    const STATIC_TOKEN = __ENV.TOKEN || '';
-
-    const START_RPS = Number(__ENV.START_RPS || 5);
-    const TARGET_RPS = Number(__ENV.TARGET_RPS || 50);
-    const RAMP_DURATION = __ENV.RAMP_DURATION || '1m';
-    const HOLD_DURATION = __ENV.HOLD_DURATION || '3m';
-    const COOLDOWN_DURATION = __ENV.COOLDOWN_DURATION || '30s';
-
-    export const options = {
-      scenarios: {
-        employee: {
-          executor: 'ramping-arrival-rate',
-          startRate: START_RPS,
-          timeUnit: '1s',
-          stages: [
-            { target: TARGET_RPS, duration: RAMP_DURATION },
-            { target: TARGET_RPS, duration: HOLD_DURATION },
-            { target: 0, duration: COOLDOWN_DURATION },
-          ],
-          preAllocatedVUs: Number(__ENV.PREALLOCATED_VUS || 50),
-          maxVUs: Number(__ENV.MAX_VUS || 300),
+        const params = {
+        headers: {
+            'Host': 'api.yongun.shop', // [필수] 도메인 명찰
         },
-      },
-      thresholds: {
-        http_req_failed: ['rate<0.01'],
-      },
-    };
+        };
 
-    function getToken() {
-      if (STATIC_TOKEN && STATIC_TOKEN.length > 20) return STATIC_TOKEN;
-      if (!AUTH_USER || !AUTH_PASS) {
-        throw new Error(
-          'TOKEN is empty and AUTH_USER/AUTH_PASS not provided. Provide either TOKEN or AUTH_USER/AUTH_PASS.'
-        );
-      }
+        // ▼▼▼ Employee 서비스의 Swagger 페이지 공격! ▼▼▼
+        // 실제 API를 테스트하고 싶다면 '/employee/docs' 대신 '/employee/api/v1/users' 등으로 바꾸세요.
+        const res = http.get('http://192.168.1.199/employee/docs', params); 
 
-      const payload = JSON.stringify({ username: AUTH_USER, password: AUTH_PASS });
-      const res = http.post(`${AUTH_BASE}/auth/login`, payload, {
-        timeout: '10s',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      check(res, { 'auth login status < 400': (r) => r.status < 400 });
-      const body = res.json();
-      const token = body && (body.token || body.access_token || body.jwt);
-      if (!token) throw new Error(`auth token missing. body=${res.body}`);
-      return token;
-    }
-
-    export function setup() {
-      const token = getToken();
-      return { token };
-    }
-
-    export default function (data) {
-      const url = `${BASE_URL}${ENDPOINT}`;
-      const params = { headers: {} };
-      if (HOST_HEADER) params.headers['Host'] = HOST_HEADER;
-      params.headers['Authorization'] = `Bearer ${data.token}`;
-
-      const res = http.get(url, params);
-      const ok = check(res, {
-        'status is < 500': (r) => r.status < 500,
-      });
-
-      errors.add(!ok);
-      latencyMs.add(res.timings.duration);
-
-      // arrival-rate executor에서는 sleep이 필수는 아니지만,
-      // 요청 루프가 너무 타이트해지는 걸 막고 싶으면 ENV로 조절하세요.
-      sleep(Number(__ENV.SLEEP || 0));
+        check(res, { 'status was 200': (r) => r.status == 200 });
+        sleep(1);
     }

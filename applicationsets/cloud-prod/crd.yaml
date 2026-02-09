@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cloud-prod-platform-crds
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: refactor/gitops-structure
+        directories:
+          - path: clusters/cloud/prod/crds/*
+  template:
+    metadata:
+      name: 'cloud-prod-crds-{{path.basename}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: "-10"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: refactor/gitops-structure
+        path: platform/crds/{{path.basename}}
+        # ✅ 이 부분이 핵심입니다! 헬름 대신 디렉토리 모드 사용
+        directory:
+          recurse: true 
+      destination:
+        server: https://kubernetes.default.svc
+
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+        - group: argoproj.io
+          kind: Rollout
+          jsonPointers:
+            - /spec/replicas
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true

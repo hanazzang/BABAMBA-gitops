@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: onprem-prod-platform
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: refactor/gitops-structure
+        directories:
+          - path: clusters/onprem/prod/platform/*
+          # 필요하면 onprem에서 제외할 컴포넌트는 여기 exclude 추가
+          # - path: clusters/onprem/prod/platform/karpenter
+          #   exclude: true
+
+  template:
+    metadata:
+      name: 'onprem-prod-{{path.basename}}'
+    spec:
+      project: default
+
+      sources:
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          path: platform/{{path.basename}}
+          helm:
+            valueFiles:
+              - $values/platform/{{path.basename}}/values.yaml
+              - $values/{{path}}/values.yaml
+
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          ref: values
+          path: .
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'
+
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+        - group: argoproj.io
+          kind: Rollout
+          jsonPointers:
+            - /spec/replicas
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

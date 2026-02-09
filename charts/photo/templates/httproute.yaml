@@ -33,7 +33,7 @@ spec:
           port: {{ .Values.service.port }}
           weight: 100
 
-    # 2️⃣ /static/uploads -> 그대로 photo-service-active로 전달
+    # 2️⃣ /static/uploads -> 그대로 전달
     - matches:
         - path:
             type: PathPrefix

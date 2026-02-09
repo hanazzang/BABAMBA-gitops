@@ -1,8 +1,0 @@
-storageClass:
-  name: nfs-client
-  isDefault: true
-  provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
-  reclaimPolicy: Retain
-  bindingMode: Immediate
-
-namespace: "common"

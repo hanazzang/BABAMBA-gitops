@@ -7,11 +7,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: argos-cloud
-
-
-
-
+        revision: refactor/gitops-structure
         directories:
           - path: clusters/cloud/prod/apps/*
   template:
@@ -21,30 +17,24 @@ spec:
       project: default
 
       sources:
+        # 1) 앱 Helm Chart (charts/<app>)
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-cloud
-
-
-
-
+          targetRevision: refactor/gitops-structure
           path: charts/{{path.basename}}
           helm:
             valueFiles:
               - $values/{{path}}/values.yaml
 
+        # 2) values repo ref (clusters)
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: argos-cloud
-
-
-
-
+          targetRevision: refactor/gitops-structure
           ref: values
-          path: clusters
+          path: .
 
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
-      
+
       ignoreDifferences:
         - group: monitoring.coreos.com
           kind: PodMonitor
@@ -59,3 +49,6 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

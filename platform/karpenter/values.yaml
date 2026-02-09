@@ -1,0 +1,23 @@
+upstream:
+  replicaCount: 2
+
+  serviceAccount:
+    create: true
+    name: karpenter
+    annotations: {}
+
+  settings:
+    clusterName: ""
+    clusterEndpoint: ""
+    interruptionQueue: ""
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+crds:
+  enabled: false

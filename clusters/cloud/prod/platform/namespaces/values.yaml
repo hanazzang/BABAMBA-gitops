@@ -1,0 +1,8 @@
+namespaces:
+  karpenter:
+    enabled: true
+    labels:
+      purpose: autoscaling
+
+  metallb-system:
+    enabled: false   # 명시적으로 꺼도 되고, 안 써도 됨

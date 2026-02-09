@@ -3,7 +3,7 @@ kind: Rollout
 metadata:
   name: {{ include "photo-service.fullname" . }}
   annotations:
-    argocd.argoproj.io/sync-wave: "2" # PV/PVC(-10, -5)보다 나중에 생성됨
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
@@ -18,6 +18,11 @@ spec:
         {{- include "photo-service.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      
+      # [선택] S3는 네트워크만 되면 되므로 특정 노드 고정 불필요 (필요시 유지)
+      # nodeSelector:
+      #   kubernetes.io/hostname: worker-in-ceph
+
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -28,31 +33,41 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           
-          # [스토리지 마운트]
-          {{- if .Values.persistence.enabled }}
-          volumeMounts:
-            - name: photo-storage
-              mountPath: {{ .Values.persistence.mountPath | default "/app/static/uploads" }}
-          {{- end }}
-      
-      # [볼륨 정의]
-      volumes:
-        - name: photo-storage
-          {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            # PVC의 이름과 정확히 매핑 (pvc.yaml의 metadata.name과 일치해야 함)
-            claimName: {{ include "photo-service.fullname" . }}-pvc
-          {{- else }}
-          emptyDir: {}
+          # [신규] S3 접속 정보 주입 (환경변수)
+          {{- if .Values.s3.enabled }}
+          env:
+            - name: STORAGE_TYPE
+              value: "s3"
+            - name: AWS_REGION
+              value: {{ .Values.s3.region | quote }}
+            - name: AWS_S3_BUCKET
+              value: {{ .Values.s3.bucketName | quote }}
+            # Secret에서 Access Key 가져오기
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3.secretName }}
+                  key: access-key
+            # Secret에서 Secret Key 가져오기
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3.secretName }}
+                  key: secret-key
           {{- end }}
 
-  # [배포 전략: BlueGreen]
+          # [삭제됨] volumeMounts 섹션 전체 삭제
+      
+      # [삭제됨] volumes 섹션 전체 삭제
+  
+  # [Blue/Green 전략 유지]
   strategy:
     blueGreen:
       activeService: {{ include "photo-service.fullname" . }}-active
       previewService: {{ include "photo-service.fullname" . }}-preview
-      autoPromotionEnabled: false # 수동 승인으로 안정성 확보
+      autoPromotionEnabled: false
       scaleDownDelaySeconds: 30
