@@ -63,6 +63,7 @@ filters:
       - monitoring
       - argocd
       - ingress-nginx
+      - employee
 
   # HTTP 로그 파싱 (Uvicorn/FastAPI 로그 형식)
   parser:
@@ -94,7 +95,8 @@ filters:
           ["default"] = true,
           ["monitoring"] = true,
           ["argocd"] = true,
-          ["ingress-nginx"] = true
+          ["ingress-nginx"] = true,
+          ["employee"] = true
         }
         local ns = record["kubernetes"] and record["kubernetes"]["namespace_name"]
         if ns and (allow[ns] ~= true) then
@@ -172,7 +174,13 @@ filters:
         if service_kv then
           record["service"] = service_kv
         end
-        local app = record["kubernetes"] and record["kubernetes"]["labels"] and record["kubernetes"]["labels"]["app"]
+        local labels = record["kubernetes"] and record["kubernetes"]["labels"]
+        local app =
+          labels and (
+            labels["app"]
+            or labels["app.kubernetes.io/name"]
+            or labels["app_kubernetes_io/name"]
+          )
         if (not record["service"]) and app then
           record["service"] = app
         end

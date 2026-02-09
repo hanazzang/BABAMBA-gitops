@@ -7,7 +7,15 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
+<<<<<<< HEAD
         revision: refactor/gitops-structure
+=======
+        revision: argos-cloud
+<<<<<<< HEAD
+
+=======
+>>>>>>> refactor/gitops-structure
+>>>>>>> hpa2
         directories:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
@@ -20,7 +28,18 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+<<<<<<< HEAD
           targetRevision: refactor/gitops-structure
+=======
+          targetRevision: argos-cloud
+<<<<<<< HEAD
+
+
+
+
+=======
+>>>>>>> refactor/gitops-structure
+>>>>>>> hpa2
           path: platform/{{path.basename}}
           helm:
             ignoreMissingValueFiles: true

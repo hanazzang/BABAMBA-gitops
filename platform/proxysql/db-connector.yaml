@@ -6,21 +6,62 @@ metadata:
   name: proxysql-service
   namespace: employee
 spec:
+  selector:
+    app: proxysql-forwarder
   ports:
     - protocol: TCP
       port: 6033
       targetPort: 6033
 ---
-apiVersion: v1
-kind: Endpoints
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
-  name: proxysql-service
+  name: proxysql-forwarder
   namespace: employee
-subsets:
-  - addresses:
-      - ip: 192.168.1.50  # 님 PC의 ProxySQL IP
-    ports:
-      - port: 6033
+spec:
+  selector:
+    matchLabels:
+      app: proxysql-forwarder
+  template:
+    metadata:
+      labels:
+        app: proxysql-forwarder
+    spec:
+      # NOTE:
+      # - 현재 클러스터 Pod CIDR(192.168.0.0/16)과 DB 대역(192.168.1.x)이 겹쳐서
+      #   파드 네트워크에서 외부 DB로 직접 연결이 타임아웃 나는 케이스가 있음.
+      # - hostNetwork로 DB 연결을 "노드 네트워크"로 우회시키고,
+      #   앱은 네임스페이스 내부 Service(proxysql-service)로만 붙게 한다.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: socat
+          image: alpine:3.20
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-lc"]
+          args:
+            - >
+              apk add --no-cache socat >/dev/null
+              && exec socat TCP-LISTEN:6033,fork,reuseaddr TCP:employee-mysql.employee.svc.cluster.local:3306
+          ports:
+            - name: mysql
+              containerPort: 6033
+          readinessProbe:
+            tcpSocket:
+              port: 6033
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+          securityContext:
+            allowPrivilegeEscalation: false
+
+# end
+# eof
+
+# eof
+
+
+
 ---
 # 3. Auth 네임스페이스용 통로 (필요시 추가)
 apiVersion: v1
@@ -29,18 +70,51 @@ metadata:
   name: proxysql-service
   namespace: auth
 spec:
+  selector:
+    app: proxysql-forwarder
   ports:
     - protocol: TCP
       port: 6033
-      targetPort: 6033
+      # auth 네임스페이스는 employee 네임스페이스와 hostNetwork 포트(6033)가 충돌할 수 있어,
+      # forwarder 컨테이너는 6034로 listen하고 Service는 6033으로 노출한다.
+      targetPort: 6034
 ---
-apiVersion: v1
-kind: Endpoints
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
-  name: proxysql-service
+  name: proxysql-forwarder
   namespace: auth
-subsets:
-  - addresses:
-      - ip: 192.168.1.50
-    ports:
-      - port: 6033
+spec:
+  selector:
+    matchLabels:
+      app: proxysql-forwarder
+  template:
+    metadata:
+      labels:
+        app: proxysql-forwarder
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: socat
+          image: alpine:3.20
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-lc"]
+          args:
+            - >
+              apk add --no-cache socat >/dev/null
+              && exec socat TCP-LISTEN:6034,fork,reuseaddr TCP:employee-mysql.employee.svc.cluster.local:3306
+          ports:
+            - name: mysql
+              containerPort: 6034
+          readinessProbe:
+            tcpSocket:
+              port: 6034
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+          securityContext:
+            allowPrivilegeEscalation: false
+
+# end
+# eof

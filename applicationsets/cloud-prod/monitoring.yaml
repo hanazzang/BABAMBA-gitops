@@ -32,7 +32,6 @@ spec:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
           ref: values
-          path: .
 
       destination:
         server: https://kubernetes.default.svc
