@@ -1,70 +1,13 @@
 namespaces:
-  - name: gateway
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-      argocd.argoproj.io/sync-options: Prune=false
-    labels:
-      purpose: envoy-proxy
+  # 1. Karpenter는 온프레미스에서 필요 없으므로 비활성화
+  karpenter:
+    enabled: false
 
-  - name: auth
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      gateway: user
-
-  - name: employee
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      gateway: user
-
-  - name: photo
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      gateway: user
-
-  - name: argo-rollouts
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      purpose: infra
-
-  - name: envoy-gateway-system
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      purpose: gateway-control-plane
-  
-  - name: metallb-system
+  # 2. MetalLB는 온프레미스 핵심 인프라이므로 설정 유지/활성화
+  metallb-system:
+    enabled: true
     annotations:
       argocd.argoproj.io/sync-wave: "-10"
       argocd.argoproj.io/sync-options: Prune=false
     labels:
       purpose: infra
-
-  # observability/logging
-  - name: monitoring
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      purpose: observability
-
-  - name: loki
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      purpose: logging
-
-  - name: fluent-bit
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      purpose: logging
-
-  - name: common
-    annotations:
-      argocd.argoproj.io/sync-wave: "-10"
-    labels:
-      purpose: redis
-
