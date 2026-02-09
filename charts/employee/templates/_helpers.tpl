@@ -12,7 +12,8 @@
 
 {{- define "employee-server.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "employee-server.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+# ArgoCD 앱 이름(Release.Name) 대신 fullname으로 고정하여 접두사 차단
+app.kubernetes.io/instance: {{ include "employee-server.name" . }} 
 {{- end -}}
 
 {{- define "employee-server.labels" -}}
