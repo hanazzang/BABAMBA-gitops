@@ -12,8 +12,6 @@ spec:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
             exclude: true
-          - path: clusters/onprem/dev/platform/monitoring
-            exclude: true
 
   template:
     metadata:
