@@ -32,3 +32,24 @@ traffic: get
 {{ include "employee-server.selectorLabels" . }}
 traffic: write
 {{- end -}}
+
+{{/*
+KEDA enabled switch per traffic role (get/write).
+- If keda.<role>.enabled exists, it overrides global keda.enabled
+- Else fall back to global keda.enabled (default: false)
+*/}}
+{{- define "employee-server.kedaEnabled.get" -}}
+{{- if and (hasKey .Values "keda") (hasKey .Values.keda "get") (hasKey .Values.keda.get "enabled") -}}
+{{- ternary "true" "false" .Values.keda.get.enabled -}}
+{{- else -}}
+{{- ternary "true" "false" (.Values.keda.enabled | default false) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "employee-server.kedaEnabled.write" -}}
+{{- if and (hasKey .Values "keda") (hasKey .Values.keda "write") (hasKey .Values.keda.write "enabled") -}}
+{{- ternary "true" "false" .Values.keda.write.enabled -}}
+{{- else -}}
+{{- ternary "true" "false" (.Values.keda.enabled | default false) -}}
+{{- end -}}
+{{- end -}}
