@@ -24,7 +24,8 @@ spec:
 
     # 2) Probe/Rule/Dashboard 같은 “타깃 정의/정책” 매니페스트 적용
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: hpa2
+      targetRevision: argos-cloud
+
 
 
 
@@ -34,7 +35,8 @@ spec:
 
     # 3) values 제공용 Git ref
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: hpa2
+      targetRevision: argos-cloud
+
 
 
 

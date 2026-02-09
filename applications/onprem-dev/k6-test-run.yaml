@@ -8,7 +8,8 @@ spec:
   sources:
     # 1. k6 실행 명령(K6 CRD)과 ConfigMap(JS파일)이 있는 내 Git 경로
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: hpa2
+      targetRevision: argos-cloud
+
 
 
 

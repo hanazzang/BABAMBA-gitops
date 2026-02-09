@@ -7,7 +7,8 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: hpa2
+        revision: argos-cloud
+
         directories:
           - path: clusters/onprem/dev/platform/*
           - path: clusters/onprem/dev/platform/keda
@@ -22,7 +23,8 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: hpa2
+          targetRevision: argos-cloud
+
 
 
 
@@ -35,7 +37,8 @@ spec:
               - $values/{{path}}/values-autoscaling.yaml
               - $values/{{path}}/values-scenario.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: hpa2
+          targetRevision: argos-cloud
+
 
 
 
