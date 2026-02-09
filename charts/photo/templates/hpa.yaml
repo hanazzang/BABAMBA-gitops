@@ -3,6 +3,8 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "photo-service.fullname" . }}-hpa
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
