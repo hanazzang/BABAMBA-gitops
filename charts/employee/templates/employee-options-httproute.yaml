@@ -21,7 +21,7 @@ spec:
             value: /employee
       backendRefs:
         - kind: Service
-          name: cloud-prod-employee-employee-server-get-stable
+          name: {{ include "employee-server.fullname" . }}-get-stable
           port: 5002
           weight: 100
       filters:

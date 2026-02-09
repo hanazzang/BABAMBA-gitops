@@ -1,3 +1,4 @@
+fullnameOverride: "onprem-dev-employee-server"
 imagePullSecrets:
   - name: ghcr-pull
 

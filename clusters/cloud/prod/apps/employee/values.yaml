@@ -1,3 +1,4 @@
+fullnameOverride: "cloud-prod-employee-server"
 imagePullSecrets:
   - name: ghcr-pull
 
