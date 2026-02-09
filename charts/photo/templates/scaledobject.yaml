@@ -2,17 +2,17 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: {{ include "photo-service.fullname" . }}
+  name: {{ include "photo-server.fullname" . }}
   annotations:
     # KEDA(CRD 설치) 이후에 생성되도록 순서를 뒤로 미룹니다.
     argocd.argoproj.io/sync-wave: "7"
   labels:
-    {{- include "photo-service.labels" . | nindent 4 }}
+    {{- include "photo-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
-    name: {{ include "photo-service.fullname" . }}
+    name: {{ include "photo-server.fullname" . }}
 
   pollingInterval: {{ .Values.keda.pollingInterval | default 15 }}
   cooldownPeriod: {{ .Values.keda.cooldownPeriod | default 300 }}

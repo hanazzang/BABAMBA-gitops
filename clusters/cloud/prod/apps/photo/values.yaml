@@ -1,3 +1,4 @@
+fullnameOverride: "photo-server"
 image:
   repository: ghcr.io/hanazzang/photo_service
   tag: "sha-a76ad4e"

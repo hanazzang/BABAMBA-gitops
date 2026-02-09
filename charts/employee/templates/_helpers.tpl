@@ -6,7 +6,7 @@
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" .Release.Name (include "employee-server.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- include "employee-server.name" . | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -19,16 +19,4 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name (.Chart.Version | replace "+" "_") }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{ include "employee-server.selectorLabels" . }}
-{{- end -}}
-
-{{/* GET 전용 selector */}}
-{{- define "employee-server.selectorLabels.get" -}}
-{{ include "employee-server.selectorLabels" . }}
-traffic: get
-{{- end -}}
-
-{{/* WRITE 전용 selector */}}
-{{- define "employee-server.selectorLabels.write" -}}
-{{ include "employee-server.selectorLabels" . }}
-traffic: write
 {{- end -}}

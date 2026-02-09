@@ -2,17 +2,17 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "photo-service.fullname" . }}-hpa
+  name: {{ include "photo-server.fullname" . }}-hpa
   annotations:
     argocd.argoproj.io/sync-wave: "3"
   labels:
-    {{- include "photo-service.labels" . | nindent 4 }}
+    {{- include "photo-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     # [중요] Rollout 타겟팅
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
-    name: {{ include "photo-service.fullname" . }}
+    name: {{ include "photo-server.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

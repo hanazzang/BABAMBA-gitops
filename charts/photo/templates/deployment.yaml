@@ -1,21 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: {{ include "photo-service.fullname" . }}
+  name: {{ include "photo-server.fullname" . }}
   annotations:
     argocd.argoproj.io/sync-wave: "2"
   labels:
-    {{- include "photo-service.labels" . | nindent 4 }}
+    {{- include "photo-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "photo-service.fullname" . }}
+      app: {{ include "photo-server.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ include "photo-service.fullname" . }}
-        {{- include "photo-service.labels" . | nindent 8 }}
+        app: {{ include "photo-server.fullname" . }}
+        {{- include "photo-server.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
       
@@ -28,7 +28,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ include "photo-service.name" . }}
+        - name: {{ include "photo-server.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -67,7 +67,7 @@ spec:
   # [Blue/Green 전략 유지]
   strategy:
     blueGreen:
-      activeService: {{ include "photo-service.fullname" . }}-active
-      previewService: {{ include "photo-service.fullname" . }}-preview
+      activeService: {{ include "photo-server.fullname" . }}-active
+      previewService: {{ include "photo-server.fullname" . }}-preview
       autoPromotionEnabled: false
       scaleDownDelaySeconds: 30

@@ -28,7 +28,7 @@ spec:
       backendRefs:
         - group: ""
           kind: Service
-          name: {{ include "photo-service.fullname" . }}-active
+          name: {{ include "photo-server.fullname" . }}-active
           port: {{ .Values.service.port }}
           weight: 100
 
@@ -40,6 +40,6 @@ spec:
       backendRefs:
         - group: ""
           kind: Service
-          name: {{ include "photo-service.fullname" . }}-active
+          name: {{ include "photo-server.fullname" . }}-active
           port: {{ .Values.service.port }}
           weight: 100

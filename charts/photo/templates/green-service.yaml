@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "photo-service.fullname" . }}-preview
+  name: {{ include "photo-server.fullname" . }}-preview
   annotations:
     argocd.argoproj.io/sync-wave: "0"
   labels:
-    {{- include "photo-service.labels" . | nindent 4 }}
+    {{- include "photo-server.labels" . | nindent 4 }}
 spec:
   ports:
     - name: http
@@ -13,4 +13,4 @@ spec:
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:
-    app: {{ include "photo-service.fullname" . }}
+    app: {{ include "photo-server.fullname" . }}

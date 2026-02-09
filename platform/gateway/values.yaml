@@ -117,11 +117,13 @@ tinyChecker:
       - name: auth
         url: http://auth-server-stable.auth.svc.cluster.local:5001/health
 
-      - name: employee
-        url: http://cloud-prod-employee-employee-server-get-stable.employee.svc.cluster.local:5002/health
+      - name: employee-get
+        url: http://employee-server-get-stable.employee.svc.cluster.local:5002/health
 
+      - name: employee-write
+        url: http://employee-server-write-stable.employee.svc.cluster.local:5002/health
       - name: photo
-        url: http://photo-service-active.photo.svc.cluster.local:5003/health
+        url: http://photo-server-active.photo.svc.cluster.local:5003/health
         
 gatewayHealthEcho:
   enabled: true
