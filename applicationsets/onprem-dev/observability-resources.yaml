@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: observability-resources
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: refactor/gitops-structure
+        directories:
+          - path: clusters/onprem/dev/platform/observability
+  template:
+    metadata:
+      name: 'onprem-dev-observability'
+    spec:
+      project: default
+      sources:
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          path: platform/observability
+          directory:
+            recurse: true # 하위 dashboards, rules 폴더를 모두 긁어옴
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: monitoring # 모니터링 전용 NS
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

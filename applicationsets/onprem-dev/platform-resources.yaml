@@ -10,7 +10,6 @@ spec:
         revision: refactor/gitops-structure
         directories:
           - path: clusters/onprem/dev/platform/*
-          - path: clusters/onprem/dev/platform/observability
           - path: clusters/onprem/dev/platform/keda
             exclude: true
 
