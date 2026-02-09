@@ -4,8 +4,8 @@ set -euo pipefail
 # One-screen dashboard for employee scaling (HPA or KEDA).
 #
 # Usage:
-#   ./scripts/watch-employee-scaling.sh hpa
-#   ./scripts/watch-employee-scaling.sh keda
+#   ./hpa-test/watch-employee-scaling.sh hpa
+#   ./hpa-test/watch-employee-scaling.sh keda
 #
 # Env:
 #   NS_EMPLOYEE (default: employee)

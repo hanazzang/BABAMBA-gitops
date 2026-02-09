@@ -1,4 +1,0 @@
-spec:
-  source:
-    directory:
-      include: "{applications/onprem-dev/*.yaml,applicationsets/onprem-dev/*.yaml}"

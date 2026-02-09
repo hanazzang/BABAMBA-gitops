@@ -8,9 +8,6 @@ spec:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: hpa2
-
-
-
         directories:
           - path: clusters/onprem/dev/apps/*
   template:
@@ -31,13 +28,9 @@ spec:
             valueFiles:
               - $values/{{path}}/values.yaml
               - $values/{{path}}/values-autoscaling.yaml 
-              - $values/{{path}}/values-scenario.yaml 
 
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: hpa2
-
-
-
           ref: values
           path: clusters
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euo pipefail  # 중간실패시 즉시종료
 
 # /employees 부하테스트(토큰 포함) - 복붙용 "한 방" 스크립트
 #
@@ -7,7 +7,7 @@ set -euo pipefail
 # - gateway 내부 DNS로 /employee/employees 호출 (HTTPRoute hostnames 매칭 위해 Host 헤더 포함)
 #
 # 사용:
-#   RATE=800 DURATION=2m ./scripts/k6-employees.sh
+#   RATE=200 DURATION=2m ./hpa-test/k6-employees.sh
 #
 # 환경변수:
 # - AUTH_BASE (default: http://auth-server-stable.auth.svc:5001)
@@ -15,17 +15,17 @@ set -euo pipefail
 # - AUTH_PASS (default: kosa1004)
 # - EMP_URL   (default: http://service-gateway.gateway.svc.cluster.local/employee/employees)
 # - HOST_HEADER (default: api.yongun.shop)
-# - RATE (default: 800), DURATION (default: 2m), PREALLOCATED_VUS (default: RATE), MAX_VUS (default: 2000)
+# - RATE (default: 200), DURATION (default: 2m), PREALLOCATED_VUS (default: RATE), MAX_VUS (default: 2000)
 # - TIMEOUT (default: 10s)
 
-AUTH_BASE="${AUTH_BASE:-http://auth-server-stable.auth.svc:5001}"
-AUTH_USER="${AUTH_USER:-kosa_demo}"
-AUTH_PASS="${AUTH_PASS:-kosa1004}"
+AUTH_BASE="${AUTH_BASE:-http://auth-server-stable.auth.svc:5001}"  # auth 서비스 주소
+AUTH_USER="${AUTH_USER:-kosa_demo}"  # auth 서비스 사용자 이름
+AUTH_PASS="${AUTH_PASS:-kosa1004}"  # auth 서비스 사용자 비밀번호
 
-EMP_URL="${EMP_URL:-http://service-gateway.gateway.svc.cluster.local/employee/employees}"
+EMP_URL="${EMP_URL:-http://service-gateway.gateway.svc.cluster.local/employee/employees}" #  gateway 내부 DNS로 employee 엔드포인트 호출
 HOST_HEADER="${HOST_HEADER:-api.yongun.shop}"
 
-RATE="${RATE:-800}"
+RATE="${RATE:-200}"
 DURATION="${DURATION:-2m}"
 PREALLOCATED_VUS="${PREALLOCATED_VUS:-$RATE}"
 MAX_VUS="${MAX_VUS:-2000}"
