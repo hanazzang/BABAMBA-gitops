@@ -23,10 +23,6 @@ spec:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
           path: platform/{{path.basename}}
-          directory:
-            # 이 옵션은 '해당 path 내부'만 재귀적으로 탐색합니다.
-            # 즉, observability 내부의 dashboards, rules 폴더만 긁어오며 다른 앱과는 격리됩니다.
-            recurse: true
           helm:
             ignoreMissingValueFiles: true
             valueFiles:
