@@ -5,19 +5,22 @@ metadata:
   namespace: monitoring        # 프로메테우스가 설치된 네임스페이스
   labels:
     app.kubernetes.io/instance: monitoring
-    release: monitoring  # 중요: 설치된 Prometheus 릴리즈 이름과 일치해야 함
+    release: onprem-dev-monitoring  # 중요: 설치된 Prometheus 릴리즈 이름과 일치해야 함
 spec:
   selector:
     matchLabels:
-      app: fastapi-app         # 아까 kubectl label로 붙인 서비스 라벨과 일치
+    # [수정] 확인하신 서비스들의 공통 라벨인 'employee-server'로 변경
+      app.kubernetes.io/name: employee-server
+      # app: fastapi-app         # 아까 kubectl label로 붙인 서비스 라벨과 일치
   namespaceSelector:
     matchNames:
       - default                # FastAPI 서비스들이 떠 있는 네임스페이스
+      - employee
   endpoints:
-  - port: http                 # 서비스 YAML의 ports.name이 'http'여야 함 (없으면 아래 설명 참조)
-    path: /metrics             # FastAPI Instrumentator가 지표를 뱉는 경로
-    interval: 15s              # 15초마다 수집
-    honorLabels: true
+  # - port: http                 # 서비스 YAML의 ports.name이 'http'여야 함 (없으면 아래 설명 참조)
+  #   path: /metrics             # FastAPI Instrumentator가 지표를 뱉는 경로
+  #   interval: 15s              # 15초마다 수집
+  #   honorLabels: true
   - targetPort: 5000
     path: /metrics
     interval: 15s
