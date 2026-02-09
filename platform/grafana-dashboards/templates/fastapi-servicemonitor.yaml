@@ -9,12 +9,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: fastapi-app         # 아까 kubectl label로 붙인 서비스 라벨과 일치
+    # [수정] 확인하신 서비스들의 공통 라벨인 'employee-server'로 변경
+      app.kubernetes.io/name: employee-server
+      # app: fastapi-app         # 아까 kubectl label로 붙인 서비스 라벨과 일치
   namespaceSelector:
     matchNames:
       - default                # FastAPI 서비스들이 떠 있는 네임스페이스
       - employee
-      - auth
   endpoints:
   - port: http                 # 서비스 YAML의 ports.name이 'http'여야 함 (없으면 아래 설명 참조)
     path: /metrics             # FastAPI Instrumentator가 지표를 뱉는 경로
