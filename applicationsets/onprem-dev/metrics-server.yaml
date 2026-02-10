@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onprem-dev-metrics-server
+  namespace: argocd
+  annotations:
+    # HPA용 메트릭 조기 배포
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  source:
+    repoURL: https://kubernetes-sigs.github.io/metrics-server/
+    chart: metrics-server
+    targetRevision: 3.13.0
+    helm:
+      values: |
+        apiService:
+          insecureSkipTLSVerify: true
+        args:
+          - --kubelet-insecure-tls
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
