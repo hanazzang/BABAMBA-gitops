@@ -1,7 +1,6 @@
 envoyProxy:
   service:
     annotations:
-<<<<<<< HEAD
       metallb.universe.tf/loadBalancerIPs: "192.168.1.220"
 
 monitoring:
@@ -14,6 +13,3 @@ autoscaling:
 keda:
   enabled: true
   triggers: []
-=======
-      metallb.universe.tf/loadBalancerIPs: "192.168.1.100"
->>>>>>> hpa2

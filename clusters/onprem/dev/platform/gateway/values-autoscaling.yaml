@@ -8,7 +8,7 @@ monitoring:
     enabled: true
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 2
   maxReplicas: 13
   cpu:
@@ -17,7 +17,7 @@ autoscaling:
     averageUtilization: 70
 
 keda:
-  enabled: true
+  enabled: false
   pollingInterval: 15
   cooldownPeriod: 300
   triggers:

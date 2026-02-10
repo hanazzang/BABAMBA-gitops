@@ -16,16 +16,16 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 15
   cpu:
-    averageUtilization: 85  # Pod 평균 CPU가 85% 초과하면 scale-out
+    averageUtilization: 50  # Pod 평균 CPU가 85% 초과하면 scale-out
   memory:
     averageUtilization: 70  # Pod 평균 Memory가 70% 초과하면 scale-out
 
 monitoring:
   podMonitor:
-    enabled: true
+    enabled: false
 
 keda:
-  enabled: true
+  enabled: false
   pollingInterval: 15  # 15초마다 Prometheus 질의
   cooldownPeriod: 60  # Scale-in은 1분 유지 후 감소
   triggers:
