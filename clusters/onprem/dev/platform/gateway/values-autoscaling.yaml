@@ -3,18 +3,20 @@
 # - 1: autoscaling.enabled=true,  keda.enabled=false (HPA: CPU/MEM, metrics-server)
 # - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95 + CPU% + MEM%)
 
-monitoring:
-  podMonitor:
-    enabled: true
+
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 2
   maxReplicas: 13
   cpu:
     averageUtilization: 85
   memory:
     averageUtilization: 70
+    
+monitoring:
+  podMonitor:
+    enabled: false
 
 keda:
   enabled: false
