@@ -30,7 +30,7 @@ keda:
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: photo_rps
-        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "photo-service.name" . }}"}[1m]))'
+        query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "photo-server.fullname" . }}"}[1m]))'
         threshold: "20"
 
     - type: prometheus
@@ -38,7 +38,7 @@ keda:
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: photo_p95_latency_seconds
-        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "photo-service.name" . }}"}[5m])) by (le))'
+        query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "photo-server.fullname" . }}"}[5m])) by (le))'
         threshold: "0.3"
 
     - type: prometheus
@@ -50,9 +50,9 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-service.fullname" . }}-.*",container!="POD"}[2m]))
+              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",container!="POD"}[2m]))
               /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-service.fullname" . }}-.*",resource="cpu",unit="core"})
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",resource="cpu",unit="core"})
             )
           )
         threshold: "85"
@@ -66,9 +66,9 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-service.fullname" . }}-.*",container!="POD"})
+              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",container!="POD"})
               /
-              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-service.fullname" . }}-.*",resource="memory",unit="byte"})
+              sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",resource="memory",unit="byte"})
             )
           )
         threshold: "70"
