@@ -29,6 +29,12 @@ grafana:
         allowUiUpdates: false
         foldersFromFilesStructure: true
 
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+      searchNamespace: monitoring
+
 
   # 로그인 강제 + 계정 생성 금지
   grafana.ini:
@@ -61,7 +67,7 @@ grafana:
       isDefault: true
       jsonData:
         timeInterval: 30s
-        
+
     - name: Loki
       type: loki
       access: proxy
