@@ -4,11 +4,11 @@ metadata:
   name: gmail
   namespace: monitoring
   labels:
-    release: onprem-dev-kube-prometheus-stack
+    # values-kps.yaml의 alertmanagerConfigSelector와 일치하도록 설정
+    release: onprem-dev-kube-prometheus-stack 
 spec:
   route:
     receiver: gmail
-    # 알림 그룹화 설정
     groupBy: ["alertname", "cluster", "pod"]
     groupWait: 10s
     groupInterval: 3m
@@ -31,9 +31,9 @@ spec:
           authPassword:
             name: alertmanager-gmail
             key: smtp_pass
-          # [핵심 수정] 명세에 맞춰 name 대신 key 사용
           headers:
             - key: "Subject"
-              value: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.cluster }} / {{ .CommonLabels.pod }})'
+              # 👇 Helm이 해석하지 못하도록 이중 중괄호 처리 적용
+              value: '[{{ "{{" }} .Status | toUpper {{ "}}" }}{{ "{{" }} if eq .Status "firing" {{ "}}" }}:{{ "{{" }} .Alerts.Firing | len {{ "}}" }}{{ "{{" }} end {{ "}}" }}] {{ "{{" }} .CommonLabels.alertname {{ "}}" }} ({{ "{{" }} .CommonLabels.cluster {{ "}}" }} / {{ "{{" }} .CommonLabels.pod {{ "}}" }})'
           requireTLS: true
-          sendResolved: true # 장애 복구 시에도 알림 발송
+          sendResolved: true
