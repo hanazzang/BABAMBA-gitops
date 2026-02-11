@@ -9,6 +9,7 @@ metadata:
     grafana_folder: "loadtest"
 data:
   localdisk-dashboard.json: |-
+    {{- $nodename := "$nodename" -}}
     {
       "annotations": {
         "list": [
