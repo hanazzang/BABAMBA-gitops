@@ -9,7 +9,6 @@ metadata:
     grafana_folder: "loadtest"
 data:
   localdisk-dashboard.json: |-
-    {{- $nodename := "$nodename" -}}
     {
       "annotations": {
         "list": [
@@ -66,7 +65,7 @@ data:
           "targets": [
             {
               "expr": "avg(rate(node_cpu_seconds_total{mode=\"iowait\"}[1m])) by (instance) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$nodename\"} * 100",
-              "legendFormat": "{{nodename}} I/O Wait",
+              "legendFormat": "{{ "{{" }}nodename{{ "}}" }} I/O Wait",
               "refId": "A"
             }
           ],
@@ -103,7 +102,7 @@ data:
           "targets": [
             {
               "expr": "max(rate(node_disk_io_time_seconds_total{device!~\"loop.*|ram.*\"}[1m])) by (instance, device) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$nodename\"} * 100",
-              "legendFormat": "{{nodename}} ({{device}})",
+              "legendFormat": "{{ "{{" }}nodename{{ "}}" }} ({{ "{{" }}device{{ "}}" }})",
               "refId": "A"
             }
           ],
@@ -138,7 +137,7 @@ data:
           "targets": [
             {
               "expr": "(100 - ((node_filesystem_avail_bytes{fstype!~\"tmpfs|fuse.*\"} * 100) / node_filesystem_size_bytes)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$nodename\"}",
-              "legendFormat": "{{nodename}} ({{mountpoint}})",
+              "legendFormat": "{{ "{{" }}nodename{{ "}}" }} ({{ "{{" }}mountpoint{{ "}}" }})",
               "refId": "A"
             }
           ],
@@ -178,7 +177,7 @@ data:
           "targets": [
             {
               "expr": "rate(node_cpu_seconds_total{mode=\"iowait\"}[1m]) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$nodename\"} * 100",
-              "legendFormat": "{{nodename}}",
+              "legendFormat": "{{ "{{" }}nodename{{ "}}" }}",
               "refId": "A"
             }
           ],
@@ -209,7 +208,7 @@ data:
           "targets": [
             {
               "expr": "max(rate(node_disk_io_time_seconds_total{device!~\"loop.*|ram.*\"}[1m])) by (instance, device) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$nodename\"} * 100",
-              "legendFormat": "{{nodename}} ({{device}})",
+              "legendFormat": "{{ "{{" }}nodename{{ "}}" }} ({{ "{{" }}device{{ "}}" }})",
               "refId": "A"
             }
           ],
