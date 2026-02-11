@@ -64,8 +64,14 @@ grafana:
 #     # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
 #     - operator: "Exists"
 
-# # operator도 격리
-# prometheusOperator:
+
+prometheusOperator:
+# Sync 에러 해결: 불필요한 Webhook Job 끄기
+  admissionWebhooks:
+    enabled: false
+    patch:
+      enabled: false
+#   operator도 격리
 #   nodeSelector:
 #     dedicated: "monitoring"
 #   tolerations:
