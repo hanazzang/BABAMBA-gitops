@@ -9,28 +9,20 @@ spec:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
         revision: refactor/gitops-structure
         directories:
-          - path: clusters/onprem/dev/platform/observability
+          - path: clusters/onprem/dev/platform/monitoring 
   template:
     metadata:
       name: 'onprem-dev-observability'
     spec:
       project: default
-      sources:
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          path: platform/observability
-          directory:
-            recurse: true # 하위 dashboards, rules 폴더를 모두 긁어옴
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          ref: values
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: refactor/gitops-structure
+        path: platform/observability
       destination:
         server: https://kubernetes.default.svc
-        namespace: monitoring # 모니터링 전용 NS
+        namespace: monitoring
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply=true
