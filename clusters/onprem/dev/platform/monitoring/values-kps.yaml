@@ -3,67 +3,34 @@ crds:
 
 grafana:
   enabled: true
+  
+  # 1. 중복 방지: 차트 기본 데이터소스 생성 끄기
+  defaultDatasourceEnabled: false
+
   service:
     type: NodePort
     nodePort: 32300
 
-  # 사이드카 설정(커스텀한 대시보드 사용)
+  # 2. 사이드카 설정 (대시보드만 사용, 데이터소스는 끔)
   sidecar:
     dashboards:
       enabled: true
-      # 라벨 키
       label: grafana_dashboard
-
-      # (중요) ConfigMap에 grafana_dashboard: "1" 로 붙일 거라면 값도 맞춰주는 게 안전
       labelValue: "1"
-
-      # (권장) RBAC 꼬임 방지: Grafana가 있는 네임스페이스만 스캔
-      # 보통 kube-prometheus-stack grafana도 monitoring에 있으니 monitoring 추천
       searchNamespace: monitoring
-
-      # (권장) 폴더 분리하고 싶으면 ConfigMap에 이 annotation 달면 폴더가 나뉨
       folderAnnotation: grafana_folder
-
-      # (권장) Grafana provisioning provider 설정
       provider:
         allowUiUpdates: false
         foldersFromFilesStructure: true
-
     datasources:
-      enabled: false
-      # label: grafana_datasource
-      # labelValue: "1"
-      # searchNamespace: monitoring
+      enabled: false  # 고장 난 사이드카는 비활성화
 
-
-  # 로그인 강제 + 계정 생성 금지
-  grafana.ini:
-    auth.anonymous:
-      enabled: false
-    users:
-      allow_sign_up: false
-      allow_org_create: false
-
-  # admin 비번은 Secret에서만
-  admin:
-    existingSecret: grafana-admin-secret
-    userKey: admin-user
-    passwordKey: admin-password
-
-  # Grafana 대시보드와 사용자 설정 보존용 스토리지
-  persistence:
-    # 데모 버전 false설정, 실 테스트에선 true로 변경하고 아래 주석 풀기
-    enabled: false
-    # storageClassName: "ceph" # Ceph StorageClass
-    # size: 10Gi
-
-  # loki
+  # 3. 데이터소스 단일화 (Prometheus + Loki)
   additionalDataSources:
     - name: Prometheus
       type: prometheus
       uid: prometheus
       access: proxy
-      # 사용자 환경에 맞는 정확한 주소
       url: http://onprem-dev-monitoring-kube-prometheus.monitoring.svc:9090
       isDefault: true
       jsonData:
@@ -74,6 +41,22 @@ grafana:
       url: http://onprem-dev-loki-loki.loki.svc.cluster.local:3100
       isDefault: false
 
+  # 4. 기타 보안 및 관리 설정
+  grafana.ini:
+    auth.anonymous:
+      enabled: false
+    users:
+      allow_sign_up: false
+      allow_org_create: false
+
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
+
+  persistence:
+    enabled: false
+    
 # prometheus-node-exporter:
 #   tolerations:
 #     # 모든 Taint를 무시하고 모든 노드에 설치되도록 설정
