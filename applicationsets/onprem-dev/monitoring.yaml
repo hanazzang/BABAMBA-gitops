@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: onprem-dev-monitoring-stack
+  namespace: argocd
+spec:
+  generators:
+    # 깃레포에 monitoring 폴더가 있는지 확인해서 트리거
+    - git:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        revision: refactor/gitops-structure
+        directories:
+          - path: clusters/onprem/dev/platform/monitoring
+  template:
+    metadata:
+      name: 'onprem-dev-monitoring'
+    spec:
+      project: default
+      sources:
+        # 1. 공식 Helm Chart 소스
+        - repoURL: https://prometheus-community.github.io/helm-charts
+          chart: kube-prometheus-stack
+          targetRevision: 80.13.3
+          helm:
+            valueFiles:
+              # ✅ 여기서 values-kps.yaml을 지정 (CRD off 설정 포함됨)
+              - $values/clusters/onprem/dev/platform/monitoring/values-kps.yaml
+
+        # 2. Values 파일을 가져올 Git 소스
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          ref: values
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: monitoring
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
