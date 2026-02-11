@@ -1,14 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  # 1. 이름 충돌 방지
   name: grafana-dashboard-k8s-basics
   namespace: monitoring
   labels:
-    # 2. 그라파나 자동 인식 라벨
     grafana_dashboard: "1"
   annotations:
-    # 3. 폴더 지정
     grafana_folder: "loadtest"
 data:
   k8s-basics.json: |-
@@ -211,7 +208,7 @@ data:
           "targets": [
             {
               "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m])) by (instance)) * 100",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "{{`{{instance}}`}}",
               "refId": "A"
             }
           ],
@@ -234,7 +231,7 @@ data:
           "targets": [
             {
               "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "{{`{{instance}}`}}",
               "refId": "A"
             }
           ],
@@ -269,7 +266,7 @@ data:
           "targets": [
             {
               "expr": "sum(increase(kube_pod_container_status_restarts_total[1h])) by (pod) > 0",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ],
@@ -300,7 +297,7 @@ data:
           "targets": [
             {
               "expr": "sum(kube_pod_container_status_terminated_reason{reason=\"OOMKilled\"}) by (pod) > 0",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A"
             }
           ],

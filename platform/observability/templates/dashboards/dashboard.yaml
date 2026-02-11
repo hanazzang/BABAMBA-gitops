@@ -8,11 +8,10 @@ metadata:
   annotations:
     grafana_folder: "loadtest"
 data:
-  # 파일명을 dashboard.json으로 설정하여 직관성을 높였습니다.
   dashboard.json: |-
     {
       "uid": "main",
-      "title": 통합 대시보드",
+      "title": "통합 대시보드",
       "editable": true,
       "annotations": {
         "list": [
@@ -27,7 +26,6 @@ data:
           }
         ]
       },
-      "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
       "id": null,
@@ -45,6 +43,7 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Step 1. Connectivity (Ping RTT)",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 0, "y": 2 },
@@ -69,6 +68,7 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Network Uptime",
           "type": "stat",
           "gridPos": { "h": 8, "w": 6, "x": 12, "y": 2 },
@@ -94,6 +94,7 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Step 2. Disk Usage (Used %)",
           "type": "stat",
           "gridPos": { "h": 8, "w": 6, "x": 18, "y": 2 },
@@ -120,13 +121,14 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Step 3. CPU I/O Wait (병목 지표)",
           "type": "timeseries",
           "gridPos": { "h": 9, "w": 12, "x": 0, "y": 10 },
           "targets": [
             {
               "expr": "avg(irate(node_cpu_seconds_total{mode='iowait'}[5m])) by (instance) * 100",
-              "legendFormat": "{{instance}} I/O Wait",
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }} I/O Wait",
               "refId": "A"
             }
           ],
@@ -145,18 +147,19 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Local Disk Throughput (IOPS)",
           "type": "timeseries",
           "gridPos": { "h": 9, "w": 12, "x": 12, "y": 10 },
           "targets": [
             {
               "expr": "sum(rate(node_disk_reads_completed_total[1m])) by (instance)",
-              "legendFormat": "{{instance}} Read IOPS",
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }} Read IOPS",
               "refId": "A"
             },
             {
               "expr": "sum(rate(node_disk_writes_completed_total[1m])) by (instance)",
-              "legendFormat": "{{instance}} Write IOPS",
+              "legendFormat": "{{ "{{" }}instance{{ "}}" }} Write IOPS",
               "refId": "B"
             }
           ],
@@ -165,6 +168,7 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Step 4. GitOps Sync Status",
           "type": "stat",
           "gridPos": { "h": 6, "w": 8, "x": 0, "y": 19 },
@@ -182,18 +186,19 @@ data:
           }
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "title": "Step 5. HPA Scaling (Pod Replicas)",
           "type": "timeseries",
           "gridPos": { "h": 6, "w": 16, "x": 8, "y": 19 },
           "targets": [
             {
               "expr": "sum(kube_hpa_status_current_replicas) by (hpa)",
-              "legendFormat": "{{hpa}} Current",
+              "legendFormat": "{{ "{{" }}hpa{{ "}}" }} Current",
               "refId": "A"
             },
             {
               "expr": "sum(kube_hpa_spec_target_replicas) by (hpa)",
-              "legendFormat": "{{hpa}} Target",
+              "legendFormat": "{{ "{{" }}hpa{{ "}}" }} Target",
               "refId": "B"
             }
           ]

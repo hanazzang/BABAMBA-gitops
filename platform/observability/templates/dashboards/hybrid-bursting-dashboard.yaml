@@ -10,28 +10,89 @@ metadata:
 data:
   hybrid-bursting.json: |-
     {
-      "title": "Hybrid Cloud Bursting Monitor",
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
       "panels": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+          "id": 1,
           "title": "Cluster-wise Traffic Distribution (RPS)",
           "type": "timeseries",
+          "options": {
+            "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right", "showLegend": true }
+          },
           "targets": [
-            { "expr": "sum(rate(envoy_cluster_upstream_rq_total[1m])) by (cluster)", "legendFormat": "{ {cluster} }" }
+            {
+              "expr": "sum(rate(envoy_cluster_upstream_rq_total[1m])) by (cluster)",
+              "legendFormat": "{{ "{{" }}cluster{{ "}}" }}",
+              "refId": "A"
+            }
           ]
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "id": 2,
           "title": "App Response Latency Comparison (P95)",
           "type": "timeseries",
+          "options": {
+            "legend": { "calcs": ["max"], "displayMode": "table", "placement": "right", "showLegend": true }
+          },
           "targets": [
-            { "expr": "histogram_quantile(0.95, sum(rate(envoy_cluster_upstream_rq_time_bucket[1m])) by (le, cluster))", "legendFormat": "{ {cluster} } P95" }
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(envoy_cluster_upstream_rq_time_bucket[1m])) by (le, cluster))",
+              "legendFormat": "{{ "{{" }}cluster{{ "}}" }} P95",
+              "refId": "A"
+            }
           ]
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+          "id": 3,
           "title": "Active Pod Count (HPA Scaling)",
           "type": "timeseries",
+          "options": {
+            "legend": { "displayMode": "table", "placement": "right", "showLegend": true }
+          },
           "targets": [
-            { "expr": "kube_hpa_status_current_replicas", "legendFormat": "{ {cluster} } Replicas" }
+            {
+              "expr": "kube_hpa_status_current_replicas",
+              "legendFormat": "{{ "{{" }}cluster{{ "}}" }} Replicas",
+              "refId": "A"
+            }
           ]
         }
-      ]
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["hybrid", "bursting", "hpa"],
+      "templating": {
+        "list": []
+      },
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Hybrid Cloud Bursting Monitor",
+      "uid": "hybrid-burst-v1",
+      "version": 1,
+      "weekStart": ""
     }

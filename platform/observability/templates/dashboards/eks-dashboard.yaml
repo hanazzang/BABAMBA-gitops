@@ -12,29 +12,59 @@ metadata:
 data:
   eks-cluster-overview.json: |-
     {
-      "title": "EKS Remote Write Overview",
-      "tags": ["eks", "remote-write"],
-      "timezone": "browser",
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
       "panels": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+          "id": 1,
           "title": "Cluster CPU Usage (Remote)",
           "type": "timeseries",
-          "datasource": "Prometheus",
+          "options": {
+            "legend": { "calcs": ["max", "mean"], "displayMode": "table", "placement": "right", "showLegend": true }
+          },
           "targets": [
             {
-              "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"})",
-              "legendFormat": "CPU Usage"
+              "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=~\"$cluster\"})",
+              "legendFormat": "{{ "{{" }}cluster{{ "}}" }} - CPU",
+              "refId": "A"
             }
-          ]
+          ],
+          "description": "선택한 클러스터의 전체 CPU 사용량"
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+          "id": 2,
           "title": "EKS Ingestion Rate",
           "type": "stat",
-          "datasource": "Prometheus",
+          "options": {
+            "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+            "colorMode": "value",
+            "graphMode": "area"
+          },
           "targets": [
             {
               "expr": "rate(prometheus_remote_storage_samples_in_total[5m])",
-              "legendFormat": "Samples/sec"
+              "legendFormat": "Samples/sec",
+              "refId": "A"
             }
           ]
         }
@@ -43,10 +73,26 @@ data:
         "list": [
           {
             "name": "cluster",
+            "label": "Cluster",
             "type": "query",
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
             "query": "label_values(up, cluster)",
-            "refresh": 1
+            "refresh": 1,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true
           }
         ]
-      }
+      },
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["eks", "remote-write"],
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "EKS Remote Write Overview",
+      "uid": "eks-remote-v1",
+      "version": 1,
+      "weekStart": ""
     }

@@ -1,17 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  # 1. ConfigMap 이름 구분
   name: grafana-dashboard-ceph-custom
   namespace: monitoring
   labels:
-    # 2. 그라파나 자동 등록 라벨
     grafana_dashboard: "1"
   annotations:
-    # 3. 같은 폴더에 묶이도록 설정
     grafana_folder: "loadtest"
 data:
-  # 4. 파일명 구분
   ceph-dashboard.json: |-
     {
       "annotations": {
