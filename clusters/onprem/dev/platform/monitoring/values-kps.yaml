@@ -59,6 +59,15 @@ grafana:
 
   # loki
   additionalDataSources:
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus
+      access: proxy
+      # 사용자 환경에 맞는 정확한 주소
+      url: http://onprem-dev-monitoring-kube-prometheus.monitoring.svc:9090
+      isDefault: true
+      jsonData:
+        timeInterval: 30s
     - name: Loki
       type: loki
       access: proxy
