@@ -14,7 +14,7 @@ spec:
           - path: clusters/onprem/dev/platform/keda
             exclude: true
 
-  template:f
+  template:
     metadata:
       name: 'onprem-dev-{{path.basename}}'
     spec:
