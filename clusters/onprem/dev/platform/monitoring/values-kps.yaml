@@ -51,8 +51,17 @@ grafana:
     # storageClassName: "ceph" # Ceph StorageClass
     # size: 10Gi
 
-  # loki
+  # loki & prometheus
   additionalDataSources:
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus   # <--- 핵심! 대시보드가 찾는 ID와 일치시킴
+      access: proxy
+      url: http://prometheus-operated:9090 # 같은 네임스페이스 내의 Prometheus 서비스 주소
+      isDefault: true
+      jsonData:
+        timeInterval: 30s
+        
     - name: Loki
       type: loki
       access: proxy
