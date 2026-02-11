@@ -30,10 +30,10 @@ grafana:
         foldersFromFilesStructure: true
 
     datasources:
-      enabled: true
-      label: grafana_datasource
-      labelValue: "1"
-      searchNamespace: monitoring
+      enabled: false
+      # label: grafana_datasource
+      # labelValue: "1"
+      # searchNamespace: monitoring
 
 
   # 로그인 강제 + 계정 생성 금지
@@ -59,15 +59,6 @@ grafana:
 
   # loki
   additionalDataSources:
-    - name: Prometheus
-      type: prometheus
-      uid: prometheus   # 대시보드와 ID를 맞춤
-      access: proxy
-      url: http://onprem-dev-monitoring-kube-prometheus.monitoring.svc:9090
-      isDefault: true
-      jsonData:
-        timeInterval: 30s
-
     - name: Loki
       type: loki
       access: proxy
