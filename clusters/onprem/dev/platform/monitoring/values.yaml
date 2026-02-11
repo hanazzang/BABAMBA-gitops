@@ -77,14 +77,13 @@ kube-prometheus-stack:
 
   prometheus:
     prometheusSpec:
-    # 1. 오퍼레이터가 만드는 포드/STS에 ArgoCD 추적 라벨 강제 삽입
-    podMetadata:
-      labels:
+      # 1. 오퍼레이터가 만드는 포드/STS에 ArgoCD 추적 라벨 강제 삽입
+      podMetadata:
+        labels:
+          app.kubernetes.io/instance: onprem-dev-monitoring
+      # 2. 오퍼레이터가 리소스를 생성할 때 ArgoCD의 관리 규칙을 따르도록 설정
+      commonLabels:
         app.kubernetes.io/instance: onprem-dev-monitoring
-    
-    # 2. 오퍼레이터가 리소스를 생성할 때 ArgoCD의 관리 규칙을 따르도록 설정
-    commonLabels:
-      app.kubernetes.io/instance: onprem-dev-monitoring
       # 노드 격리 설정 (Taint + NodeSelector) — dedicated=monitoring 노드에 스케줄되려면 둘 다 필요
       # nodeSelector:
       #   dedicated: "monitoring"
