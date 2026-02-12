@@ -24,8 +24,6 @@ spec:
             ignoreMissingValueFiles: true
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
-              - $values/{{path}}/values.yaml
-              - $values/{{path}}/values-autoscaling.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
           ref: values

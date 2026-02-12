@@ -3,17 +3,18 @@
 # - 1: autoscaling.enabled=true,  keda.enabled=false
 # - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95)
 
+
 resources:
   requests:
-    cpu: "100m"
-    memory: "256Mi"
-  limits:
-    cpu: "500m"
+    cpu: "300m"
     memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1024Mi"
 
 autoscaling:
   enabled: true
-  minReplicas: 1
+  minReplicas: 2
   # 데모/발표용: 폭주 방지 상한선
   maxReplicas: 30
   cpu:
@@ -29,7 +30,7 @@ autoscaling:
           value: 200        # 한 번에 2배
           periodSeconds: 15
         - type: Pods
-          value: 4          # 15초에 최대 +4
+          value: 6          # 15초에 최대 +6
           periodSeconds: 15
       selectPolicy: Max
     scaleDown:
@@ -43,9 +44,13 @@ autoscaling:
   get:
     maxReplicas: 30
   write:
+    # WRITE는 이미지 리사이즈(PIL) + DB commit이 섞여 순간 CPU가 치솟을 수 있어
+    # 최소 파드 수를 올려 초기 피크를 완화합니다.
+    minReplicas: 2
     maxReplicas: 5
     cpu:
-      averageUtilization: 85
+      # 리사이즈 CPU 스파이크를 더 빨리 감지하도록 목표치를 낮춤
+      averageUtilization: 70
     memory:
       averageUtilization: 70
     # WRITE는 DB 보호 관점에서 스케일 업을 더 보수적으로
@@ -55,10 +60,10 @@ autoscaling:
         policies:
           - type: Percent
             value: 100
-            periodSeconds: 30
+            periodSeconds: 15
           - type: Pods
             value: 1
-            periodSeconds: 30
+            periodSeconds: 15
         selectPolicy: Max
       scaleDown:
         stabilizationWindowSeconds: 300
@@ -76,27 +81,23 @@ monitoring:
     scrapeTimeout: 10s
 
 keda:
-  enabled: true
   # ✅ get/write 분리 스케일링:
   # - GET: KEDA(트래픽 기반)
   # - WRITE: HPA(CPU/메모리, metrics-server)
-  get:
-    enabled: true
+
   write:
     enabled: false
   pollingInterval: 5
   cooldownPeriod: 60
 
-  # NOTE:
-  # - 이 차트의 ScaledObject(HPA behavior)는 keda.advanced가 아니라 autoscaling.behavior를 사용합니다.
-  # - (과거 테스트 값이 keda.advanced에만 있다면 autoscaling.behavior로도 옮겨주세요.)
-
   get:
+    enabled: true 
     triggers:
       # 1️⃣ RPS (빠른 반응 트리거) - GET 전용
       - type: prometheus
-        # 중요: query가 "전체 RPS(sum)"이므로 Value로 두어야 폭주(곱셈) 스케일이 안 납니다.
-        metricType: Value
+        # query가 "전체 RPS(sum)"일 때, AverageValue + (pod 당 목표 RPS=threshold) 조합이면
+        # 전체 RPS / threshold 만큼으로 스케일되어 의도한 동작(파드당 목표 처리량)에 가장 가깝습니다.
+        metricType: AverageValue
         metadata:
           serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
           metricName: employee_get_rps

@@ -131,10 +131,17 @@ kubectl -n employee get pods -l app.kubernetes.io/name=employee-server -o wide 2
 부하주기 전 이전 이벤트/로그 깨끗하게 초기화하기. 
 
 ```bash
+# GET(/employee/employees)만 부하 (기존과 동일)
 RATE=200 DURATION=2m ./hpa-test/k6-employees.sh
+
+# WRITE(직원 등록/수정)만 부하
+WRITE_RATE=50 GET_RATE=0 DURATION=2m ./hpa-test/k6-employees.sh
+
+# GET + WRITE 혼합 (등록 후 목록 확인까지 흉내)
+GET_RATE=30 WRITE_RATE=50 DURATION=2m ./hpa-test/k6-employees.sh
 ```
 
-(필요시 값 변경: `RATE`, `DURATION`, `HOST_HEADER`, `EMP_URL` 등은 스크립트 상단 ENV 참고)
+(필요시 값 변경: `GET_RATE`, `WRITE_RATE`, `PHOTO_PCT`, `POST_THEN_GET_PCT`, `DURATION`, `HOST_HEADER`, `EMP_URL` 등은 스크립트 상단 ENV 참고)
 
 ---
 
@@ -243,7 +250,7 @@ Normal   KEDAScale           22s   keda-operator               ScaledObject trig
 ## k6-employees.sh에 대한 설명
 
 ### 전체 목적
-**(1) auth에서 JWT를 자동으로 얻고 → (2) 그 토큰으로 gateway 경유 `/employee/employees`에 k6 부하를 걸고 → (3) 부하 전/후 + 진행 중에 pod 수 변화를 같이 찍는** “한 방” 부하 스크립트
+**(1) auth에서 JWT를 자동으로 얻고 → (2) 그 토큰으로 gateway 경유 GET/WRITE 트래픽을 발생시키고(HTTP method로 get/write 라우팅 분리) → (3) 부하 전/후 + 진행 중에 pod 수 변화를 같이 찍는** “한 방” 부하 스크립트
 
 ---
 
@@ -252,10 +259,17 @@ Normal   KEDAScale           22s   keda-operator               ScaledObject trig
 - **대상/계정 기본값 ENV**
   - `AUTH_BASE`: auth 서비스 주소(기본 `auth-server-stable.auth.svc:5001`)
   - `AUTH_USER`, `AUTH_PASS`: 로그인 계정
-  - `EMP_URL`: gateway 내부 DNS로 employee 엔드포인트 호출
+  - `EMP_URL`: (기본) GET 호출 URL(기본 `.../employee/employees`)
+  - `EMP_GET_URL`: GET 호출 URL(기본: `EMP_URL`)
+  - `EMP_WRITE_URL`: WRITE 호출 URL(기본: `EMP_GET_URL`에서 파생되어 `.../employee/employee`)
   - `HOST_HEADER`: HTTPRoute 매칭용 Host 헤더(가상호스트)
 - **부하 파라미터 ENV**
-  - `RATE`(초당 도착 요청수), `DURATION`, `PREALLOCATED_VUS`, `MAX_VUS`, `TIMEOUT`
+  - `RATE`: (호환용) GET_RATE 기본값
+  - `GET_RATE`: GET 시나리오의 초당 도착 요청수(기본: `RATE`)
+  - `WRITE_RATE`: WRITE 시나리오의 초당 도착 요청수(기본: `0`)
+  - `PHOTO_PCT`: WRITE 요청 중 사진(리사이즈) 포함 비율(%, 기본 `70`)
+  - `POST_THEN_GET_PCT`: WRITE 성공 후 목록 확인 GET 비율(%, 기본 `30`)
+  - `DURATION`, `PREALLOCATED_VUS`, `MAX_VUS`, `TIMEOUT`
 - **쿠버네티스 관련**
   - `K6_IMAGE`, `NS_AUTH`, `NS_K6`, `NS_EMPLOYEE`
   - `EMP_POD_LABEL_SELECTOR`: employee pod 라벨 셀렉터
@@ -287,7 +301,7 @@ Normal   KEDAScale           22s   keda-operator               ScaledObject trig
 
 ### 4) 부하 시작 전 상태 기록 + 단건 헬스체크(97~109)
 - `snapshot_k8s`로 “부하 전” 스케일러/파드 상태를 찍음
-- `/employee/employees`에 **단건 curl**을 `k6` 네임스페이스에서 실행(`emp-check`)
+- (기본) `EMP_GET_URL`에 **단건 curl**을 `k6` 네임스페이스에서 실행(`emp-check`)
   - 실패해도 전체 스크립트가 죽지 않게 `set +e … || true`
   - 여기서도 `Host` 헤더 + `Authorization: Bearer <TOKEN>`을 넣어 실제 호출 조건을 맞춤
 
@@ -299,10 +313,13 @@ Normal   KEDAScale           22s   keda-operator               ScaledObject trig
   - `trap`으로 스크립트 종료 시 워처 프로세스 정리
 - `kubectl run k6-employees ... grafana/k6`로 k6 Pod를 띄우고,
   - 컨테이너 안에서 `/tmp/test.js`를 생성한 뒤 `k6 run` 실행
-- k6 JS 로직(130~162 요지)
-  - `constant-arrival-rate`로 **초당 RATE 요청을 DURATION 동안** 발생
-  - 각 요청은 `EMP_URL`로 GET, Host 헤더(옵션), Bearer 토큰 포함
-  - `status 200` 체크, 아주 짧게 sleep
+- k6 JS 로직(요지)
+  - `constant-arrival-rate`를 **GET/WRITE 2개 시나리오로 분리**
+    - GET: `EMP_GET_URL`로 GET
+    - WRITE: `EMP_WRITE_URL`로 POST(FormData, 사진 포함 비율은 `PHOTO_PCT`)
+  - WRITE는 성공 후 일부 비율로 “목록 확인 GET”을 추가 호출(`POST_THEN_GET_PCT`)
+  - Host 헤더(옵션), Bearer 토큰 포함
+  - `status 200` 체크 후 아주 짧게 sleep
 
 ---
 
