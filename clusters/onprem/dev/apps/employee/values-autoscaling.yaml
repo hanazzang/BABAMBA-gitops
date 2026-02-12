@@ -15,8 +15,7 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 2
-  # 데모/발표용: 폭주 방지 상한선
-  maxReplicas: 30
+  maxReplicas: 15
   cpu:
     averageUtilization: 85
   memory:
@@ -42,7 +41,7 @@ autoscaling:
       selectPolicy: Min
   # 역할별 상한(WRITE는 보수적으로)
   get:
-    maxReplicas: 30
+    maxReplicas: 15
   write:
     # WRITE는 이미지 리사이즈(PIL) + DB commit이 섞여 순간 CPU가 치솟을 수 있어
     # 최소 파드 수를 올려 초기 피크를 완화합니다.
@@ -64,7 +63,8 @@ autoscaling:
           - type: Pods
             value: 1
             periodSeconds: 15
-        selectPolicy: Max
+        # DB/외부(사진 업로드) 보호 관점: 급격한 증설 방지(+1 pod/15s 수준으로 제한)
+        selectPolicy: Min
       scaleDown:
         stabilizationWindowSeconds: 300
         policies:
@@ -114,38 +114,38 @@ keda:
           # "pod 당 목표 RPS"로 잡으면, 전체 RPS/threshold 만큼으로 스케일되는 효과
           threshold: "30"
 
-      # 2️⃣ p95 latency (안정성 트리거, 조건부) - GET 전용
-      - type: prometheus
-        metricType: Value
-        metadata:
-          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-          metricName: employee_get_p95_latency_seconds
-          query: >
-            histogram_quantile(
-              0.95,
-              sum(
-                rate(http_request_duration_seconds_bucket{
-                  namespace="{{ .Release.Namespace }}",
-                  app="{{ include "employee-server.name" . }}",
-                  traffic="get",
-                  # NOTE: prometheus-fastapi-instrumentator 기본 히스토그램은 (handler, method) 라벨만 가집니다.
-                  #       status 라벨이 없으므로 status=~"2.." 같은 필터를 넣으면 매칭이 0이 되어 p95가 미동작합니다.
-                  handler!~"/(metrics|health|ready)"
-                }[2m])
-              ) by (le)
-            )
-            and
-            sum(
-              rate(http_requests_total{
-                namespace="{{ .Release.Namespace }}",
-                app="{{ include "employee-server.name" . }}",
-                traffic="get",
-                status=~"2..",
-                handler!~"/(metrics|health|ready)"
-              }[2m])
-            ) > 30
-          # p95는 "보조 안전장치": 충분한 트래픽이 있을 때만, 체감 악화 구간에서만 확장
-          threshold: "1.2"
+      # # 2️⃣ p95 latency (안정성 트리거, 조건부) - GET 전용  # 빼기로 결정.
+      # - type: prometheus
+      #   metricType: Value
+      #   metadata:
+      #     serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+      #     metricName: employee_get_p95_latency_seconds
+      #     query: >
+      #       histogram_quantile(
+      #         0.95,
+      #         sum(
+      #           rate(http_request_duration_seconds_bucket{
+      #             namespace="{{ .Release.Namespace }}",
+      #             app="{{ include "employee-server.name" . }}",
+      #             traffic="get",
+      #             # NOTE: prometheus-fastapi-instrumentator 기본 히스토그램은 (handler, method) 라벨만 가집니다.
+      #             #       status 라벨이 없으므로 status=~"2.." 같은 필터를 넣으면 매칭이 0이 되어 p95가 미동작합니다.
+      #             handler!~"/(metrics|health|ready)"
+      #           }[2m])
+      #         ) by (le)
+      #       )
+      #       and
+      #       sum(
+      #         rate(http_requests_total{
+      #           namespace="{{ .Release.Namespace }}",
+      #           app="{{ include "employee-server.name" . }}",
+      #           traffic="get",
+      #           status=~"2..",
+      #           handler!~"/(metrics|health|ready)"
+      #         }[2m])
+      #       ) > 30
+      #     # p95는 "보조 안전장치": 충분한 트래픽이 있을 때만, 체감 악화 구간에서만 확장
+      #     threshold: "1.2"
 
       # 3️⃣ CPU (보조, 참고용) - GET 파드만
       - type: prometheus
