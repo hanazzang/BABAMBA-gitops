@@ -5,18 +5,18 @@
 
 resources:
   requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
     cpu: "200m"
-    memory: "512Mi"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
 
 autoscaling:
   enabled: false
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 10
   cpu:
-    averageUtilization: 85
+    averageUtilization: 60
   memory:
     averageUtilization: 70
 
