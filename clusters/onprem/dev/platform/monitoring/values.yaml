@@ -26,18 +26,18 @@ grafana:
         allowUiUpdates: false
         foldersFromFilesStructure: true
 
-    # datasources:
-    #   enabled: true
-    #   label: grafana_datasource
-    #   labelValue: "1" 
-    #   searchNamespace: monitoring
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1" 
+      searchNamespace: monitoring
 
-  # additionalDataSources:
-  #   - name: Loki
-  #     type: loki
-  #     access: proxy
-  #     url: http://onprem-dev-loki-loki.loki.svc.cluster.local:3100
-  #     isDefault: false
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://onprem-dev-loki-loki.loki.svc.cluster.local:3100
+      isDefault: false
 
   # 기타 보안 및 관리 설정
   grafana.ini:
