@@ -24,7 +24,7 @@ grafana:
         foldersFromFilesStructure: true
 
     datasources:
-      enabled: enabled: true
+      enable: true
       label: grafana_datasource
       labelValue: "1" 
       searchNamespace: monitoring
