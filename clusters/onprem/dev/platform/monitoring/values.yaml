@@ -7,12 +7,32 @@ crds:
 grafana:
   enabled: true
 
-  # 차트 기본 데이터소스 생성
-  defaultDatasourceEnabled: true
+  # 차트 기본 데이터소스 자동 연결 비활성화
+  defaultDatasourceEnabled: false
 
   service:
     type: NodePort
     nodePort: 32300
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus
+        # 우리가 고정한 짧은 이름(kps)을 정확하게 명시
+        url: http://kps-prometheus.monitoring.svc:9090
+        access: proxy
+        isDefault: true
+        jsonData:
+          timeInterval: 30s
+      
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://onprem-dev-loki-loki.loki.svc.cluster.local:3100
+        isDefault: false
 
   # 사이드카 설정
   sidecar:
