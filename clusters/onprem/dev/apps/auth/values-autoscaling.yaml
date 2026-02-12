@@ -36,7 +36,7 @@ autoscaling:
           periodSeconds: 15
       selectPolicy: Max
     scaleDown:
-      stabilizationWindowSeconds: 300
+      stabilizationWindowSeconds: 120 # 테스트를 위해 낮게잡음. 
       policies:
         - type: Percent
           value: 50
@@ -55,7 +55,7 @@ keda:
   # KEDA를 켜면( enabled=true ) 기존 Resource HPA 대신 ScaledObject 기반으로 스케일합니다.
   enabled: true
   pollingInterval: 10  # Prometheus 질의 주기(초)
-  cooldownPeriod: 120  # scale-in 지연(초). 로그인 버스트/출렁임 완충
+#   cooldownPeriod: 120  # scale-in 지연(초). 로그인 버스트/출렁임 완충. ‘(minReplicas>0이면 영향 적음)
   triggers:
     - type: prometheus
       metricType: AverageValue
@@ -68,41 +68,12 @@ keda:
             rate(http_requests_total{
               namespace="{{ .Release.Namespace }}",
               app="{{ include "auth-server.name" . }}",
-              path!~"/(metrics|health|ready)"
+              status=~"2..",
+              handler!~"/(metrics|health|ready)"
             }[30s])
           )
         # per-pod RPS 목표치(= total_rps / replicas). 데모/버스트 대응용으로 낮게 잡는 편이 반응성이 좋습니다.
-        threshold: "10"
-
-    - type: prometheus
-      # p95 latency는 "replica로 나눠서 평균"내는 값이 아니므로 Value가 안전합니다.
-      metricType: Value
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: auth_p95_latency_seconds
-        # 트래픽이 너무 적을 때 quantile이 흔들리는 걸 피하려고 RPS 조건을 같이 둡니다.
-        query: >
-          (
-            histogram_quantile(
-              0.95,
-              sum(
-                rate(http_request_duration_seconds_bucket{
-                  namespace="{{ .Release.Namespace }}",
-                  app="{{ include "auth-server.name" . }}",
-                  path!~"/(metrics|health|ready)"
-                }[2m])
-              ) by (le)
-            )
-          )
-          and
-          sum(
-            rate(http_requests_total{
-              namespace="{{ .Release.Namespace }}",
-              app="{{ include "auth-server.name" . }}",
-              path!~"/(metrics|health|ready)"
-            }[2m])
-          ) > 1
-        threshold: "0.3"  # p95 latency가 300ms 초과
+        threshold: "30"
 
     - type: prometheus
       metricType: Value

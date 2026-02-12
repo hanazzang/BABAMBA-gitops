@@ -34,7 +34,7 @@ autoscaling:
           periodSeconds: 15
       selectPolicy: Max
     scaleDown:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 120   # 테스트를 위해 낮게잡음. 
       policies:
         - type: Percent
           value: 50
@@ -108,11 +108,11 @@ keda:
                 app="{{ include "employee-server.name" . }}",
                 traffic="get",
                 status=~"2..",
-                path!~"/(metrics|health|ready)"
+                handler!~"/(metrics|health|ready)"
               }[30s])
             )
           # "pod 당 목표 RPS"로 잡으면, 전체 RPS/threshold 만큼으로 스케일되는 효과
-          threshold: "50"
+          threshold: "30"
 
       # 2️⃣ p95 latency (안정성 트리거, 조건부) - GET 전용
       - type: prometheus
@@ -128,7 +128,9 @@ keda:
                   namespace="{{ .Release.Namespace }}",
                   app="{{ include "employee-server.name" . }}",
                   traffic="get",
-                  path!~"/(metrics|health|ready)"
+                  # NOTE: prometheus-fastapi-instrumentator 기본 히스토그램은 (handler, method) 라벨만 가집니다.
+                  #       status 라벨이 없으므로 status=~"2.." 같은 필터를 넣으면 매칭이 0이 되어 p95가 미동작합니다.
+                  handler!~"/(metrics|health|ready)"
                 }[2m])
               ) by (le)
             )
@@ -139,11 +141,11 @@ keda:
                 app="{{ include "employee-server.name" . }}",
                 traffic="get",
                 status=~"2..",
-                path!~"/(metrics|health|ready)"
+                handler!~"/(metrics|health|ready)"
               }[2m])
-            ) > 10
-          # 목표(p95 <= 0.95s)보다 약간 보수적으로 잡아 체감 안정화 유도
-          threshold: "0.8"
+            ) > 30
+          # p95는 "보조 안전장치": 충분한 트래픽이 있을 때만, 체감 악화 구간에서만 확장
+          threshold: "1.2"
 
       # 3️⃣ CPU (보조, 참고용) - GET 파드만
       - type: prometheus
