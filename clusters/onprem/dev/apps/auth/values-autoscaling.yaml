@@ -36,7 +36,7 @@ autoscaling:
           periodSeconds: 15
       selectPolicy: Max
     scaleDown:
-      stabilizationWindowSeconds: 120 # 테스트를 위해 낮게잡음. 
+      stabilizationWindowSeconds: 120 # 테스트를 위해 낮게잡음. 300
       policies:
         - type: Percent
           value: 50

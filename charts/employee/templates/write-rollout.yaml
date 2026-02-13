@@ -28,6 +28,12 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
           envFrom:
             {{- toYaml .Values.envFrom | nindent 12 }}
+          {{- $res := .Values.resources -}}
+          {{- if and (hasKey .Values "resourcesByTraffic") (hasKey .Values.resourcesByTraffic "write") -}}
+          {{- $res = .Values.resourcesByTraffic.write -}}
+          {{- end }}
+          resources:
+            {{- toYaml $res | nindent 12 }}
   strategy:
     canary:
       stableService: {{ include "employee-server.fullname" . }}-write-stable

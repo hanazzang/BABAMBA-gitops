@@ -12,13 +12,33 @@ resources:
     memory: "1Gi"
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 2
   maxReplicas: 10
   cpu:
-    averageUtilization: 60
+    averageUtilization: 65
   memory:
-    averageUtilization: 70
+    averageUtilization: 75
+  # 업로드(프록시) 트래픽은 피크가 크고 외부(S3) 의존이 있어,
+  # scale-up은 빠르게 / scale-down은 느리게 가져가 플랩핑을 줄입니다.
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 120   # 테스트를 위해 낮게잡음. 600
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
 
 keda:
   enabled: false

@@ -12,6 +12,27 @@ resources:
     cpu: "1000m"
     memory: "1024Mi"
 
+# GET/WRITE 리소스를 분리해서 적용하려면 여기 값을 사용합니다.
+# - charts/employee/templates/get-rollout.yaml  -> resourcesByTraffic.get (없으면 resources)
+# - charts/employee/templates/write-rollout.yaml -> resourcesByTraffic.write (없으면 resources)
+resourcesByTraffic:
+  # GET은 RPS(KEDA)로 스케일하므로, 기본 처리/스케줄링 안정 수준으로 잡고 과도한 리소스 예약을 피합니다.
+  get:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1024Mi"
+  # WRITE는 이미지 리사이즈(PIL) + DB commit 등으로 CPU 스파이크가 커질 수 있어 GET보다 여유를 둡니다.
+  write:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "1500m"
+      memory: "2Gi"
+
 autoscaling:
   enabled: true
   minReplicas: 2
@@ -66,7 +87,7 @@ autoscaling:
         # DB/외부(사진 업로드) 보호 관점: 급격한 증설 방지(+1 pod/15s 수준으로 제한)
         selectPolicy: Min
       scaleDown:
-        stabilizationWindowSeconds: 300
+        stabilizationWindowSeconds: 120   # 테스트를 위해 낮게잡음. 300
         policies:
           - type: Percent
             value: 50
