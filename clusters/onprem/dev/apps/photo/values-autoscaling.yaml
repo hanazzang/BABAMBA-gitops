@@ -43,7 +43,9 @@ autoscaling:
 keda:
   enabled: false
   pollingInterval: 15
-  cooldownPeriod: 300
+  # scale-to-zero(0으로 축소) 구간에서 특히 의미가 큰 완충값입니다.
+  # minReplicas>0이면 1~N 스케일인은 주로 HPA behavior(scaleDown)가 결정합니다.
+  cooldownPeriod: 120
   triggers:
     - type: prometheus
       metricType: AverageValue

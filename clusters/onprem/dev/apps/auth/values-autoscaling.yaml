@@ -55,7 +55,9 @@ keda:
   # KEDA를 켜면( enabled=true ) 기존 Resource HPA 대신 ScaledObject 기반으로 스케일합니다.
   enabled: true
   pollingInterval: 10  # Prometheus 질의 주기(초)
-#   cooldownPeriod: 120  # scale-in 지연(초). 로그인 버스트/출렁임 완충. ‘(minReplicas>0이면 영향 적음)
+  # scale-to-zero(0으로 축소) 구간에서 특히 의미가 큰 완충값입니다.
+  # auth처럼 minReplicas>0이면 1~N 스케일인은 주로 HPA behavior(scaleDown)가 결정합니다.
+  cooldownPeriod: 120
   triggers:
     - type: prometheus
       metricType: AverageValue

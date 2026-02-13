@@ -105,12 +105,13 @@ keda:
   # ✅ get/write 분리 스케일링:
   # - GET: KEDA(트래픽 기반)
   # - WRITE: HPA(CPU/메모리, metrics-server)
+  pollingInterval: 10
+  # scale-to-zero(0으로 축소) 구간에서 특히 의미가 큰 완충값입니다.
+  # minReplicas>0이면 1~N 스케일인은 주로 HPA behavior(scaleDown)가 결정합니다.
+  cooldownPeriod: 120
 
   write:
     enabled: false
-  pollingInterval: 5
-  cooldownPeriod: 60
-
   get:
     enabled: true 
     triggers:
