@@ -192,13 +192,13 @@ data:
           "gridPos": { "h": 6, "w": 16, "x": 8, "y": 19 },
           "targets": [
             {
-              "expr": "sum(kube_hpa_status_current_replicas) by (hpa)",
-              "legendFormat": "{{ "{{" }}hpa{{ "}}" }} Current",
+              "expr": "sum(kube_horizontalpodautoscaler_status_current_replicas) by (horizontalpodautoscaler)",
+              "legendFormat": "{{ "{{" }}horizontalpodautoscaler{{ "}}" }} Current",
               "refId": "A"
             },
             {
-              "expr": "sum(kube_hpa_spec_target_replicas) by (hpa)",
-              "legendFormat": "{{ "{{" }}hpa{{ "}}" }} Target",
+              "expr": "sum(kube_horizontalpodautoscaler_spec_target_replicas) by (horizontalpodautoscaler)",
+              "legendFormat": "{{ "{{" }}horizontalpodautoscaler{{ "}}" }} Target",
               "refId": "B"
             }
           ]
