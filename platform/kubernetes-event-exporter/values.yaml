@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/resmoio/kubernetes-event-exporter
-햣 ㅁㅇㅇ   # GHCR에서는 v1.7.0 태그가 없고 v1.7 형태로 제공됩니다.
+  # GHCR에서는 v1.7.0 태그가 없고 v1.7 형태로 제공됩니다.
   tag: "v1.7"
   pullPolicy: IfNotPresent
 
