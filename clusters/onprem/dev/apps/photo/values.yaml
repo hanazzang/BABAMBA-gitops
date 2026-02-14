@@ -33,3 +33,11 @@ persistence:
 pvName: "photo-service-pv"
 nfsServer: "192.168.13.187"  # <--- 여기에 NFS VM IP를 꼭 넣어주세요!
 nfsPath: "/data/nfs/photo"   # <--- NFS 서버에서 설정한 경로
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"

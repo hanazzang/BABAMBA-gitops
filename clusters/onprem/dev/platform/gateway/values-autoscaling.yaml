@@ -16,9 +16,15 @@ autoscaling:
     
 monitoring:
   podMonitor:
-    enabled: false
+    # Envoy(/stats/prometheus) 지표 수집이 켜져 있어야
+    # - Grafana Envoy 대시보드
+    # - KEDA Prometheus(RPS) 트리거
+    # 가 정상 동작합니다.
+    enabled: true
 
 keda:
+  # ✅ 기본은 HPA(metrics-server)로 스케일
+  # - 부하테스트 후 KEDA로 전환이 필요하면 enabled만 true로 바꾸면 됩니다.
   enabled: false
   pollingInterval: 15
   cooldownPeriod: 300
@@ -28,24 +34,9 @@ keda:
       metadata:
         serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
         metricName: gateway_rps
+        # total RPS(sum) / threshold => replicas(대략) 로 스케일되는 형태
         query: 'sum(rate(envoy_http_downstream_rq_total{namespace="{{ .Values.envoyProxy.namespace }}",app="{{ .Values.envoyProxy.podLabels.app }}"}[1m]))'
         threshold: "200"
-
-    - type: prometheus
-      metricType: Value
-      metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-        metricName: gateway_p95_latency_ms
-        query: >
-          histogram_quantile(
-            0.95,
-            sum(
-              rate(
-                envoy_http_downstream_rq_time_bucket{namespace="{{ .Values.envoyProxy.namespace }}",app="{{ .Values.envoyProxy.podLabels.app }}"}[1m]
-              )
-            ) by (le)
-          )
-        threshold: "300"
 
     - type: prometheus
       metricType: Value
