@@ -15,6 +15,11 @@ spec:
           # "already owned by another ApplicationSet" 충돌이 발생하므로 제외합니다.
           - path: clusters/onprem/dev/platform/monitoring
             exclude: true
+          # KEDA 컨트롤러는 Helm chart로 별도 Application(onprem-dev-keda)에서 관리합니다.
+          # platform-resources가 platform/keda(존재하지 않음)를 대상으로 Application을 만들면
+          # ComparisonError(app path does not exist)가 발생하므로 제외합니다.
+          - path: clusters/onprem/dev/platform/keda
+            exclude: true
 
   template:
     metadata:

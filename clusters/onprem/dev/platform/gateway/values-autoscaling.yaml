@@ -74,7 +74,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: gateway_rps
         # total RPS(sum) / threshold => replicas(대략) 로 스케일되는 형태
         # NOTE:
@@ -96,7 +96,7 @@ keda:
     - type: prometheus
       metricType: Value
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: gateway_cpu_util_percent
         query: >
           100 *
@@ -128,7 +128,7 @@ keda:
     # - type: prometheus
     #   metricType: Value
     #   metadata:
-    #     serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+    #     serverAddress: http://kps-prometheus.monitoring.svc:9090
     #     metricName: gateway_mem_util_percent
     #     query: >
     #       100 *

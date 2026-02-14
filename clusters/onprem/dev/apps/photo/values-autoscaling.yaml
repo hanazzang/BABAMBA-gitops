@@ -50,7 +50,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: photo_rps
         query: 'sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",app="{{ include "photo-server.fullname" . }}"}[1m]))'
         threshold: "20"
@@ -58,7 +58,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: photo_p95_latency_seconds
         query: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="{{ .Release.Namespace }}",app="{{ include "photo-server.fullname" . }}"}[5m])) by (le))'
         threshold: "0.3"
@@ -66,7 +66,7 @@ keda:
     - type: prometheus
       metricType: Value
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: photo_cpu_util_percent
         query: >
           avg(

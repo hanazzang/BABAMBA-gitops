@@ -121,7 +121,7 @@ keda:
         # 전체 RPS / threshold 만큼으로 스케일되어 의도한 동작(파드당 목표 처리량)에 가장 가깝습니다.
         metricType: AverageValue
         metadata:
-          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          serverAddress: http://kps-prometheus.monitoring.svc:9090
           metricName: employee_get_rps
           query: >
             sum(
@@ -140,7 +140,7 @@ keda:
       # - type: prometheus
       #   metricType: Value
       #   metadata:
-      #     serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+      #     serverAddress: http://kps-prometheus.monitoring.svc:9090
       #     metricName: employee_get_p95_latency_seconds
       #     query: >
       #       histogram_quantile(
@@ -173,7 +173,7 @@ keda:
       - type: prometheus
         metricType: Value
         metadata:
-          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          serverAddress: http://kps-prometheus.monitoring.svc:9090
           metricName: employee_get_cpu_util_percent
           query: >
             avg(
@@ -203,7 +203,7 @@ keda:
       - type: prometheus
         metricType: Value
         metadata:
-          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+          serverAddress: http://kps-prometheus.monitoring.svc:9090
           metricName: employee_get_mem_util_percent
           query: >
             avg(

@@ -62,7 +62,7 @@ keda:
     - type: prometheus
       metricType: AverageValue
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: auth_rps
         # 주의: /metrics(스크랩) 같은 내부 트래픽을 포함하면 스케일이 왜곡될 수 있어 제외합니다.
         query: >
@@ -80,7 +80,7 @@ keda:
     - type: prometheus
       metricType: Value
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: auth_cpu_util_percent 
         query: >
           avg(
@@ -96,7 +96,7 @@ keda:
     - type: prometheus
       metricType: Value
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: auth_mem_util_percent
         query: >
           avg(
