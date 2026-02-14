@@ -3,13 +3,10 @@ envoyProxy:
     annotations:
       metallb.universe.tf/loadBalancerIPs: "192.168.1.220"
 
-monitoring:
-  podMonitor:
-    enabled: false
-
-autoscaling:
-  enabled: false
-
-keda:
-  enabled: true
-  triggers: []
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"

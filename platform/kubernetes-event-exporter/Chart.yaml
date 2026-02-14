@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kubernetes-event-exporter
+description: Export Kubernetes Events to stdout (to be collected by Fluent Bit -> Loki)
+type: application
+version: 0.1.0
+appVersion: "1.7.0"
+

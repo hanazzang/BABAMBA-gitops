@@ -5,25 +5,47 @@
 
 resources:
   requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
     cpu: "200m"
-    memory: "512Mi"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
 
 autoscaling:
-  enabled: false
-  minReplicas: 1
+  enabled: true
+  minReplicas: 2
   maxReplicas: 10
   cpu:
-    averageUtilization: 85
+    averageUtilization: 65
   memory:
-    averageUtilization: 70
+    averageUtilization: 75
+  # 업로드(프록시) 트래픽은 피크가 크고 외부(S3) 의존이 있어,
+  # scale-up은 빠르게 / scale-down은 느리게 가져가 플랩핑을 줄입니다.
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 120   # 테스트를 위해 낮게잡음. 600
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
 
 keda:
   enabled: false
   pollingInterval: 15
-  cooldownPeriod: 300
+  # scale-to-zero(0으로 축소) 구간에서 특히 의미가 큰 완충값입니다.
+  # minReplicas>0이면 1~N 스케일인은 주로 HPA behavior(scaleDown)가 결정합니다.
+  cooldownPeriod: 120
   triggers:
     - type: prometheus
       metricType: AverageValue

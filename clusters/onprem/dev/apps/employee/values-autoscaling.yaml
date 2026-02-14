@@ -3,19 +3,40 @@
 # - 1: autoscaling.enabled=true,  keda.enabled=false
 # - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95)
 
+
 resources:
   requests:
-    cpu: "100m"
-    memory: "256Mi"
-  limits:
-    cpu: "500m"
+    cpu: "300m"
     memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1024Mi"
+
+# GET/WRITE 리소스를 분리해서 적용하려면 여기 값을 사용합니다.
+# - charts/employee/templates/get-rollout.yaml  -> resourcesByTraffic.get (없으면 resources)
+# - charts/employee/templates/write-rollout.yaml -> resourcesByTraffic.write (없으면 resources)
+resourcesByTraffic:
+  # GET은 RPS(KEDA)로 스케일하므로, 기본 처리/스케줄링 안정 수준으로 잡고 과도한 리소스 예약을 피합니다.
+  get:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1024Mi"
+  # WRITE는 이미지 리사이즈(PIL) + DB commit 등으로 CPU 스파이크가 커질 수 있어 GET보다 여유를 둡니다.
+  write:
+    requests:
+      cpu: "400m"
+      memory: "512Mi"
+    limits:
+      cpu: "1500m"
+      memory: "2Gi"
 
 autoscaling:
   enabled: true
-  minReplicas: 1
-  # 데모/발표용: 폭주 방지 상한선
-  maxReplicas: 30
+  minReplicas: 2
+  maxReplicas: 15
   cpu:
     averageUtilization: 85
   memory:
@@ -29,11 +50,11 @@ autoscaling:
           value: 200        # 한 번에 2배
           periodSeconds: 15
         - type: Pods
-          value: 4          # 15초에 최대 +4
+          value: 6          # 15초에 최대 +6
           periodSeconds: 15
       selectPolicy: Max
     scaleDown:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 120   # 테스트를 위해 낮게잡음. 
       policies:
         - type: Percent
           value: 50
@@ -41,11 +62,15 @@ autoscaling:
       selectPolicy: Min
   # 역할별 상한(WRITE는 보수적으로)
   get:
-    maxReplicas: 30
+    maxReplicas: 15
   write:
+    # WRITE는 이미지 리사이즈(PIL) + DB commit이 섞여 순간 CPU가 치솟을 수 있어
+    # 최소 파드 수를 올려 초기 피크를 완화합니다.
+    minReplicas: 2
     maxReplicas: 5
     cpu:
-      averageUtilization: 85
+      # 리사이즈 CPU 스파이크를 더 빨리 감지하도록 목표치를 낮춤
+      averageUtilization: 70
     memory:
       averageUtilization: 70
     # WRITE는 DB 보호 관점에서 스케일 업을 더 보수적으로
@@ -55,13 +80,14 @@ autoscaling:
         policies:
           - type: Percent
             value: 100
-            periodSeconds: 30
+            periodSeconds: 15
           - type: Pods
             value: 1
-            periodSeconds: 30
-        selectPolicy: Max
+            periodSeconds: 15
+        # DB/외부(사진 업로드) 보호 관점: 급격한 증설 방지(+1 pod/15s 수준으로 제한)
+        selectPolicy: Min
       scaleDown:
-        stabilizationWindowSeconds: 300
+        stabilizationWindowSeconds: 120   # 테스트를 위해 낮게잡음. 300
         policies:
           - type: Percent
             value: 50
@@ -76,27 +102,24 @@ monitoring:
     scrapeTimeout: 10s
 
 keda:
-  enabled: true
   # ✅ get/write 분리 스케일링:
   # - GET: KEDA(트래픽 기반)
   # - WRITE: HPA(CPU/메모리, metrics-server)
-  get:
-    enabled: true
+  pollingInterval: 10
+  # scale-to-zero(0으로 축소) 구간에서 특히 의미가 큰 완충값입니다.
+  # minReplicas>0이면 1~N 스케일인은 주로 HPA behavior(scaleDown)가 결정합니다.
+  cooldownPeriod: 120
+
   write:
     enabled: false
-  pollingInterval: 5
-  cooldownPeriod: 60
-
-  # NOTE:
-  # - 이 차트의 ScaledObject(HPA behavior)는 keda.advanced가 아니라 autoscaling.behavior를 사용합니다.
-  # - (과거 테스트 값이 keda.advanced에만 있다면 autoscaling.behavior로도 옮겨주세요.)
-
   get:
+    enabled: true 
     triggers:
       # 1️⃣ RPS (빠른 반응 트리거) - GET 전용
       - type: prometheus
-        # 중요: query가 "전체 RPS(sum)"이므로 Value로 두어야 폭주(곱셈) 스케일이 안 납니다.
-        metricType: Value
+        # query가 "전체 RPS(sum)"일 때, AverageValue + (pod 당 목표 RPS=threshold) 조합이면
+        # 전체 RPS / threshold 만큼으로 스케일되어 의도한 동작(파드당 목표 처리량)에 가장 가깝습니다.
+        metricType: AverageValue
         metadata:
           serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
           metricName: employee_get_rps
@@ -107,42 +130,44 @@ keda:
                 app="{{ include "employee-server.name" . }}",
                 traffic="get",
                 status=~"2..",
-                path!~"/(metrics|health|ready)"
+                handler!~"/(metrics|health|ready)"
               }[30s])
             )
           # "pod 당 목표 RPS"로 잡으면, 전체 RPS/threshold 만큼으로 스케일되는 효과
-          threshold: "50"
+          threshold: "30"
 
-      # 2️⃣ p95 latency (안정성 트리거, 조건부) - GET 전용
-      - type: prometheus
-        metricType: Value
-        metadata:
-          serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
-          metricName: employee_get_p95_latency_seconds
-          query: >
-            histogram_quantile(
-              0.95,
-              sum(
-                rate(http_request_duration_seconds_bucket{
-                  namespace="{{ .Release.Namespace }}",
-                  app="{{ include "employee-server.name" . }}",
-                  traffic="get",
-                  path!~"/(metrics|health|ready)"
-                }[2m])
-              ) by (le)
-            )
-            and
-            sum(
-              rate(http_requests_total{
-                namespace="{{ .Release.Namespace }}",
-                app="{{ include "employee-server.name" . }}",
-                traffic="get",
-                status=~"2..",
-                path!~"/(metrics|health|ready)"
-              }[2m])
-            ) > 10
-          # 목표(p95 <= 0.95s)보다 약간 보수적으로 잡아 체감 안정화 유도
-          threshold: "0.8"
+      # # 2️⃣ p95 latency (안정성 트리거, 조건부) - GET 전용  # 빼기로 결정.
+      # - type: prometheus
+      #   metricType: Value
+      #   metadata:
+      #     serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+      #     metricName: employee_get_p95_latency_seconds
+      #     query: >
+      #       histogram_quantile(
+      #         0.95,
+      #         sum(
+      #           rate(http_request_duration_seconds_bucket{
+      #             namespace="{{ .Release.Namespace }}",
+      #             app="{{ include "employee-server.name" . }}",
+      #             traffic="get",
+      #             # NOTE: prometheus-fastapi-instrumentator 기본 히스토그램은 (handler, method) 라벨만 가집니다.
+      #             #       status 라벨이 없으므로 status=~"2.." 같은 필터를 넣으면 매칭이 0이 되어 p95가 미동작합니다.
+      #             handler!~"/(metrics|health|ready)"
+      #           }[2m])
+      #         ) by (le)
+      #       )
+      #       and
+      #       sum(
+      #         rate(http_requests_total{
+      #           namespace="{{ .Release.Namespace }}",
+      #           app="{{ include "employee-server.name" . }}",
+      #           traffic="get",
+      #           status=~"2..",
+      #           handler!~"/(metrics|health|ready)"
+      #         }[2m])
+      #       ) > 30
+      #     # p95는 "보조 안전장치": 충분한 트래픽이 있을 때만, 체감 악화 구간에서만 확장
+      #     threshold: "1.2"
 
       # 3️⃣ CPU (보조, 참고용) - GET 파드만
       - type: prometheus

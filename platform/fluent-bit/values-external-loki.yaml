@@ -53,10 +53,13 @@ filters:
     mergeLog: true
     # 모든 네임스페이스의 로그 수집
     allowNamespaces:
-      - default
       - monitoring
       - argocd
-      - ingress-nginx
+      - auth
+      - employee
+      - photo
+      - gateway
+      - kubernetes-event-exporter
 
   # Lua 필터: 의미 필드 추출
   lua:   
@@ -68,10 +71,13 @@ filters:
 
         -- namespace allowlist (원하는 범위만 Loki로 전송)
         local allow = {
-          ["default"] = true,
           ["monitoring"] = true,
           ["argocd"] = true,
-          ["ingress-nginx"] = true
+          ["auth"] = true,
+          ["employee"] = true,
+          ["photo"] = true,
+          ["gateway"] = true,
+          ["kubernetes-event-exporter"] = true
         }
         local ns = record["kubernetes"] and record["kubernetes"]["namespace_name"]
         if ns and (allow[ns] ~= true) then
@@ -162,13 +168,11 @@ output:
     # (선택) 멀티테넌시 사용 시 tenant_id (X-Scope-OrgID)
     tenantID: ""
     labels:
-      - job=fluent-bit-external
       - namespace=$kubernetes['namespace_name']
       - pod=$kubernetes['pod_name']
       - service=$service
       - level=$level
       - source_cluster=$source_cluster
-      - env=external
     removeKeys:
       - kubernetes
       - stream

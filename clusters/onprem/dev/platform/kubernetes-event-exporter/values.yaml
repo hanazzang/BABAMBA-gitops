@@ -1,0 +1,6 @@
+# Kubernetes Event -> stdout -> Fluent Bit -> Loki
+#
+# NOTE:
+# - Events are not container stdout by default, so we deploy an exporter to log them.
+# - This helps to track HPA scaling reasons (e.g., FailedGetResourceMetric / ScalingLimited) in Loki.
+

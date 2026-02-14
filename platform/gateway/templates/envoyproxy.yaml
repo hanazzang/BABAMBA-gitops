@@ -17,9 +17,9 @@ spec:
         annotations:
 {{ toYaml . | nindent 10 }}
         {{- end }}
-
-        {{- with .Values.envoyProxy.service.loadBalancerIP }}
-        loadBalancerIP: {{ . | quote }}
+        {{- $lbip := (index .Values.envoyProxy.service "loadBalancerIP") -}}
+        {{- if $lbip }}
+        loadBalancerIP: {{ $lbip | quote }}
         {{- end }}
 
       envoyDeployment:
@@ -28,6 +28,11 @@ spec:
         {{- end }}
         {{- if and (not .Values.keda.enabled) (not .Values.autoscaling.enabled) }}
         replicas: {{ .Values.envoyProxy.replicas }}
+        {{- end }}
+        {{- with .Values.envoyProxy.resources }}
+        container:
+          resources:
+{{ toYaml . | nindent 12 }}
         {{- end }}
         pod:
           {{- if .Values.envoyProxy.podLabels }}

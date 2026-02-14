@@ -21,7 +21,6 @@ spec:
           targetRevision: refactor/gitops-structure
           path: charts/{{path.basename}}
           helm:
-            ignoreMissingValueFiles: true
             valueFiles:
               - $values/{{path}}/values.yaml
               - $values/{{path}}/values-autoscaling.yaml 
@@ -34,13 +33,17 @@ spec:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
       
-      ignoreDifferences:
+      ignoreDifferences:   
         - group: monitoring.coreos.com
           kind: PodMonitor
           jqPathExpressions:
             - .spec.podMetricsEndpoints[]?.relabelings
         - group: argoproj.io
           kind: Rollout
+          jsonPointers:
+            - /spec/replicas
+        - group: apps
+          kind: Deployment
           jsonPointers:
             - /spec/replicas
         # 데모/임시 우회용: auth 네임스페이스의 redis-config는 운영 중 수동 패치가 있을 수 있어

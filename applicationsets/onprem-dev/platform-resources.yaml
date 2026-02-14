@@ -10,10 +10,6 @@ spec:
         revision: refactor/gitops-structure
         directories:
           - path: clusters/onprem/dev/platform/*
-          - path: clusters/onprem/dev/platform/monitoring
-            exclude: true
-          - path: clusters/onprem/dev/platform/keda
-            exclude: true
 
   template:
     metadata:
@@ -27,8 +23,9 @@ spec:
           helm:
             ignoreMissingValueFiles: true
             valueFiles:
-              - $values/platform/{{path.basename}}/values.yaml
+              # env(클러스터)별 오버라이드 값 적용
               - $values/{{path}}/values.yaml
+              # autoscaling 스위치/트리거(선택). 없으면 무시됩니다.
               - $values/{{path}}/values-autoscaling.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
           targetRevision: refactor/gitops-structure
