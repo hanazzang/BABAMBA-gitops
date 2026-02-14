@@ -10,6 +10,11 @@ spec:
         revision: refactor/gitops-structure
         directories:
           - path: clusters/onprem/dev/platform/*
+          # monitoring은 별도 ApplicationSet(onprem-dev-monitoring-stack)에서 관리합니다.
+          # platform-resources가 동일 Application(onprem-dev-monitoring)을 생성하려고 하면
+          # "already owned by another ApplicationSet" 충돌이 발생하므로 제외합니다.
+          - path: clusters/onprem/dev/platform/monitoring
+            exclude: true
 
   template:
     metadata:
