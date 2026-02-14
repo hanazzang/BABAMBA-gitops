@@ -1,0 +1,28 @@
+image:
+  repository: ghcr.io/resmoio/kubernetes-event-exporter
+  tag: "v1.7.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Resmoio kubernetes-event-exporter config:
+# - Logs events as JSON to stdout
+config:
+  logLevel: info
+  logFormat: json
+  receivers:
+    - name: stdout
+      stdout: {}
+  route:
+    routes:
+      - match:
+          - receiver: stdout
+
