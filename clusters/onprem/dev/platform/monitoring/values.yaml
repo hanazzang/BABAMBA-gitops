@@ -200,3 +200,39 @@ nodeExporter:
   enabled: true
 kubeStateMetrics:
   enabled: true
+
+# blackbox-exporter
+prometheus-blackbox-exporter:
+  enabled: true
+  # 서비스 이름 고정
+  fullnameOverride: "blackbox-exporter"
+
+  # 모듈 정의
+  config:
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          follow_redirects: true
+          preferred_ip_protocol: "ip4"
+      icmp:
+        prober: icmp
+        timeout: 10s
+        icmp:
+          preferred_ip_protocol: "ip4"
+
+  # ICMP(Ping) 권한 부여
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      add: ["NET_RAW"]
+
+  # Exporter 자체 상태 모니터링
+  serviceMonitor:
+    enabled: true
+    defaults:
+      labels:
+        release: onprem-dev-monitoring
