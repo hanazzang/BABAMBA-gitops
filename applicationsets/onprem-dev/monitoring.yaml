@@ -16,16 +16,14 @@ spec:
       name: 'onprem-dev-monitoring'
     spec:
       project: default
-      sources:
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          path: platform/monitoring
-          helm:
-            valueFiles:
-              - $values/clusters/onprem/dev/platform/monitoring/values.yaml
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          ref: values
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: refactor/gitops-structure
+        path: platform/monitoring
+        
+        helm:
+          valueFiles:
+            - ../../clusters/onprem/dev/platform/monitoring/values.yaml
 
       destination:
         server: https://kubernetes.default.svc
