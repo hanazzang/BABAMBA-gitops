@@ -17,9 +17,9 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: https://prometheus-community.github.io/helm-charts
-          chart: kube-prometheus-stack
-          targetRevision: 80.13.3
+        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
+          targetRevision: refactor/gitops-structure
+          path: platform/monitoring
           helm:
             valueFiles:
               - $values/clusters/onprem/dev/platform/monitoring/values.yaml

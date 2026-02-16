@@ -1,34 +1,34 @@
-# Service 이름을 고정하여 Probe CRD에서 주소를 쉽게 찾도록 함
-fullnameOverride: "blackbox-exporter"
+# # Service 이름을 고정하여 Probe CRD에서 주소를 쉽게 찾도록 함
+# fullnameOverride: "blackbox-exporter"
 
-config:
-  modules:
-    http_2xx:
-      prober: http
-      timeout: 10s
-      http:
-        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
-        follow_redirects: true
-        preferred_ip_protocol: "ip4"
-    icmp:
-      prober: icmp
-      timeout: 10s
-      icmp:
-        preferred_ip_protocol: "ip4"
+# config:
+#   modules:
+#     http_2xx:
+#       prober: http
+#       timeout: 10s
+#       http:
+#         valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+#         follow_redirects: true
+#         preferred_ip_protocol: "ip4"
+#     icmp:
+#       prober: icmp
+#       timeout: 10s
+#       icmp:
+#         preferred_ip_protocol: "ip4"
 
-service:
-  type: ClusterIP
-  port: 9115
+# service:
+#   type: ClusterIP
+#   port: 9115
 
-# ICMP 권한 부여
-securityContext:
-  capabilities:
-    add: ["NET_RAW"]
+# # ICMP 권한 부여
+# securityContext:
+#   capabilities:
+#     add: ["NET_RAW"]
 
-# Blackbox Exporter '자체'의 상태 모니터링용 (타겟 모니터링용 아님)
-serviceMonitor:
-  enabled: true
-  defaults:
-    labels:
-      release: onprem-dev-kube-prometheus-stack
-  # 아래 targets 섹션은 삭제합니다. (Probe CRD로 일원화)
+# # Blackbox Exporter '자체'의 상태 모니터링용 (타겟 모니터링용 아님)
+# serviceMonitor:
+#   enabled: true
+#   defaults:
+#     labels:
+#       release: onprem-dev-kube-prometheus-stack
+#   # 아래 targets 섹션은 삭제합니다. (Probe CRD로 일원화)
