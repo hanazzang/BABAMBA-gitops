@@ -82,14 +82,14 @@ kube-prometheus-stack:
   #     - operator: "Exists"
 
 
-  # prometheusOperator:
-  # # Sync 에러 해결: 불필요한 Webhook Job 끄기
-  #   admissionWebhooks:
-  #     enabled: false
-  #     patch:
-  #       enabled: false
-  #     tls:
-  #       enabled: false # 인증서 마운트 시도 방지
+  prometheusOperator:
+  # Sync 에러 해결: 불필요한 Webhook Job 끄기
+    admissionWebhooks:
+      enabled: false
+      patch:
+        enabled: false
+      tls:
+        enabled: false # 인증서 마운트 시도 방지
   #   operator도 격리
   #   nodeSelector:
   #     dedicated: "monitoring"
