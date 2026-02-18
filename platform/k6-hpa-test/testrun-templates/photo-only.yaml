@@ -1,0 +1,30 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: photo-only
+  namespace: k6
+spec:
+  parallelism: 10
+  cleanup: post
+
+  script:
+    configMap:
+      name: k6-hpa-test-scenario
+      file: k6-hpa-photo-only.js
+
+  runner:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+
+  arguments: >
+    -e USERS=1000
+    -e DURATION=2m
+    -e TIMEOUT=10s
+    -e GETS_PER_SEC=2
+    -e PHOTO_URL=http://service-gateway.gateway.svc.cluster.local/photo/
+    -e HOST_HEADER=api.yongun.shop

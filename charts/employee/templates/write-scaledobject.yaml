@@ -1,4 +1,4 @@
-{{- if eq (include "employee-server.kedaEnabled.write" .) "true" }}
+{{- if and .Values.autoscaling.enabled (.Values.autoscaling.write.enabled | default true) (eq (include "employee-server.kedaEnabled.write" .) "true") }}
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:

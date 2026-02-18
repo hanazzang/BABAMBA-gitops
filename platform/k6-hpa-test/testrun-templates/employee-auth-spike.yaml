@@ -1,0 +1,33 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: employee-auth-spike
+  namespace: k6
+spec:
+  parallelism: 10
+  cleanup: post
+
+  script:
+    configMap:
+      name: k6-hpa-test-scenario
+      file: k6-hpa-employee-multiid.js
+
+  runner:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+
+  arguments: >
+    -e TEST_MODE=auth_spike
+    -e USERS=1000
+    -e DURATION=2m
+    -e TIMEOUT=10s
+    -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
+    -e AUTH_LOGIN_PATH=/auth/login
+    -e USER_PREFIX=k6_user_
+    -e PASS_PREFIX=k6_pass_
+    -e USER_PAD=6

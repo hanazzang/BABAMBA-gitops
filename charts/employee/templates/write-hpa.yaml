@@ -1,4 +1,4 @@
-{{- if and .Values.autoscaling.enabled (ne (include "employee-server.kedaEnabled.write" .) "true") }}
+{{- if and .Values.autoscaling.enabled (.Values.autoscaling.write.enabled | default true) (ne (include "employee-server.kedaEnabled.write" .) "true") }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

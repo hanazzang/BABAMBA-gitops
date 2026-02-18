@@ -15,6 +15,171 @@
 “ArgoCD 일시정지 → 로컬 helm upgrade → 관찰/부하” 의 순서로 부하테스트는 진행됩니다. 
 ---
 
+---
+## ✅ 이 디렉터리(`hpa-test/`)의 역할(요약)
+
+`hpa-test/`는 **(1) 스케일링 정책을 바꾸고(HPA/KEDA), (2) k6 TestRun을 실행하고, (3) 관찰/비교**하기 위한 “운영자용 도구 모음”입니다.
+
+이 폴더의 스크립트들은 **클러스터에 뭔가를 설치**하는 도구가 아니라,
+- (로컬) Helm values 파일을 바꾸거나
+- (클러스터) k6 실행을 위한 Job/TestRun 등을 *생성*하거나
+- 상태를 *관찰*하는 도구입니다.
+
+---
+## 📦 스크립트 각각의 역할
+
+- **`set-autoscaling-scenario.sh`**
+  - **역할**: `clusters/onprem/dev/.../values-autoscaling.yaml`의 스위치만 바꿔서 시나리오(0/1/2)를 적용
+  - **특징**: employee는 `--employee-get`, `--employee-write`로 **GET/WRITE를 분리**해서 서로 다른 시나리오 적용 가능
+  - **주의**: 이 스크립트는 **로컬 파일을 수정**합니다. 클러스터 반영은 `helm upgrade ... -f values.yaml -f values-autoscaling.yaml`로 별도 수행.
+
+- **`seed-auth-users.sh`**
+  - **역할**: k6가 로그인에 쓸 **결정론 계정(k6_user_000001..USERS)** 을 auth에 등록(없으면 생성/확장)
+  - **특징**: users.csv/Secret 없이, k8s **Job(컨테이너에서 계산)** 로 `/auth/register`를 호출
+
+- **`legacy_k6-employees-1id.sh` / `legacy_k6-employees-multiid.sh`**
+  - **역할**: 이전 방식의 k6 실행 스크립트(단일 토큰/구형 분산 방식 등)
+  - **현재**: k6-operator `TestRun` 템플릿 방식으로 전환하면서 **레거시로 분류**
+
+- **관찰(watch)**
+  - **`watch-k6-testrun.sh`**: k6 `TestRun` 진행(stage)/pods/jobs/events 관찰
+  - **`watch-app-scaling.sh`**: auth/gateway/photo/employee(get/write) 대상별 스케일(HPA/KEDA)/workload/pods/events 관찰
+
+---
+## 🔁 실행 흐름(부하테스트 절차)
+
+아래 흐름이 “실무적으로 가장 흔한” 반복 테스트 루프입니다.
+
+1) **(선택) ArgoCD 리컨실 일시정지**
+2) **스케일링 시나리오(0/1/2) 선택**
+   - `set-autoscaling-scenario.sh`로 로컬 values 변경
+   - `helm upgrade ... -f values.yaml -f values-autoscaling.yaml`로 클러스터 반영
+3) **(필요 시) 계정 시드**
+   - `seed-auth-users.sh`로 `k6_user_000001..USERS` 생성/확장
+4) **k6 준비 + 실행**
+   - 준비: `kubectl apply -k platform/k6-hpa-test` (k6 ns + ConfigMap)
+   - 실행: `kubectl -n k6 apply -f platform/k6-hpa-test/testrun-templates/<템플릿>.yaml`
+5) **관찰/비교**
+   - 대상 스케일: `watch-app-scaling.sh ...`
+   - k6 실행: `watch-k6-testrun.sh <testrun>`
+6) **재실행**
+   - `kubectl -n k6 delete testrun <name> && kubectl -n k6 apply -f ...`
+7) **테스트 종료 후 원복**
+   - values-autoscaling.yaml 원복 + ArgoCD 재가동
+
+---
+## 🎯 TestRun 템플릿(목적/실행 방식)
+
+`TestRun` 템플릿은 `platform/k6-hpa-test/testrun-templates/*.yaml`에 있습니다.
+각 템플릿은 “목적이 1개”가 되도록 설계되어, 병목/스케일링 반응을 분리해 관찰하기 쉽습니다.
+
+- **`employee-auth-spike`**
+  - **목적**: “동시 로그인 버스트” 흡수(auth/redis/db 영향) 확인
+  - **실행**: 모든 VU가 시작 직후 로그인 1회(`TEST_MODE=auth_spike`)
+
+- **`employee-auth-ramp-2m`**
+  - **목적**: “2분 동안 5000명 로그인”처럼 분산 유입(실무형)에서 auth 흡수/스케일 반응 확인
+  - **실행**: `TEST_MODE=auth_ramp` + `LOGIN_RATE=42` (≈ 2분에 5000 로그인)
+
+- **`employee-get`**
+  - **목적**: employee GET-only → **KEDA(RPS) 반응/안정성** 확인
+  - **실행**: 로그인 후 GET만 반복(`TEST_MODE=employee_get`)
+
+- **`employee-write`**
+  - **목적**: employee WRITE-only → **HPA(CPU/MEM)/DB 병목** 확인
+  - **실행**: 로그인 후 WRITE만 반복(`TEST_MODE=employee_write`)
+
+- **`employee-e2e`**
+  - **목적**: gateway→auth→employee(+photo) “전체 경로” 용량/안정성 확인
+  - **실행**: 로그인 후 GET+WRITE 혼합(`TEST_MODE=e2e`)
+
+- **`gateway-only`**
+  - **목적**: 특정 URL GET 반복으로 gateway 경로 관점 병목 확인
+  - **실행**: `TEST_MODE=gateway_only` (옵션: auth 필요하면 `GATEWAY_NEEDS_AUTH=true`)
+
+- **`photo-only` / `photo-write`**
+  - **목적**: photo 경로 단독(또는 거의 단독)으로 GET/WRITE 부하 확인
+  - **실행**: `k6-hpa-photo-only.js`가 `PHOTO_URL`로 GET/WRITE 반복
+
+---
+## 🧹 (중요) HPA/KEDA로 확장된 파드 “빠르게 정리(일시적 스케일 다운)”
+
+부하를 주고 나면 HPA/KEDA 때문에 파드가 많이 늘어날 수 있습니다.  
+**테스트가 끝났는데 파드를 빨리 줄이고 싶다면** 아래 중 하나를 선택하세요.
+
+### A) (권장, Helm/GitOps에 안전) autoscaling을 끄고(시나리오 0) Helm으로 반영
+
+핵심은 **HPA/ScaledObject를 비활성화한 뒤**, 차트의 기본 replicas(또는 rollout `spec.replicas`)로 돌아가게 하는 겁니다.
+
+예시(employee GET/WRITE만 빠르게 정리):
+```bash
+./hpa-test/set-autoscaling-scenario.sh --employee-get 0 --employee-write 0 --auth 0 --photo 0 --gateway 0
+helm upgrade --install onprem-dev-employee ./charts/employee \
+  -n employee --create-namespace \
+  -f ./clusters/onprem/dev/apps/employee/values.yaml \
+  -f ./clusters/onprem/dev/apps/employee/values-autoscaling.yaml
+
+helm upgrade --install onprem-dev-auth ./charts/auth \
+  -n auth --create-namespace \
+  -f ./clusters/onprem/dev/apps/auth/values.yaml \
+  -f ./clusters/onprem/dev/apps/auth/values-autoscaling.yaml
+
+helm upgrade --install onprem-dev-photo ./charts/photo \
+  -n photo --create-namespace \
+  -f ./clusters/onprem/dev/apps/photo/values.yaml \
+  -f ./clusters/onprem/dev/apps/photo/values-autoscaling.yaml
+
+helm upgrade --install onprem-dev-gateway ./platform/gateway \
+  -n gateway --create-namespace \
+  -f ./clusters/onprem/dev/platform/gateway/values.yaml \
+  -f ./clusters/onprem/dev/platform/gateway/values-autoscaling.yaml
+```
+
+원래 운영 기본으로 되돌리기(로컬 파일 기준):
+```bash
+./hpa-test/set-autoscaling-scenario.sh --default
+helm upgrade --install onprem-dev-auth ./charts/auth \
+  -n auth --create-namespace \
+  -f ./clusters/onprem/dev/apps/auth/values.yaml \
+  -f ./clusters/onprem/dev/apps/auth/values-autoscaling.yaml
+
+helm upgrade --install onprem-dev-employee ./charts/employee \
+  -n employee --create-namespace \
+  -f ./clusters/onprem/dev/apps/employee/values.yaml \
+  -f ./clusters/onprem/dev/apps/employee/values-autoscaling.yaml
+
+helm upgrade --install onprem-dev-photo ./charts/photo \
+  -n photo --create-namespace \
+  -f ./clusters/onprem/dev/apps/photo/values.yaml \
+  -f ./clusters/onprem/dev/apps/photo/values-autoscaling.yaml
+
+helm upgrade --install onprem-dev-gateway ./platform/gateway \
+  -n gateway --create-namespace \
+  -f ./clusters/onprem/dev/platform/gateway/values.yaml \
+  -f ./clusters/onprem/dev/platform/gateway/values-autoscaling.yaml
+```
+
+### B) (즉시/임시, 드리프트 주의) kubectl로 강제 스케일 다운
+
+HPA/KEDA가 켜져 있으면 `kubectl scale`이 곧바로 다시 늘려버릴 수 있습니다.  
+그래서 **(1) 스케일러를 먼저 지우고 → (2) workload를 scale**하는 순서가 필요합니다.
+
+예시(employee GET):
+```bash
+# 1) 스케일러 제거(임시)
+kubectl -n employee delete scaledobject employee-server-get --ignore-not-found
+kubectl -n employee delete hpa employee-server-get --ignore-not-found
+
+# 2) workload 스케일 다운(rollout 기준)
+kubectl -n employee scale rollout employee-server-get --replicas=1
+```
+
+이 방식은 Helm/ArgoCD가 다시 리컨실하면 원복될 수 있으니,
+**일시적 응급 조치**로만 쓰는 걸 권장합니다.
+
+---
+## 튜토리얼 
+
 #### 0) 사전 준비
 - `kubectl`, `helm`, `watch` 사용 가능해야 합니다.
 - KEDA/Prometheus/metrics-server 등은 이미 클러스터에 설치되어 있다고 가정합니다.
@@ -125,23 +290,70 @@ kubectl -n employee get pods -l app.kubernetes.io/name=employee-server -o wide 2
 ./hpa-test/watch-employee-scaling.sh keda
 ```
 
+추가(템플릿 기반 k6 실행 관찰):
+
+```bash
+# k6-operator TestRun 진행상태/파드/이벤트를 한 화면에서 보기
+./hpa-test/watch-k6-testrun.sh employee-get
+./hpa-test/watch-k6-testrun.sh employee-write
+./hpa-test/watch-k6-testrun.sh employee-e2e
+./hpa-test/watch-k6-testrun.sh photo-write
+```
+
+추가(서비스별 스케일 관찰; TestRun 목적에 맞춰 선택):
+
+```bash
+# Auth 로그인 버스트(=employee-auth-spike) 관찰
+./hpa-test/watch-app-scaling.sh auth hpa
+./hpa-test/watch-app-scaling.sh auth keda
+
+# Employee GET-only(=employee-get) 관찰
+./hpa-test/watch-app-scaling.sh employee-get hpa
+./hpa-test/watch-app-scaling.sh employee-get keda
+
+# Employee WRITE-only(=employee-write) 관찰
+./hpa-test/watch-app-scaling.sh employee-write hpa
+./hpa-test/watch-app-scaling.sh employee-write keda
+
+# Photo write-only(=photo-write) 관찰
+./hpa-test/watch-app-scaling.sh photo hpa
+./hpa-test/watch-app-scaling.sh photo keda
+
+# Gateway-only(=gateway-only) 관찰
+./hpa-test/watch-app-scaling.sh gateway hpa
+./hpa-test/watch-app-scaling.sh gateway keda
+```
+
 ---
 
 #### 4) 부하 (k6)
 부하주기 전 이전 이벤트/로그 깨끗하게 초기화하기. 
 
 ```bash
-# GET(/employee/employees)만 부하 (기존과 동일)
-RATE=200 DURATION=2m ./hpa-test/k6-employees.sh
+# (권장) "모드 기반" 부하: 컴포넌트 단독 → 마지막에 E2E
+# - 필요 시 auth 계정은 seed-auth-users.sh가 자동으로 생성/확장합니다.
+# - GETS_PER_SEC/WRITES_PER_SEC는 사용자당 초당 기대치(소수 가능)입니다.
 
-# WRITE(직원 등록/수정)만 부하
-WRITE_RATE=50 GET_RATE=0 DURATION=2m ./hpa-test/k6-employees.sh
+# 1) Auth만: 동시 로그인 버스트(각 VU 1회 로그인)
+USERS=5000 PARALLELISM=10 DURATION=2m TEST_MODE=auth_spike ./hpa-test/run-k6-hpa-test.sh
 
-# GET + WRITE 혼합 (등록 후 목록 확인까지 흉내)
-GET_RATE=30 WRITE_RATE=50 DURATION=2m ./hpa-test/k6-employees.sh
+# 2) Employee-GET만: (기본) 사용자당 GET 2/s
+USERS=5000 PARALLELISM=10 DURATION=5m TEST_MODE=employee_get ./hpa-test/run-k6-hpa-test.sh
+
+# 3) Employee-WRITE만: (기본) 사용자당 WRITE 0.2/s (= 5초에 1회)
+USERS=5000 PARALLELISM=10 DURATION=5m TEST_MODE=employee_write ./hpa-test/run-k6-hpa-test.sh
+
+# 4) Gateway-only(선택): 로그인 없이 특정 URL만(보호 엔드포인트면 GATEWAY_NEEDS_AUTH=true)
+USERS=5000 PARALLELISM=10 DURATION=5m TEST_MODE=gateway_only GATEWAY_URL=http://service-gateway.gateway.svc.cluster.local/employee/employees ./hpa-test/run-k6-hpa-test.sh
+
+# 5) End-to-End: (기본) 사용자당 GET 1/s + WRITE 0.1/s
+USERS=5000 PARALLELISM=10 DURATION=10m TEST_MODE=e2e ./hpa-test/run-k6-hpa-test.sh
+
+# (옵션) 1개 계정(토큰 1개 공유) 기반으로 GET/WRITE만 빠르게 때려보고 싶을 때
+RATE=200 DURATION=2m ./hpa-test/k6-employees-1id.sh
 ```
 
-(필요시 값 변경: `GET_RATE`, `WRITE_RATE`, `PHOTO_PCT`, `POST_THEN_GET_PCT`, `DURATION`, `HOST_HEADER`, `EMP_URL` 등은 스크립트 상단 ENV 참고)
+(필요시 값 변경: 각 스크립트 상단 ENV 참고)
 
 ---
 
@@ -247,7 +459,7 @@ Normal   KEDAScale           22s   keda-operator               ScaledObject trig
 ---
 
 
-## k6-employees.sh에 대한 설명
+## k6 부하 스크립트에 대한 설명
 
 ### 전체 목적
 **(1) auth에서 JWT를 자동으로 얻고 → (2) 그 토큰으로 gateway 경유 GET/WRITE 트래픽을 발생시키고(HTTP method로 get/write 라우팅 분리) → (3) 부하 전/후 + 진행 중에 pod 수 변화를 같이 찍는** “한 방” 부하 스크립트
@@ -328,5 +540,3 @@ Normal   KEDAScale           22s   keda-operator               ScaledObject trig
 - 다시 `snapshot_k8s`를 찍어서 “부하 후” 스케일러/파드 상태를 남김
 
 ---
-
-원하면, 이 스크립트를 README에 넣기 좋게 **“전제조건(필요 네임스페이스/k6 설치 여부/HTTPRoute host)”** 섹션과 **자주 실패하는 지점(토큰 추출, Host 헤더, k6 ns 권한)** 체크리스트까지 같이 정리해드릴게요.

@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  # TestRun이 ConfigMap 이름을 고정 문자열로 참조하므로 suffix hash를 끕니다.
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: k6-hpa-test-scenario
+    namespace: k6
+    files:
+      - k6-hpa-employee-multiid.js
+      - k6-hpa-photo-only.js
+
+resources:
+  - namespace-k6.yaml
+  # TestRun(실제 부하 실행)은 GitOps/자동적용 대상에서 빼고,
+  # 사람이 필요할 때 `platform/k6-hpa-test/testrun-templates/*.yaml`을 apply 합니다.
+

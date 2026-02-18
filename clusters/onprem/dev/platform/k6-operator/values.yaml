@@ -1,0 +1,25 @@
+k6-operator:
+  # platform-resources의 destination namespace는 디렉터리명(=k6-operator)으로 고정됩니다.
+  # 여기서는 운영 환경에 맞게 controller-manager 설정만 약간 조정합니다.
+
+  namespace:
+    create: false
+
+  manager:
+    logging:
+      development: false
+
+    # TestRun을 `k6` 네임스페이스에 두는 구조를 기본으로 가정하고, 그 네임스페이스만 watch하도록 제한
+    # (원하면 WATCH_NAMESPACES를 지우면 전체 네임스페이스를 watch합니다)
+    env:
+      - name: WATCH_NAMESPACES
+        value: "k6"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 300m
+        memory: 300Mi
+

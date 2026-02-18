@@ -62,10 +62,13 @@ autoscaling:
       selectPolicy: Min
   # 역할별 상한(WRITE는 보수적으로)
   get:
+    enabled: true
+    minReplicas: 2
     maxReplicas: 15
   write:
     # WRITE는 이미지 리사이즈(PIL) + DB commit이 섞여 순간 CPU가 치솟을 수 있어
     # 최소 파드 수를 올려 초기 피크를 완화합니다.
+    enabled: true
     minReplicas: 2
     maxReplicas: 5
     cpu:

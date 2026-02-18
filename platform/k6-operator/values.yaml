@@ -1,0 +1,10 @@
+k6-operator:
+  # ArgoCD(ApplicationSet platform-resources)가 namespace를 만들어주므로,
+  # chart에서 namespace 리소스를 추가로 만들지 않게 끕니다.
+  namespace:
+    create: false
+
+  # CRDs(TestRun/PrivateLoadZone)는 chart가 설치하도록 유지합니다.
+  # (CRD를 platform/crds로 분리하는 구조로 바꾸려면 installCRDs: false + CRD 매니페스트 추가가 필요)
+  installCRDs: true
+
