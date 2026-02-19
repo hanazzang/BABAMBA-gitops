@@ -9,12 +9,12 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # - 2: KEDA(RPS/p95 등) 켬
 #
 # 사용법:
-#   ./set-autoscaling-scenario.sh [--auth <0|1|2>] [--employee <0|1|2>] [--employee-get <0|1|2>] [--employee-write <0|1|2>] [--photo <0|1|2>] [--gateway <0|1|2>]
+#   ./set-autoscaling-scenario.sh [--auth <0|1|2>] [--employee-get <0|1|2>] [--employee-write <0|1|2>] [--photo <0|1|2>] [--gateway <0|1|2>]
 #   ./set-autoscaling-scenario.sh --default
 #
 # 예:
-#   ./set-autoscaling-scenario.sh --employee 0
-#   ./set-autoscaling-scenario.sh --employee 0 --gateway 1 --auth 2
+#   ./set-autoscaling-scenario.sh --employee-get 0 --employee-write 0
+#   ./set-autoscaling-scenario.sh --employee-get 2 --employee-write 1 --gateway 1 --auth 2
 #   ./set-autoscaling-scenario.sh   # 옵션 없으면 변경 없이 "현재 상태 출력"만 수행
 
 # ===== 디폴트 시나리오(값을 안 주면 이 값 사용) =====
@@ -32,7 +32,7 @@ DEFAULT_GATEWAY="${DEFAULT_GATEWAY:-1}"
 usage() {
   cat >&2 <<'EOF'
 usage:
-  set-autoscaling-scenario.sh [--auth [0|1|2]] [--employee [0|1|2]] [--employee-get [0|1|2]] [--employee-write [0|1|2]] [--photo [0|1|2]] [--gateway [0|1|2]]
+  set-autoscaling-scenario.sh [--auth [0|1|2]] [--employee-get [0|1|2]] [--employee-write [0|1|2]] [--photo [0|1|2]] [--gateway [0|1|2]]
   set-autoscaling-scenario.sh --default
 
 behavior:
@@ -296,14 +296,13 @@ while [[ $# -gt 0 ]]; do
       DEFAULT_RESET="true"
       shift
       ;;
-    --auth|--employee|--employee-get|--employee-write|--photo|--gateway)
+    --auth|--employee-get|--employee-write|--photo|--gateway)
       target="${1#--}"
       shift
       # 시나리오가 생략되면 디폴트 사용(다음 토큰이 --로 시작하거나, 토큰이 없는 경우)
       if [[ $# -eq 0 || "${1:-}" == --* ]]; then
         case "${target}" in
           auth) sc="${DEFAULT_AUTH}" ;;
-          employee) sc="${DEFAULT_EMPLOYEE}" ;;
           employee-get) sc="${DEFAULT_EMPLOYEE_GET}" ;;
           employee-write) sc="${DEFAULT_EMPLOYEE_WRITE}" ;;
           photo) sc="${DEFAULT_PHOTO}" ;;
@@ -329,10 +328,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # --default: 스크립트에 적힌 "초기(디폴트) 셋팅값"으로 되돌리기
-# - 사용자가 특정 대상을 명시했다면(예: --employee 0) 그 값이 우선입니다.
+# - 사용자가 특정 대상을 명시했다면(예: --employee-get 0) 그 값이 우선입니다.
 if [[ "${DEFAULT_RESET}" == "true" ]]; then
   [[ -n "${DESIRED[auth]+x}" ]] || DESIRED["auth"]="${DEFAULT_AUTH}"
-  if [[ -z "${DESIRED[employee]+x}" && -z "${DESIRED["employee-get"]+x}" && -z "${DESIRED["employee-write"]+x}" ]]; then
+  if [[ -z "${DESIRED["employee-get"]+x}" && -z "${DESIRED["employee-write"]+x}" ]]; then
     DESIRED["employee-get"]="${DEFAULT_EMPLOYEE_GET}"
     DESIRED["employee-write"]="${DEFAULT_EMPLOYEE_WRITE}"
   fi
@@ -345,14 +344,6 @@ if [[ ${#DESIRED[@]} -gt 0 ]]; then
   # 1) employee는 GET/WRITE를 합쳐 1번만 패치(같은 파일이므로)
   emp_get=""
   emp_write=""
-
-  if [[ -n "${DESIRED[employee]+x}" ]]; then
-    case "${DESIRED[employee]}" in
-      0) emp_get="0"; emp_write="0" ;;
-      1) emp_get="1"; emp_write="1" ;;
-      2) emp_get="2"; emp_write="1" ;; # 레거시: GET=KEDA, WRITE=HPA
-    esac
-  fi
   [[ -n "${DESIRED["employee-get"]+x}" ]] && emp_get="${DESIRED["employee-get"]}"
   [[ -n "${DESIRED["employee-write"]+x}" ]] && emp_write="${DESIRED["employee-write"]}"
 
