@@ -16,16 +16,14 @@ spec:
       name: 'onprem-dev-monitoring'
     spec:
       project: default
-      sources:
-        - repoURL: https://prometheus-community.github.io/helm-charts
-          chart: kube-prometheus-stack
-          targetRevision: 80.13.3
-          helm:
-            valueFiles:
-              - $values/clusters/onprem/dev/platform/monitoring/values.yaml
-        - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: refactor/gitops-structure
-          ref: values
+      source:
+        repoURL: https://github.com/hanazzang/BABAMBA-gitops
+        targetRevision: refactor/gitops-structure
+        path: platform/monitoring
+        
+        helm:
+          valueFiles:
+            - ../../clusters/onprem/dev/platform/monitoring/values.yaml
 
       destination:
         server: https://kubernetes.default.svc

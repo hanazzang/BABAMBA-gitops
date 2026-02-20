@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
   labels:
     # Prometheus가 이 라벨을 보고 수집 대상을 찾습니다.
-    release: onprem-dev-kube-prometheus-stack
+    release: onprem-dev-monitoring
 spec:
   jobName: blackbox-icmp # Prometheus에서 job 라벨로 표시됨
   interval: 15s

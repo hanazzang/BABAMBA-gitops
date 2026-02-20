@@ -4,7 +4,7 @@ metadata:
   name: probe-http-example
   namespace: monitoring
   labels:
-    release: onprem-dev-kube-prometheus-stack
+    release: onprem-dev-monitoring
 spec:
   jobName: blackbox-http
   interval: 30s
