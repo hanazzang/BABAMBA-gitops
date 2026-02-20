@@ -11,13 +11,13 @@ set -euo pipefail
 # - 이미 만들어진 계정이 있으면(409 등) 그대로 넘어가도록 구성합니다.
 #
 # 사용 예시
-#   USERS=100 ./hpa-test/seed-auth-users.sh
+#   USERS=1000 ./hpa-test/seed-auth-users.sh
 #   USERS=5000 AUTH_REGISTER_PATH=/auth/signup ./hpa-test/seed-auth-users.sh
 #
 # 결과물
 # - DB에 사용자 1..USERS가 존재하게 됨(없으면 생성, 있으면 스킵)
 
-USERS="${USERS:-100}"
+USERS="${USERS:-1000}"
 NS_K6="${NS_K6:-k6}"
 NS_AUTH="${NS_AUTH:-auth}"
 

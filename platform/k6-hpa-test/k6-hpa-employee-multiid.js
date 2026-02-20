@@ -30,30 +30,6 @@ import exec from "k6/execution";
  * - 따라서 auth DB에 사용자 1..USERS는 사전에 존재해야 합니다(= seed-auth-users.sh 역할).
  */
 
-/**
- * ===== ENV 요약(자주 쓰는 것만) =====
- *
- * 공통
- * - USERS, DURATION, TIMEOUT
- *
- * 인증/계정
- * - AUTH_BASE, AUTH_LOGIN_PATH
- * - USER_PREFIX, PASS_PREFIX, USER_PAD
- *
- * Employee
- * - EMP_GET_URL, EMP_WRITE_URL
- * - GETS_PER_SEC, WRITES_PER_SEC (사용자당 초당 "기대치", 소수 가능)
- * - PHOTO_PCT (WRITE payload에 photo 첨부 확률)
- * - POST_THEN_GET_PCT (WRITE 후 새로고침 GET 추가 확률; employee_write 모드에서 쓰려면 EMP_GET_URL 필요)
- *
- * Gateway-only
- * - GATEWAY_URL
- * - GATEWAY_NEEDS_AUTH (보호 엔드포인트면 true)
- *
- * Auth ramp
- * - LOGIN_RATE, LOGIN_PREALLOCATED_VUS, LOGIN_MAX_VUS
- */
-
 const AUTH_BASE = __ENV.AUTH_BASE || "http://auth-server-stable.auth.svc:5001";
 const AUTH_LOGIN_PATH = __ENV.AUTH_LOGIN_PATH || "/auth/login";
 
@@ -71,7 +47,7 @@ const host = __ENV.HOST_HEADER || "";
 const duration = __ENV.DURATION || "2m";
 // USERS는 "동시 사용자 수"이며 constant-vus에서는 그대로 VU 개수로 사용됩니다.
 // (auth_ramp에서는 arrival-rate executor이므로 VU는 풀(preAllocated/maxVUs)로 쓰고, USERS는 "계정 상한"으로 의미가 남습니다.)
-const users = Number(__ENV.USERS || 100);
+const users = Number(__ENV.USERS || 1000);
 const timeout = __ENV.TIMEOUT || "10s";
 
 // auth_ramp(로그인 분산) 옵션

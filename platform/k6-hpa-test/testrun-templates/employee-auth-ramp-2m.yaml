@@ -26,10 +26,10 @@ spec:
     -e USERS=1000
     -e DURATION=2m
     -e TIMEOUT=10s
-    # 2분(120초) 동안 5000명 로그인 ≒ 41.7/s
-    -e LOGIN_RATE=42
-    -e LOGIN_PREALLOCATED_VUS=200
-    -e LOGIN_MAX_VUS=1000
+    # 2분(120초) 동안 1000명 로그인 ≒ 8.33/s
+    -e LOGIN_RATE=8.33
+    -e LOGIN_PREALLOCATED_VUS=200   # 미리 확보해둘 VU 풀 크기
+    -e LOGIN_MAX_VUS=1000  
     -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
     -e AUTH_LOGIN_PATH=/auth/login
     -e USER_PREFIX=k6_user_

@@ -54,6 +54,14 @@ helm upgrade --install onprem-dev-gateway ./platform/gateway \
   -f ./clusters/onprem/dev/platform/gateway/values-autoscaling.yaml
 ```
 
+### (선택) 계정 시드 (GATEWAY_NEEDS_AUTH=true로 바꿀 때만 필요)
+템플릿 기본값은 `GATEWAY_NEEDS_AUTH=false`라서 로그인 없이 실행됩니다.
+보호 엔드포인트를 테스트하려면 템플릿에서 `GATEWAY_NEEDS_AUTH=true`로 바꾸고 아래를 실행하세요:
+
+```bash
+USERS=1000 MODE=extend ./hpa-test/seed-auth-users.sh
+```
+
 ### 실행
 ```bash
 kubectl -n k6 delete testrun gateway-only --ignore-not-found
