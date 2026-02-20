@@ -23,18 +23,18 @@ spec:
 
   arguments: >
     -e TEST_MODE=e2e
-    -e USERS=1000 # 동시 사용자 수
-    -e DURATION=2m # 시간
-    -e TIMEOUT=10s # 타임아웃
+    -e USERS=1000
+    -e DURATION=2m
+    -e TIMEOUT=10s
     -e GETS_PER_SEC=5
-    -e WRITES_PER_SEC=0.2 # 사용자당 초당 기대치, 소수 가능
-    -e PHOTO_PCT=90 # photo 첨부 확률
-    -e POST_THEN_GET_PCT=100 # WRITE 후 새로고침 GET 추가 확률
+    -e WRITES_PER_SEC=0.2
+    -e PHOTO_PCT=90
+    -e POST_THEN_GET_PCT=100
     -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
-    -e AUTH_LOGIN_PATH=/auth/login # auth 로그인 경로
-    -e HOST_HEADER=api.yongun.shop # 호스트 헤더
-    -e EMP_GET_URL=http://service-gateway.gateway.svc.cluster.local/employee/employees # employee GET 경로
-    -e EMP_WRITE_URL=http://service-gateway.gateway.svc.cluster.local/employee/employee # employee WRITE 경로
-    -e USER_PREFIX=k6_user_ # 사용자 접두사
-    -e PASS_PREFIX=k6_pass_ # 비밀번호 접두사
-    -e USER_PAD=6 # 사용자 패딩
+    -e AUTH_LOGIN_PATH=/auth/login
+    -e HOST_HEADER=api.yongun.shop
+    -e EMP_GET_URL=http://service-gateway.gateway.svc.cluster.local/employee/employees
+    -e EMP_WRITE_URL=http://service-gateway.gateway.svc.cluster.local/employee/employee
+    -e USER_PREFIX=k6_user_
+    -e PASS_PREFIX=k6_pass_
+    -e USER_PAD=6

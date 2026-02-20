@@ -22,15 +22,15 @@ spec:
         memory: 2Gi
 
   arguments: >
-    -e TEST_MODE=employee_get 
-    -e USERS=1000 # 동시 사용자 수
-    -e DURATION=2m # 시간
-    -e TIMEOUT=10s # 타임아웃   
-    -e GETS_PER_SEC=5 # 사용자당 초당 기대치, 소수 가능
-    -e AUTH_BASE=http://auth-server-stable.auth.svc:5001  # auth 서버 주소
-    -e AUTH_LOGIN_PATH=/auth/login # auth 로그인 경로 
-    -e HOST_HEADER=api.yongun.shop # 호스트 헤더
-    -e EMP_GET_URL=http://service-gateway.gateway.svc.cluster.local/employee/employees # employee GET 경로
-    -e USER_PREFIX=k6_user_ # 사용자 접두사
-    -e PASS_PREFIX=k6_pass_ # 비밀번호 접두사
-    -e USER_PAD=6 # 사용자 패딩
+    -e TEST_MODE=employee_get
+    -e USERS=1000
+    -e DURATION=2m
+    -e TIMEOUT=10s
+    -e GETS_PER_SEC=5
+    -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
+    -e AUTH_LOGIN_PATH=/auth/login
+    -e HOST_HEADER=api.yongun.shop
+    -e EMP_GET_URL=http://service-gateway.gateway.svc.cluster.local/employee/employees
+    -e USER_PREFIX=k6_user_
+    -e PASS_PREFIX=k6_pass_
+    -e USER_PAD=6

@@ -26,9 +26,5 @@ spec:
     -e DURATION=2m
     -e TIMEOUT=10s
     -e WRITES_PER_SEC=1
-    # 기본: gateway의 /photo/ 경로를 통해 photo로 라우팅 (실무 E2E에 가까움)
     -e PHOTO_URL=http://service-gateway.gateway.svc.cluster.local/photo/
-    # 아래 2개는 photo 서비스 업로드 API에 맞춰 조정하세요.
-    # -e PHOTO_WRITE_PATH=upload
-    # -e PHOTO_FILE_FIELD=file
     -e HOST_HEADER=api.yongun.shop
