@@ -28,5 +28,5 @@ spec:
     -e TIMEOUT=10s
     -e GETS_PER_SEC=100
     -e HOST_HEADER=api.yongun.shop
-    -e GATEWAY_URL=http://service-gateway.gateway.svc.cluster.local/gateway-health
+    -e GATEWAY_URL=https://service-gateway.gateway.svc.cluster.local:443/gateway-health
     -e GATEWAY_NEEDS_AUTH=false

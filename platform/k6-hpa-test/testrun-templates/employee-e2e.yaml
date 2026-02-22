@@ -33,8 +33,8 @@ spec:
     -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
     -e AUTH_LOGIN_PATH=/auth/login
     -e HOST_HEADER=api.yongun.shop
-    -e EMP_GET_URL=http://service-gateway.gateway.svc.cluster.local/employee/employees
-    -e EMP_WRITE_URL=http://service-gateway.gateway.svc.cluster.local/employee/employee
+    -e EMP_GET_URL=https://service-gateway.gateway.svc.cluster.local:443/employee/employees
+    -e EMP_WRITE_URL=https://service-gateway.gateway.svc.cluster.local:443/employee/employee
     -e USER_PREFIX=k6_user_
     -e PASS_PREFIX=k6_pass_
     -e USER_PAD=6

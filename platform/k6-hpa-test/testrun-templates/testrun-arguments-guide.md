@@ -26,8 +26,10 @@ TestRun YAML의 `spec.arguments` 블록을 작성할 때 지켜야 할 규칙과
 | `AUTH_LOGIN_PATH` | 로그인 API 경로 | `/auth/login` |
 | `EMP_GET_URL` | employee GET 경로(전체 URL) | gateway 경유 예: `http://.../employee/employees` |
 | `EMP_WRITE_URL` | employee WRITE 경로(전체 URL) | gateway 경유 예: `http://.../employee/employee` |
-| `GATEWAY_URL` | gateway_only 모드에서 때릴 URL | 가벼운 엔드포인트 권장 |
+| `GATEWAY_URL` | gateway_only 모드에서 때릴 URL | 가벼운 엔드포인트 권장. `https://` 이면 스크립트가 자동으로 TLS 검증 스킵 적용 |
 | `GATEWAY_NEEDS_AUTH` | gateway_only 시 로그인 여부 | `true` / `false` |
+| `INSECURE_SKIP_TLS_VERIFY` | TLS 인증서 검증 스킵 여부 | `true` 시 모든 HTTPS 요청에서 검증 스킵(자체서명/내부 인증서용). `GATEWAY_URL`이 `https://`이면 별도 설정 없이도 스킵됨 |
+
 
 ### 부하 강도(사용자당 초당)
 
@@ -103,6 +105,13 @@ TestRun YAML의 `spec.arguments` 블록을 작성할 때 지켜야 할 규칙과
 - `TEST_MODE=gateway_only` + `GATEWAY_URL`, `GATEWAY_NEEDS_AUTH`, `GETS_PER_SEC`.
 - **권장**: platform/gateway 차트의 http-echo 같은 경로. 예: `GATEWAY_URL=.../gateway-health`.
 - `GATEWAY_NEEDS_AUTH=false`면 로그인 없이 GET만 반복.
+
+**TLS 검증 스킵 (어디서/어떻게)**  
+- **어디서**: 스크립트 `k6-hpa-employee-multiid.js`의 `options.insecureSkipTLSVerify`에서 적용됩니다. (k6 전역 옵션이라 해당 스크립트의 모든 HTTPS 요청에 적용.)
+- **어떻게**  
+  1. **자동**: `GATEWAY_URL`을 `https://...` 로 두면 **별도 인자 없이** TLS 스킵이 켜집니다.  
+  2. **수동**: 다른 이유로 HTTPS만 쓰고 싶다면 TestRun `arguments`에 `-e INSECURE_SKIP_TLS_VERIFY=true` 를 넣으면 됩니다.  
+- 클러스터 내부/자체서명 인증서용이며, 운영 환경에서는 인증서를 맞추는 것이 권장됩니다.
 
 ### photo-only / photo-write
 

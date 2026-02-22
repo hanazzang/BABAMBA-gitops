@@ -82,7 +82,13 @@ const tinyPngB64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/6Xn2gAAAABJRU5ErkJggg==";
 const tinyPngBytes = encoding.b64decode(tinyPngB64, "std");
 
+// HTTPS로 Gateway 호출 시 클러스터 내부/자체서명 인증서면 TLS 검증 스킵 (옵션 또는 GATEWAY_URL이 https://일 때)
+const skipTLS =
+  String(__ENV.INSECURE_SKIP_TLS_VERIFY || "").toLowerCase() === "true" ||
+  (gatewayUrl && gatewayUrl.startsWith("https://"));
+
 export const options = {
+  insecureSkipTLSVerify: skipTLS,
   scenarios: {
     ...(mode === "auth_spike"
       ? {

@@ -21,10 +21,14 @@ spec:
         cpu: "1"
         memory: 2Gi
 
+
   arguments: >
     -e USERS=1000
     -e DURATION=2m
     -e TIMEOUT=10s
     -e WRITES_PER_SEC=1
-    -e PHOTO_URL=http://service-gateway.gateway.svc.cluster.local/photo/
-    -e HOST_HEADER=api.yongun.shop
+    -e PHOTO_URL=http://photo-server-active.photo.svc.cluster.local:5003/
+  # 기본: gateway의 /photo/ 경로를 통해 photo로 라우팅 (실무 E2E에 가까움)
+  # -e PHOTO_URL=http://service-gateway.gateway.svc.cluster.local/photo/
+  # -e HOST_HEADER=api.yongun.shop    
+

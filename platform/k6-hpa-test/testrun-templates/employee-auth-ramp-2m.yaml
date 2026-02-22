@@ -21,14 +21,15 @@ spec:
         cpu: "1"
         memory: 2Gi
 
+  # 사전에 USERS=12000 MODE=extend ./hpa-test/seed-auth-users.sh 과 같이 미리 계정을 추가해야 합니다.
+  # 2분동안 100명씩 로그인을 시도하는 경우.
   arguments: >
     -e TEST_MODE=auth_ramp
-    -e USERS=1000
     -e DURATION=2m
     -e TIMEOUT=10s
-    -e LOGIN_RATE=8.33
+    -e LOGIN_RATE=100
     -e LOGIN_PREALLOCATED_VUS=200
-    -e LOGIN_MAX_VUS=1000
+    -e LOGIN_MAX_VUS=500
     -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
     -e AUTH_LOGIN_PATH=/auth/login
     -e USER_PREFIX=k6_user_
