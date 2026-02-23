@@ -18,6 +18,23 @@ spec:
         - path:
             type: PathPrefix
             value: /auth
+      filters:
+        # 프론트(yongun.shop)에서 api.yongun.shop/auth 로 로그인 요청 시 CORS 허용
+        - type: CORS
+          cors:
+            allowOrigins:
+              - "https://yongun.shop"
+              - "http://yongun.shop"
+              - "https://www.yongun.shop"
+              - "http://www.yongun.shop"
+            allowMethods:
+              - GET
+              - POST
+              - OPTIONS
+            allowHeaders:
+              - "Content-Type"
+              - "Authorization"
+            allowCredentials: true
       backendRefs:
         - group: ""
           kind: Service
