@@ -1,0 +1,28 @@
+# Envoy Gateway SecurityPolicy: yongun.shop 프론트에서 api.yongun.shop/auth 호출 시 CORS 허용
+# (로그인/회원가입 등 auth API가 브라우저에서 동작하도록)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: auth-cors
+  namespace: auth
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: auth-route
+  cors:
+    allowOrigins:
+      - "https://yongun.shop"
+      - "http://yongun.shop"
+      - "https://www.yongun.shop"
+      - "http://www.yongun.shop"
+    allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+    allowHeaders:
+      - "Content-Type"
+      - "Authorization"
+    allowCredentials: true
