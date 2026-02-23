@@ -52,6 +52,21 @@ spec:
           kind: Deployment
           jsonPointers:
             - /spec/replicas
+        # HPA: .status는 컨트롤러가 채우므로 Git과 비교 제외
+        - group: autoscaling
+          kind: HorizontalPodAutoscaler
+          jsonPointers:
+            - /status
+        # HTTPRoute: .status는 Gateway 컨트롤러가 채우므로 비교 제외
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jsonPointers:
+            - /status
+        # Envoy Gateway 앱: CRD는 클러스터에 설치 시 .status 등이 달라질 수 있음
+        - group: apiextensions.k8s.io
+          kind: CustomResourceDefinition
+          jsonPointers:
+            - /status
       syncPolicy:
         automated:
           prune: true
