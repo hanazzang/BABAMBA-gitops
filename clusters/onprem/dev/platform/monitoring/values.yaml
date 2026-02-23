@@ -8,27 +8,34 @@ kube-prometheus-stack:
   grafana:
     enabled: true
 
-    # 기본 Prometheus 데이터소스 1개만 사용 (중복 default 제거로 Grafana 기동 오류 방지)
-    defaultDatasourceEnabled: true  # false
+    # 차트 기본 자동 추가 비활성화 후, default 1개만 명시해 중복 오류 방지
+    defaultDatasourceEnabled: false
 
     service:
       type: NodePort
       nodePort: 32300
 
-    # 추가 데이터소스만 명시 (default는 차트 기본 Prometheus 1개)
     datasources:
       datasources.yaml:
         apiVersion: 1
         datasources:
-        # - name: Prometheus
-        #   type: prometheus
-        #   uid: prometheus
-        #   # 우리가 고정한 짧은 이름(kps)을 정확하게 명시
-        #   url: http://kps-prometheus.monitoring.svc:9090
-        #   access: proxy
-        #   isDefault: true
-        #   jsonData:
-        #     timeInterval: 30s
+        - name: Prometheus
+          type: prometheus
+          uid: prometheus
+          url: http://kps-prometheus.monitoring.svc:9090
+          access: proxy
+          isDefault: true
+          jsonData:
+            timeInterval: 30s
+        - name: Alertmanager
+          type: alertmanager
+          uid: alertmanager
+          url: http://kps-alertmanager.monitoring.svc:9093
+          access: proxy
+          isDefault: false
+          jsonData:
+            handleGrafanaManagedAlerts: false
+            implementation: prometheus
         - name: Loki
           type: loki
           uid: loki
