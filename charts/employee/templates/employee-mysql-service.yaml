@@ -1,0 +1,27 @@
+# 외부 MySQL(192.168.1.50:3306)을 employee 네임스페이스에서
+# employee-mysql:3306 으로 접근할 수 있게 하는 Service + Endpoints
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: employee-mysql
+  namespace: employee
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+      name: mysql
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: employee-mysql
+  namespace: employee
+subsets:
+  - addresses:
+      - ip: {{ .Values.externalDatabase.host | quote }}
+    ports:
+      - port: {{ .Values.externalDatabase.port }}
+        protocol: TCP
+        name: mysql
