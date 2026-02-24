@@ -6,6 +6,8 @@ metadata:
 spec:
   parallelism: 10
   cleanup: post
+  paused: false
+  quiet: false
 
   script:
     configMap:

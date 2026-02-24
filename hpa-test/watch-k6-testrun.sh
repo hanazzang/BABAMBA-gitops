@@ -24,6 +24,7 @@ fi
 NS_K6="${NS_K6:-k6}"
 INTERVAL="${INTERVAL:-2}"
 POD_TAIL="${POD_TAIL:-12}"
+LOG_TAIL="${LOG_TAIL:-40}"
 
 watch -n "${INTERVAL}" "
 echo \"=== TESTRUN (${NS_K6}/${name}) ===\"
@@ -33,6 +34,11 @@ echo
 
 echo \"=== JOBS/PODS (k6 ns) ===\"
 kubectl -n \"${NS_K6}\" get jobs,pods -o wide 2>/dev/null | tail -n \"${POD_TAIL}\" || true
+echo
+
+echo \"=== RUNNER LOGS (tail) ===\"
+# k6 출력은 runner 파드 로그에 남습니다. (cleanup=post면 완료 후 리소스/로그가 삭제될 수 있어 실행 중에 보는 걸 권장)
+kubectl -n \"${NS_K6}\" logs -l \"k6_cr=${name}\" --tail=\"${LOG_TAIL}\" --max-log-requests=20 2>/dev/null || true
 echo
 
 echo \"=== RECENT EVENTS (k6 ns) ===\"
