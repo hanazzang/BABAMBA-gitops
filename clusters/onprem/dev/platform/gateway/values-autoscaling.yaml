@@ -102,11 +102,13 @@ keda:
           100 *
           (
             sum(
-              rate(container_cpu_usage_seconds_total{
-                namespace="{{ .Values.envoyProxy.namespace }}",
-                pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",
-                container="envoy"
-              }[2m])
+              max by (pod, container) (
+                rate(container_cpu_usage_seconds_total{
+                  namespace="{{ .Values.envoyProxy.namespace }}",
+                  pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",
+                  container="envoy"
+                }[2m])
+              )
             )
             /
             sum(
@@ -134,11 +136,13 @@ keda:
     #       100 *
     #       (
     #         sum(
-    #           container_memory_working_set_bytes{
-    #             namespace="{{ .Values.envoyProxy.namespace }}",
-    #             pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",
-    #             container="envoy"
-    #           }
+    #           max by (pod, container) (
+    #             container_memory_working_set_bytes{
+    #               namespace="{{ .Values.envoyProxy.namespace }}",
+    #               pod=~"{{ (.Values.envoyProxy.deploymentName | default .Values.envoyProxy.name) }}-.*",
+    #               container="envoy"
+    #             }
+    #           )
     #         )
     #         /
     #         sum(

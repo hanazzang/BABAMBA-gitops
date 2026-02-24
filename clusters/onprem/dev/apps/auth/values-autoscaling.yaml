@@ -86,7 +86,16 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",container!="POD"}[2m]))
+              sum by (pod) (
+                max by (pod, container) (
+                  rate(container_cpu_usage_seconds_total{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "auth-server.name" . }}-.*",
+                    container=~".+",
+                    container!="POD"
+                  }[2m])
+                )
+              )
               /
               sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",resource="cpu",unit="core"})
             )
@@ -102,7 +111,16 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",container!="POD"})
+              sum by (pod) (
+                max by (pod, container) (
+                  container_memory_working_set_bytes{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "auth-server.name" . }}-.*",
+                    container=~".+",
+                    container!="POD"
+                  }
+                )
+              )
               /
               sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "auth-server.name" . }}-.*",resource="memory",unit="byte"})
             )

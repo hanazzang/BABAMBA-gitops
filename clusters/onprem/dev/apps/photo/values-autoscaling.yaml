@@ -72,7 +72,16 @@ keda:
           avg(
             100 *
             (
-              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",container!="POD"}[2m]))
+              sum by (pod) (
+                max by (pod, container) (
+                  rate(container_cpu_usage_seconds_total{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "photo-server.fullname" . }}-.*",
+                    container=~".+",
+                    container!="POD"
+                  }[2m])
+                )
+              )
               /
               sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",resource="cpu",unit="core"})
             )
@@ -82,13 +91,22 @@ keda:
     - type: prometheus
       metricType: Value
       metadata:
-        serverAddress: http://onprem-dev-kube-prometheus-prometheus.monitoring.svc:9090
+        serverAddress: http://kps-prometheus.monitoring.svc:9090
         metricName: photo_mem_util_percent
         query: >
           avg(
             100 *
             (
-              sum by (pod) (container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",container!="POD"})
+              sum by (pod) (
+                max by (pod, container) (
+                  container_memory_working_set_bytes{
+                    namespace="{{ .Release.Namespace }}",
+                    pod=~"{{ include "photo-server.fullname" . }}-.*",
+                    container=~".+",
+                    container!="POD"
+                  }
+                )
+              )
               /
               sum by (pod) (kube_pod_container_resource_requests{namespace="{{ .Release.Namespace }}",pod=~"{{ include "photo-server.fullname" . }}-.*",resource="memory",unit="byte"})
             )

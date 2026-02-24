@@ -183,11 +183,14 @@ keda:
               100 *
               (
                 sum by (pod) (
-                  rate(container_cpu_usage_seconds_total{
-                    namespace="{{ .Release.Namespace }}",
-                    pod=~"{{ include "employee-server.fullname" . }}-get-.*",
-                    container!="POD"
-                  }[2m])
+                  max by (pod, container) (
+                    rate(container_cpu_usage_seconds_total{
+                      namespace="{{ .Release.Namespace }}",
+                      pod=~"{{ include "employee-server.fullname" . }}-get-.*",
+                      container=~".+",
+                      container!="POD"
+                    }[2m])
+                  )
                 )
                 /
                 sum by (pod) (
@@ -213,11 +216,14 @@ keda:
               100 *
               (
                 sum by (pod) (
-                  container_memory_working_set_bytes{
-                    namespace="{{ .Release.Namespace }}",
-                    pod=~"{{ include "employee-server.fullname" . }}-get-.*",
-                    container!="POD"
-                  }
+                  max by (pod, container) (
+                    container_memory_working_set_bytes{
+                      namespace="{{ .Release.Namespace }}",
+                      pod=~"{{ include "employee-server.fullname" . }}-get-.*",
+                      container=~".+",
+                      container!="POD"
+                    }
+                  )
                 )
                 /
                 sum by (pod) (

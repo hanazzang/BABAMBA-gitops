@@ -24,6 +24,11 @@ NS_AUTH="${NS_AUTH:-auth}"
 AUTH_BASE="${AUTH_BASE:-http://auth-server-stable.auth.svc:5001}"
 AUTH_REGISTER_PATH="${AUTH_REGISTER_PATH:-/auth/register}"
 
+# seeding 안정화 옵션(일시적 5xx/네트워크 튐 대응)
+RETRIES="${RETRIES:-2}"                 # 실패 시 추가 재시도 횟수(총 시도 = 1 + RETRIES)
+RETRY_SLEEP_MS="${RETRY_SLEEP_MS:-50}"  # 재시도 간 sleep (ms)
+FAIL_TOLERANCE="${FAIL_TOLERANCE:-0}"   # 허용 실패 건수(기본 0 = 1건이라도 실패하면 Job 실패)
+
 # 결정론적 계정 규칙
 # 예: USER_PREFIX=k6_user_, PASS_PREFIX=k6_pass_, USER_PAD=6 -> k6_user_000001 / k6_pass_000001
 USER_PREFIX="${USER_PREFIX:-k6_user_}"
@@ -48,6 +53,80 @@ need_cmd kubectl
 echo "[INFO] running seed Job ${JOB_NAME} (MODE=${MODE}, USERS=${USERS}) (calls ${AUTH_BASE}${AUTH_REGISTER_PATH})..."
 kubectl -n "${NS_K6}" delete job "${JOB_NAME}" --ignore-not-found >/dev/null 2>&1 || true
 
+SEED_SCRIPT="$(cat <<'SH'
+set -euo pipefail
+ok=0
+exists=0
+fail=0
+i=0
+while [ "$i" -lt "${USERS}" ]; do
+  i=$((i+1))
+  suffix=$(printf "%0*d" "${USER_PAD}" "$i")
+  u="${USER_PREFIX}${suffix}"
+  p="${PASS_PREFIX}${suffix}"
+  payload=$(printf '{"username":"%s","password":"%s"}' "$u" "$p")
+
+  attempt=0
+  code="000"
+  last_body=""
+  while :; do
+    resp="/tmp/seed_resp_${$}.json"
+    code=$(curl -sS -o "${resp}" -w "%{http_code}" \
+      --max-time 10 \
+      -X POST "${AUTH_BASE}${AUTH_REGISTER_PATH}" \
+      -H "Content-Type: application/json" \
+      -d "$payload" || echo "000")
+    last_body="$(cat "${resp}" 2>/dev/null || true)"
+    rm -f "${resp}" || true
+
+    # BABAMBA auth_server는 "중복"을 400으로 반환합니다(409 아님).
+    # - {"detail":"이미 존재하는 아이디입니다."}
+    if [ "$code" = "400" ]; then
+      case "$last_body" in
+        *"이미 존재"*) code="409" ;;
+      esac
+    fi
+
+    case "$code" in
+      200|201|409)
+        break
+        ;;
+      5*|000)
+        if [ "$attempt" -ge "${RETRIES}" ]; then
+          break
+        fi
+        attempt=$((attempt+1))
+        sleep "$(awk "BEGIN { printf \"%.3f\", ${RETRY_SLEEP_MS}/1000 }")"
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  case "$code" in
+    200|201)
+      ok=$((ok+1))
+      ;;
+    409)
+      exists=$((exists+1))
+      ;;
+    *)
+      fail=$((fail+1))
+      # 바디가 너무 길면 잡음이 커서 200자만 노출
+      short_body="$(printf "%s" "$last_body" | head -c 200)"
+      echo "[WARN] register failed: idx=$i user=$u code=$code attempts=$((attempt+1)) body=${short_body}"
+      ;;
+  esac
+done
+echo "[RESULT] ok=$ok exists=$exists fail=$fail total=$i"
+if [ "$fail" -gt "${FAIL_TOLERANCE}" ]; then
+  echo "[ERROR] some registrations failed. check AUTH_REGISTER_PATH or auth behavior."
+  exit 1
+fi
+SH
+)"
+
 kubectl -n "${NS_K6}" apply -f - <<EOF
 apiVersion: batch/v1
 kind: Job
@@ -68,6 +147,12 @@ spec:
               value: "${AUTH_REGISTER_PATH}"
             - name: USERS
               value: "${USERS}"
+            - name: RETRIES
+              value: "${RETRIES}"
+            - name: RETRY_SLEEP_MS
+              value: "${RETRY_SLEEP_MS}"
+            - name: FAIL_TOLERANCE
+              value: "${FAIL_TOLERANCE}"
             - name: USER_PREFIX
               value: "${USER_PREFIX}"
             - name: PASS_PREFIX
@@ -77,43 +162,7 @@ spec:
           command: ["sh", "-lc"]
           args:
             - |
-              set -euo pipefail
-              ok=0
-              exists=0
-              fail=0
-              i=0
-              while [ "$i" -lt "${USERS}" ]; do
-                i=$((i+1))
-                suffix=$(printf "%0*d" "${USER_PAD}" "$i")
-                u="${USER_PREFIX}${suffix}"
-                p="${PASS_PREFIX}${suffix}"
-                # username/password payload은 login과 동일한 형태를 가정
-                payload=$(printf '{"username":"%s","password":"%s"}' "$u" "$p")
-                code=$(curl -sS -o /dev/null -w "%{http_code}" \
-                  --max-time 10 \
-                  -X POST "${AUTH_BASE}${AUTH_REGISTER_PATH}" \
-                  -H "Content-Type: application/json" \
-                  -d "$payload" || echo "000")
-                case "$code" in
-                  200|201)
-                    ok=$((ok+1))
-                    ;;
-                  409)
-                    # already exists
-                    exists=$((exists+1))
-                    ;;
-                  *)
-                    fail=$((fail+1))
-                    echo "[WARN] register failed: idx=$i user=$u code=$code"
-                    ;;
-                esac
-              done
-              echo "[RESULT] ok=$ok exists=$exists fail=$fail total=$i"
-              # 실패가 있으면 일단 실패로 처리(원하면 FAIL_TOLERANCE로 완화 가능)
-              if [ "$fail" -gt 0 ]; then
-                echo "[ERROR] some registrations failed. check AUTH_REGISTER_PATH or auth behavior."
-                exit 1
-              fi
+$(printf '%s\n' "${SEED_SCRIPT}" | sed 's/^/              /')
 EOF
 
 kubectl -n "${NS_K6}" wait --for=condition=complete "job/${JOB_NAME}" --timeout="${WAIT_TIMEOUT}"

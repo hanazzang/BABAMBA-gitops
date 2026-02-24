@@ -86,7 +86,7 @@ echo \"ns=${NS} workload=${WORKLOAD}\"
 echo
 
 echo \"=== SCALERS ===\"
-if [[ \"${mode}\" == \"hpa\" ]]; then
+if [ \"${mode}\" = \"hpa\" ]; then
   kubectl -n \"${NS}\" get hpa \"${HPA}\" -o wide 2>/dev/null || true
   kubectl -n \"${NS}\" get scaledobject 2>/dev/null || true
 else
