@@ -33,14 +33,16 @@ ApplicationSet이 Application spec을 다시 덮어쓸 수 있으니, **applicat
 
 ```bash
 # 현재 replicas 기록(나중에 복구용)
-kubectl -n argocd get deploy argocd-application-controller argocd-applicationset-controller
+kubectl -n argocd get deploy argocd-applicationset-controller
+kubectl -n argocd get deploy argocd-application-controller 2>/dev/null || kubectl -n argocd get sts argocd-application-controller
 
 # 리컨실 중단
-kubectl -n argocd scale deploy argocd-application-controller --replicas=0
 kubectl -n argocd scale deploy argocd-applicationset-controller --replicas=0
+kubectl -n argocd scale deploy argocd-application-controller --replicas=0 2>/dev/null || kubectl -n argocd scale sts argocd-application-controller --replicas=0
 
 # 확인
-kubectl -n argocd get deploy argocd-application-controller argocd-applicationset-controller
+kubectl -n argocd get deploy argocd-applicationset-controller
+kubectl -n argocd get deploy argocd-application-controller 2>/dev/null || kubectl -n argocd get sts argocd-application-controller
 ```
 
 ### 시나리오 전환 + Helm 반영 (photo + gateway)
@@ -62,12 +64,15 @@ helm upgrade --install onprem-dev-gateway ./platform/gateway \
 ### 실행
 ```bash
 kubectl -n k6 delete testrun photo-only --ignore-not-found
-kubectl -n k6 apply -f platform/k6-hpa-test/testrun-templates/photo-only.yaml
+./hpa-test/run-k6-testrun.sh platform/k6-hpa-test/testrun-templates/photo-only.yaml
 ```
 
 ### 관찰
 ```bash
 ./hpa-test/watch-k6-testrun.sh photo-only
+
+# (선택) runner 로그를 실시간으로 길게 보기(k6 콘솔 출력)
+kubectl -n k6 logs -f -l k6_cr=photo-only --max-log-requests=20 --tail=50
 
 ./hpa-test/watch-app-scaling.sh photo hpa
 ./hpa-test/watch-app-scaling.sh photo keda
@@ -79,7 +84,7 @@ kubectl -n k6 apply -f platform/k6-hpa-test/testrun-templates/photo-only.yaml
 ### 재실행
 ```bash
 kubectl -n k6 delete testrun photo-only --ignore-not-found
-kubectl -n k6 apply -f platform/k6-hpa-test/testrun-templates/photo-only.yaml
+./hpa-test/run-k6-testrun.sh platform/k6-hpa-test/testrun-templates/photo-only.yaml
 ```
 
 ### 종료/원복(권장)
@@ -99,9 +104,10 @@ helm upgrade --install onprem-dev-gateway ./platform/gateway \
 
 ### (선택) ArgoCD 재개
 ```bash
-kubectl -n argocd scale deploy argocd-application-controller --replicas=1
 kubectl -n argocd scale deploy argocd-applicationset-controller --replicas=1
-kubectl -n argocd get deploy argocd-application-controller argocd-applicationset-controller
+kubectl -n argocd scale deploy argocd-application-controller --replicas=1 2>/dev/null || kubectl -n argocd scale sts argocd-application-controller --replicas=1
+kubectl -n argocd get deploy argocd-applicationset-controller
+kubectl -n argocd get deploy argocd-application-controller 2>/dev/null || kubectl -n argocd get sts argocd-application-controller
 ```
 
 ---
