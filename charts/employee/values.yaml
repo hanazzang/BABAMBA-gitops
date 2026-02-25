@@ -21,7 +21,12 @@ service:
   port: 5002        # [중요] Employee 서버 포트
   targetPort: 5002
 
+# WRITE 시 Photo 서비스 호출 URL (앱 기본값 photo-service-active는 클러스터 서비스명 photo-server-active와 불일치)
+photoServiceUrl: "http://photo-server-active.photo.svc.cluster.local:5003"
+
 envFrom:
+  - configMapRef:
+      name: app-config
   - configMapRef:
       name: db-config
   - configMapRef:

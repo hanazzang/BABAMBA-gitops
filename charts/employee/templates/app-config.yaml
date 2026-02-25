@@ -1,0 +1,12 @@
+# WRITE 시 사진 업로드용 Photo 서비스 URL (앱 기본값 photo-service-active는 클러스터 서비스명과 불일치)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    {{- include "employee-server.labels" . | nindent 4 }}
+data:
+  PHOTO_SERVICE_URL: {{ .Values.photoServiceUrl | default "http://photo-server-active.photo.svc.cluster.local:5003" | quote }}

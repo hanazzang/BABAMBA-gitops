@@ -55,6 +55,46 @@ dst_for_target() {
   esac
 }
 
+# 시나리오 전환 시 HPA ↔ KEDA ScaledObject 충돌 방지: 기존 스케일러를 먼저 삭제
+# - 0: 둘 다 삭제 (어떤 스케일러도 사용 안 함)
+# - 1: ScaledObject 삭제 (HPA만 사용)
+# - 2: HPA 삭제 (ScaledObject만 사용)
+delete_scaler_conflicts() {
+  local target="$1"
+  local scenario="$2"
+  local ns hpa_name so_name
+  case "${target}" in
+    employee-get)
+      ns="employee"; hpa_name="employee-server-get"; so_name="employee-server-get"
+      ;;
+    employee-write)
+      ns="employee"; hpa_name="employee-server-write"; so_name="employee-server-write"
+      ;;
+    auth)
+      ns="auth"; hpa_name="auth-server-hpa"; so_name="auth-server"
+      ;;
+    photo)
+      ns="photo"; hpa_name="photo-server-hpa"; so_name="photo-server"
+      ;;
+    gateway)
+      ns="gateway"; hpa_name="envoy-gw-infra-dataplane"; so_name="envoy-gw-infra-dataplane"
+      ;;
+    *) return 0 ;;
+  esac
+  case "${scenario}" in
+    0)
+      kubectl -n "${ns}" delete hpa "${hpa_name}" --ignore-not-found 2>/dev/null || true
+      kubectl -n "${ns}" delete scaledobject "${so_name}" --ignore-not-found 2>/dev/null || true
+      ;;
+    1)
+      kubectl -n "${ns}" delete scaledobject "${so_name}" --ignore-not-found 2>/dev/null || true
+      ;;
+    2)
+      kubectl -n "${ns}" delete hpa "${hpa_name}" --ignore-not-found 2>/dev/null || true
+      ;;
+  esac
+}
+
 apply_switch() {
   local target="$1"   # auth|photo|gateway
   local scenario="$2" # 0|1|2
@@ -349,12 +389,15 @@ if [[ ${#DESIRED[@]} -gt 0 ]]; then
 
   if [[ -n "${emp_get}" || -n "${emp_write}" ]]; then
     apply_employee_switch "${emp_get}" "${emp_write}"
+    [[ -n "${emp_get}" ]] && delete_scaler_conflicts "employee-get" "${emp_get}"
+    [[ -n "${emp_write}" ]] && delete_scaler_conflicts "employee-write" "${emp_write}"
   fi
 
   # 2) 나머지 대상 적용(순서 고정)
   for t in auth photo gateway; do
     if [[ -n "${DESIRED[$t]+x}" ]]; then
       apply_switch "${t}" "${DESIRED[$t]}"
+      delete_scaler_conflicts "${t}" "${DESIRED[$t]}"
     fi
   done
 else

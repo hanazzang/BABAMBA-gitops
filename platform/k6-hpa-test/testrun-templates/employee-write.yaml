@@ -25,11 +25,11 @@ spec:
 
   arguments: >
     -e TEST_MODE=employee_write
-    -e USERS=1000
+    -e USERS=200
     -e DURATION=2m
     -e TIMEOUT=10s
-    -e WRITES_PER_SEC=0.2
-    -e PHOTO_PCT=90
+    -e WRITES_PER_SEC=2
+    -e PHOTO_PCT=100
     -e POST_THEN_GET_PCT=0
     -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
     -e AUTH_LOGIN_PATH=/auth/login

@@ -111,12 +111,12 @@ keda:
   pollingInterval: 10
   # scale-to-zero(0으로 축소) 구간에서 특히 의미가 큰 완충값입니다.
   # minReplicas>0이면 1~N 스케일인은 주로 HPA behavior(scaleDown)가 결정합니다.
-  cooldownPeriod: 120
+  cooldownPeriod: 10  # 테스트를 위해 낮게잡음. 120
 
   write:
     enabled: false
   get:
-    enabled: false
+    enabled: true
     triggers:
       # 1️⃣ RPS (빠른 반응 트리거) - GET 전용
       - type: prometheus

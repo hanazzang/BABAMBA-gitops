@@ -63,7 +63,8 @@ helm upgrade --install onprem-dev-auth ./charts/auth \
 helm upgrade --install onprem-dev-photo ./charts/photo \
   -n photo --create-namespace \
   -f ./clusters/onprem/dev/apps/photo/values.yaml \
-  -f ./clusters/onprem/dev/apps/photo/values-autoscaling.yaml
+  -f ./clusters/onprem/dev/apps/photo/values-autoscaling.yaml \
+  --take-ownership
 
 helm upgrade --install onprem-dev-gateway ./platform/gateway \
   -n gateway --create-namespace \
