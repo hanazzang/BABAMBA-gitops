@@ -3,6 +3,9 @@
 # - 1: autoscaling.enabled=true,  keda.enabled=false
 # - 2: autoscaling.enabled=true,  keda.enabled=true  (RPS/p95)
 
+# dev: 캐너리 1단계(100%)만 사용 → 롤아웃이 바로 완료되어 파드가 금방 뜸
+rollout:
+  fastPromotion: true
 
 resources:
   requests:

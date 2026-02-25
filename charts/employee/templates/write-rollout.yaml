@@ -47,6 +47,10 @@ spec:
             namespace: employee
 
       steps:
+        {{- $fast := (index (.Values.rollout | default dict) "fastPromotion") | default false }}
+        {{- if $fast }}
+        - setWeight: 100
+        {{- else }}
         - setWeight: 5
         - pause: { duration: 5m }
         - setWeight: 10
@@ -60,3 +64,4 @@ spec:
         - setWeight: 90
         - pause: { duration: 10m }
         - setWeight: 100
+        {{- end }}

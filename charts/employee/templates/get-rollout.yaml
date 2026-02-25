@@ -48,8 +48,12 @@ spec:
             httpRoute: employee-get-route
             namespace: employee
 
-      # ✅ 수동 프로모트: 각 단계에서 멈추고, 직접 promote 해야 다음 단계로 진행
+      # fastPromotion=true면 1단계(100%)만 사용 → 바로 풀 롤아웃
       steps:
+        {{- $fast := (index (.Values.rollout | default dict) "fastPromotion") | default false }}
+        {{- if $fast }}
+        - setWeight: 100
+        {{- else }}
         - setWeight: 5
         - pause: { duration: 5m }
         - setWeight: 10
@@ -63,3 +67,4 @@ spec:
         - setWeight: 90
         - pause: { duration: 10m }
         - setWeight: 100
+        {{- end }}
