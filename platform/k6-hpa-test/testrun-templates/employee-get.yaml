@@ -6,8 +6,8 @@ metadata:
 spec:
   parallelism: 10
   cleanup: post
-  paused: false
-  quiet: false
+  paused: "false"
+  quiet: "false"
 
   script:
     configMap:
@@ -25,7 +25,7 @@ spec:
 
   arguments: >
     -e TEST_MODE=employee_get
-    -e USERS=1000
+    -e USERS=300
     -e DURATION=2m
     -e TIMEOUT=10s
     -e GETS_PER_SEC=5

@@ -1,4 +1,6 @@
 {{- if and .Values.autoscaling.enabled (.Values.autoscaling.get.enabled | default true) (ne (include "employee-server.kedaEnabled.get" .) "true") }}
+{{- $getCpu := (get .Values.autoscaling.get "cpu") | default dict }}
+{{- $getMem := (get .Values.autoscaling.get "memory") | default dict }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -28,11 +30,11 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.get.cpu.averageUtilization | default .Values.autoscaling.cpu.averageUtilization }}
+          averageUtilization: {{ default .Values.autoscaling.cpu.averageUtilization (get $getCpu "averageUtilization") }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.get.memory.averageUtilization | default .Values.autoscaling.memory.averageUtilization }}
+          averageUtilization: {{ default .Values.autoscaling.memory.averageUtilization (get $getMem "averageUtilization") }}
 {{- end }}

@@ -83,9 +83,12 @@ const tinyPngB64 =
 const tinyPngBytes = encoding.b64decode(tinyPngB64, "std");
 
 // HTTPS로 Gateway 호출 시 클러스터 내부/자체서명 인증서면 TLS 검증 스킵 (옵션 또는 GATEWAY_URL이 https://일 때)
+// 주의: `gatewayUrl && ...`는 gatewayUrl이 ""(빈 문자열)이면 boolean이 아니라 ""를 반환할 수 있어,
+// k6 옵션 파싱에서 `json: cannot unmarshal string into ... null.Bool`로 실패합니다.
+// 따라서 skipTLS는 항상 boolean이 되도록 강제합니다.
 const skipTLS =
   String(__ENV.INSECURE_SKIP_TLS_VERIFY || "").toLowerCase() === "true" ||
-  (gatewayUrl && gatewayUrl.startsWith("https://"));
+  (!!gatewayUrl && gatewayUrl.startsWith("https://"));
 
 export const options = {
   insecureSkipTLSVerify: skipTLS,

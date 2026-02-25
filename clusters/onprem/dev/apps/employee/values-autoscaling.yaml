@@ -116,7 +116,7 @@ keda:
   write:
     enabled: false
   get:
-    enabled: true 
+    enabled: false
     triggers:
       # 1️⃣ RPS (빠른 반응 트리거) - GET 전용
       - type: prometheus

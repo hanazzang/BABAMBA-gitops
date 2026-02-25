@@ -33,7 +33,7 @@ kubectl -n \"${NS_K6}\" get testrun \"${name}\" -o jsonpath='{.status.stage}' 2>
 echo
 
 echo \"=== JOBS/PODS (k6 ns) ===\"
-kubectl -n \"${NS_K6}\" get jobs,pods -o wide 2>/dev/null | tail -n \"${POD_TAIL}\" || true
+kubectl -n \"${NS_K6}\" get jobs,pods -l \"k6_cr=${name}\" -o wide 2>/dev/null || true
 echo
 
 echo \"=== RUNNER LOGS (tail) ===\"

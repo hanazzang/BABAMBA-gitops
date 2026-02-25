@@ -6,8 +6,8 @@ metadata:
 spec:
   parallelism: 10
   cleanup: post
-  paused: false
-  quiet: false
+  paused: "false"
+  quiet: "false"
 
   script:
     configMap:
@@ -26,7 +26,7 @@ spec:
   # 사전에 USERS=1000 MODE=extend ./hpa-test/seed-auth-users.sh 과 같이 미리 계정을 추가해야 합니다.
   arguments: >
     -e TEST_MODE=auth_spike
-    -e USERS=1000
+    -e USERS=100
     -e TIMEOUT=10s
     -e AUTH_BASE=http://auth-server-stable.auth.svc:5001
     -e AUTH_LOGIN_PATH=/auth/login
