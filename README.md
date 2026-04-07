@@ -7,42 +7,6 @@ gitops/
 │   ├── root-onprem-prod.yaml
 │   └── root-cloud-prod.yaml
 │
-├── applications/                       # 🧱 고정 설치 (Application)
-│   ├── onprem-dev/
-│   │   ├── envoy-gateway.yaml
-│   │   ├── redis.yaml
-│   │   ├── vault.yaml
-│   │   ├── cloudflared.yaml
-│   │   ├── argocd-rollouts.yaml
-│   │   ├── prometheus.yaml
-│   │   ├── grafana.yaml
-│   │   ├── loki.yaml
-│   │   ├── fluentbit.yaml
-│   │   └── k6.yaml
-│   │
-│   ├── onprem-prod/
-│   │   ├── envoy-gateway.yaml
-│   │   ├── redis.yaml
-│   │   ├── vault.yaml
-│   │   ├── cloudflared.yaml
-│   │   ├── argocd-rollouts.yaml
-│   │   ├── prometheus.yaml
-│   │   ├── grafana.yaml
-│   │   ├── loki.yaml
-│   │   └── fluentbit.yaml
-│   │
-│   └── cloud-prod/
-│       ├── envoy-gateway.yaml
-│       ├── redis.yaml
-│       ├── vault.yaml
-│       ├── cloudflared.yaml
-│       ├── argocd-rollouts.yaml
-│       ├── prometheus.yaml
-│       ├── grafana.yaml
-│       ├── loki.yaml
-│       ├── fluentbit.yaml
-│       └── karpenter.yaml
-│
 ├── applicationsets/                   # 🔁 반복 생성 (ApplicationSet)
 │   ├── onprem-dev/
 │   │   ├── apps.yaml
