@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloud-prod-root-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hanazzang/BABAMBA-gitops
+    targetRevision: argos-test
+    path: .
+    directory:
+      recurse: true
+      include: '{applicationsets/cloud-prod/*.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-warmup
+  namespace: common
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: redis-warmup
+  template:
+    metadata:
+      labels:
+        app: redis-warmup
+    spec:
+      containers:
+        - name: warmup
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

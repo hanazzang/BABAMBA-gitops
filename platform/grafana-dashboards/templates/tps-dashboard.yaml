@@ -36,7 +36,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
           "id": 99,
-          "title": "🚀 비즈니스 핵심 지표 (Business Key Metrics)",
+          "title": "비즈니스 핵심 지표",
           "type": "row",
           "collapsed": false
         },
@@ -72,7 +72,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "🔥 실시간 서비스 TPS (Total Throughput)",
+          "title": "실시간 서비스 TPS (Total Throughput)",
           "type": "timeseries",
           "description": "서버가 초당 처리하고 있는 전체 트래픽 양입니다."
         },
@@ -111,7 +111,7 @@ data:
               "refId": "B"
             }
           ],
-          "title": "✅ 성공 vs 실패 (Success vs Error)",
+          "title": "성공 / 실패",
           "type": "timeseries",
           "description": "트래픽 중 에러(5xx)가 얼마나 섞여 있는지 비교합니다."
         }

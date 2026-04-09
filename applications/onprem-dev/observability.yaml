@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hanazzang/BABAMBA-gitops
-    targetRevision: monitoring2
+    targetRevision: argos-cloud
 
     path: platform/grafana-dashboards/templates
 

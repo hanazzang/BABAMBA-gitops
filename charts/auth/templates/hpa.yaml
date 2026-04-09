@@ -1,17 +1,23 @@
-{{- if .Values.autoscaling.enabled }}
+{{- if and .Values.autoscaling.enabled (not .Values.keda.enabled) }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "auth-server.fullname" . }}-hpa
+  annotations:
+    # HPA가 Rollout을 스케일 대상으로 참조하므로, Rollout(sync-wave 2) 이후에 생성되도록 순서를 뒤로 미룹니다.
+    argocd.argoproj.io/sync-wave: "3"
   labels:
     {{- include "auth-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: {{ include "auth-server.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  {{- with .Values.autoscaling.behavior }}
+  behavior:{{ toYaml . | nindent 4 }}
+  {{- end }}
   metrics:
     - type: Resource
       resource:

@@ -7,9 +7,14 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/hanazzang/BABAMBA-gitops
-        revision: monitoring2
+        revision: argos-cloud
         directories:
           - path: clusters/onprem/dev/platform/*
+          - path: clusters/onprem/dev/platform/keda
+            exclude: true
+          - path: clusters/onprem/dev/platform/monitoring
+            exclude: true
+
   template:
     metadata:
       name: 'onprem-dev-{{path.basename}}'
@@ -17,19 +22,34 @@ spec:
       project: default
       sources:
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: monitoring2
+          targetRevision: argos-cloud
           path: platform/{{path.basename}}
           helm:
+            ignoreMissingValueFiles: true
             valueFiles:
               - $values/platform/{{path.basename}}/values.yaml
               - $values/{{path}}/values.yaml
+              - $values/{{path}}/values-autoscaling.yaml
+              - $values/{{path}}/values-scenario.yaml
         - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-          targetRevision: monitoring2
+          targetRevision: argos-cloud
           ref: values
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
+      ignoreDifferences:
+        - group: monitoring.coreos.com
+          kind: PodMonitor
+          jqPathExpressions:
+            - .spec.podMetricsEndpoints[]?.relabelings
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

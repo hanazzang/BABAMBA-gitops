@@ -10,10 +10,26 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyService:
+        {{- if .Values.envoyProxy.service.type }}
         type: {{ .Values.envoyProxy.service.type | quote }}
+        {{- end }}
+
+        {{- with .Values.envoyProxy.service.annotations }}
+        annotations:
+{{ toYaml . | nindent 10 }}
+        {{- end }}
+
+        {{- with .Values.envoyProxy.service.loadBalancerIP }}
+        loadBalancerIP: {{ . | quote }}
+        {{- end }}
 
       envoyDeployment:
+        {{- with .Values.envoyProxy.deploymentName }}
+        name: {{ . | quote }}
+        {{- end }}
+        {{- if and (not .Values.keda.enabled) (not .Values.autoscaling.enabled) }}
         replicas: {{ .Values.envoyProxy.replicas }}
+        {{- end }}
         pod:
           {{- if .Values.envoyProxy.podLabels }}
           labels:

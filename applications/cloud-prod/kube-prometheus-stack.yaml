@@ -22,7 +22,7 @@ spec:
     
     # 2. values 파일을 제공하는 Git 소스
     - repoURL: https://github.com/hanazzang/BABAMBA-gitops
-      targetRevision: monitoring2
+      targetRevision: argos-test
       ref: values
   
   syncPolicy:
@@ -30,4 +30,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true
       - ServerSideApply=true # 대용량 리소스 처리를 위해 활성화

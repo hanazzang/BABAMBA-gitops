@@ -10,6 +10,9 @@ service:
   name: "redis-cache-service"
   port: 6379
 
+labels:
+  app: "redis-cache"
+  
 resources:
   requests:
     memory: 256Mi

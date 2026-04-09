@@ -12,20 +12,20 @@ spec:
       name: service-gateway
       namespace: gateway
   hostnames:
-    - api.yxngjxe.store
+    - api.yongun.shop
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/auth
+            value: /auth
       backendRefs:
-          - group: ""
-            kind: Service
-            name: auth-server-stable
-            port: 5001
-            weight: 100
-          - group: ""
-            kind: Service
-            name: auth-server-canary
-            port: 5001
-            weight: 0
+        - group: ""
+          kind: Service
+          name: {{ include "auth-server.fullname" . }}-stable
+          port: 5001
+          weight: 100
+        - group: ""
+          kind: Service
+          name: {{ include "auth-server.fullname" . }}-canary
+          port: 5001
+          weight: 0

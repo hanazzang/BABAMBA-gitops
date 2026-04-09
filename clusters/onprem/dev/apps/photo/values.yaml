@@ -1,7 +1,7 @@
 # ===== 기본 스케일 =====
 replicaCount: 1
 
-# ===== 이미지 (환경별 핵심 값) =====
+# ===== 이미지 =====
 image:
   repository: ghcr.io/hanazzang/photo_service
   tag: "sha-29544c2"
@@ -16,27 +16,19 @@ service:
   port: 5003
   targetPort: 5003
 
-# ===== 환경변수 주입 (사전 생성된 리소스) =====
-#envFrom:
-#  configMapRef:
-#    name: db-config
-#  secretRef:
-#    name: db-credentials
+ingress:
+  host: api.yongun.shop
 
-# ===== 리소스 (dev 기준) =====
-resources:
-  requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
-    cpu: "200m"
-    memory: "512Mi"
+# ===== 스토리지 (NFS RWX로 수정) =====
+# 이제 여러 노드에서 동시에 접근 가능(RWX)하며, 데이터가 VM에 안전하게 저장됩니다.
+persistence:
+  enabled: true
+  storageClassName: "nfs-client"
+  accessMode: ReadWriteMany  # [중요] 여러 파드가 동시에 쓸 수 있게 RWX로 설정
+  size: 1Gi
+  mountPath: /app/static/uploads
 
-# ===== HPA =====
-autoscaling:
-  minReplicas: 1
-  maxReplicas: 3
-  cpu:
-    averageUtilization: 50
-  memory:
-    averageUtilization: 70
+# [NFS 실제 정보] - PV 템플릿에서 참조할 값들
+pvName: "photo-service-pv"
+nfsServer: "192.168.13.187"  # <--- 여기에 NFS VM IP를 꼭 넣어주세요!
+nfsPath: "/data/nfs/photo"   # <--- NFS 서버에서 설정한 경로

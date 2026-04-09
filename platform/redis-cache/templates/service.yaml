@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.namespace | default "common" }}
 spec:
   selector:
-    app: {{ .Values.service.name }}
+    app: {{ .Values.labels.app }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 6379

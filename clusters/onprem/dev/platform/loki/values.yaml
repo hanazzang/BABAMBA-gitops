@@ -1,0 +1,34 @@
+# onprem-dev: 클러스터 내부 Loki (fluent-bit가 전송)
+# (ApplicationSet destination namespace와 일치)
+namespace: loki
+
+# Loki gateway를 NodePort로 노출 (MetalLB 없이 사용)
+gateway:
+  enabled: true
+  type: NodePort
+  nodePort: 31000
+
+config:
+  common:
+    replication_factor: 1
+    ring:
+      kvstore:
+        store: inmemory
+
+persistence:
+  enabled: false
+  useEmptyDir: true
+  emptyDirSize: 10Gi
+
+# Loki를 eks-worker1(라벨: loki=monitoring-loki)로 고정
+# - 먼저 노드에 라벨을 부여하세요:
+#   kubectl label node eks-worker1 loki=monitoring-loki --overwrite
+# - 해당 노드에 taint dedicated=monitoring:NoSchedule 이 있으면 tolerations 필요
+nodeSelector:
+  loki: monitoring-loki
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "monitoring"
+    effect: "NoSchedule"
+

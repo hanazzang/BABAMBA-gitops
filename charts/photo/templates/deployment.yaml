@@ -2,6 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: {{ include "photo-service.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     {{- include "photo-service.labels" . | nindent 4 }}
 spec:
@@ -16,28 +18,40 @@ spec:
         {{- include "photo-service.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ include "photo-service.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
-          volumeMounts:
-            - name: photo-storage
-              mountPath: {{ .Values.persistence.mountPath }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          
+          # [스토리지 마운트]
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: photo-storage
+              mountPath: {{ .Values.persistence.mountPath | default "/app/static/uploads" }}
+          {{- end }}
+      
+      # [볼륨 정의]
       volumes:
         - name: photo-storage
+          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "photo-service.fullname" . }}-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+
+  # [Blue/Green 전략]
   strategy:
     blueGreen:
       activeService: {{ include "photo-service.fullname" . }}-active
       previewService: {{ include "photo-service.fullname" . }}-preview
-
-      # 새 버전(Preview) 올려놓고 확인 후 Promote로 스위치
       autoPromotionEnabled: false
-
-      # 스위치 후 기존 ReplicaSet을 잠깐 유지(롤백 빠르게)
       scaleDownDelaySeconds: 30

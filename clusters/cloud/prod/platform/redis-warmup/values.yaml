@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: jaewoozzang/redis-warmup
+  tag: "1.1"
+  pullPolicy: Always
+
+resources: {}
+
+envFrom:
+  - configMapRef:
+      name: db-config
+
+# resources:
+#   limits:
+#     cpu: "500m"
+#     memory: "512Mi"
+#   requests:
+#     cpu: "100m"
+#     memory: "128Mi"

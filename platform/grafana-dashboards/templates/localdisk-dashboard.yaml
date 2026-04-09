@@ -32,7 +32,7 @@ data:
         {
           "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
           "id": 99,
-          "title": "🚦 현재 상태 요약 (Real-time Snapshot)",
+          "title": "🚦 현재 상태 요약",
           "type": "row",
           "collapsed": false
         },

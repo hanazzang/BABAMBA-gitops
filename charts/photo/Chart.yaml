@@ -1,6 +1,6 @@
 apiVersion: v2
 name: photo-service
-description: Photo Service Helm chart
+description: Photo Service Helm chart (CephFS Support)
 type: application
-version: 0.1.0
+version: 0.3.0
 appVersion: "v2.02"

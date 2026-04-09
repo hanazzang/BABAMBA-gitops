@@ -1,0 +1,178 @@
+# 다른 클러스터에서 사용할 Fluent Bit 설정
+# 현재 클러스터의 Loki로 로그를 전송합니다
+
+image:
+  repository: fluent/fluent-bit
+  tag: 2.2.0
+  pullPolicy: IfNotPresent
+
+namespace: monitoring
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# 배포 설정
+tolerations:
+  - operator: Exists
+
+# 메트릭 설정
+metrics:
+  enabled: true
+  port: 2020
+  
+# 로그 수집 설정
+service:
+  flush: 5
+  logLevel: info
+  workers: 2
+
+# 로그 수집 대상
+input:
+  tail:
+    path: /var/log/containers/*.log
+    # (노이즈 감소) fluent-bit 자신의 컨테이너 로그는 제외
+    exclude_path: /var/log/containers/*fluent-bit*.log
+    parser: docker
+    tag: kube.*
+    mem_buf_limit: 50MB
+    skip_long_lines: true
+    db: /var/fluent-bit/state/flb_kube.db
+    refresh_interval: 5
+    rotate_wait: 5
+
+# Kubernetes 메타데이터 추가 및 필터링
+filters:
+  kubernetes:
+    enabled: true
+    keepLog: false
+    mergeLog: true
+    # 모든 네임스페이스의 로그 수집
+    allowNamespaces:
+      - default
+      - monitoring
+      - argocd
+      - ingress-nginx
+
+  # Lua 필터: 의미 필드 추출
+  lua:   
+    enabled: true
+    call: extract_operational_fields
+    script: |
+      function extract_operational_fields(tag, ts, record)
+        local log = record["log"] or ""
+
+        -- namespace allowlist (원하는 범위만 Loki로 전송)
+        local allow = {
+          ["default"] = true,
+          ["monitoring"] = true,
+          ["argocd"] = true,
+          ["ingress-nginx"] = true
+        }
+        local ns = record["kubernetes"] and record["kubernetes"]["namespace_name"]
+        if ns and (allow[ns] ~= true) then
+          return -1, ts, record
+        end
+
+        -- level 추출
+        if string.match(log, "ERROR") or string.match(log, "Error") or string.match(log, "error") then
+          record["level"] = "ERROR"
+        elseif string.match(log, "WARN") or string.match(log, "Warn") or string.match(log, "warn") then
+          record["level"] = "WARN"
+        elseif string.match(log, "DEBUG") or string.match(log, "Debug") or string.match(log, "debug") then
+          record["level"] = "DEBUG"
+        else
+          record["level"] = "INFO"
+        end
+
+        -- HTTP 상태 코드
+        local status_match =
+          string.match(log, '"[A-Z]+ [^"]+ HTTP/[%d%.]+" (%d%d%d) ') -- nginx/common
+          or string.match(log, '" (%d%d%d) ')
+        if status_match then
+          record["status_code"] = status_match
+        end
+
+        -- 메서드/경로
+        local method_match =
+          string.match(log, '^(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD) ')
+          or string.match(log, '"(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD) ')
+        if method_match then
+          record["method"] = method_match
+        end
+        local path_match =
+          string.match(log, '"[A-Z]+ ([^%s]+) HTTP/[%d%.]+"') -- nginx/common
+          or string.match(log, ' [A-Z]+ ([^%s]+) ')
+        if path_match then
+          record["path"] = path_match
+        end
+
+        -- 응답 시간(ms)
+        local duration_match =
+          (function()
+            local rt = string.match(log, 'request_time=([%d%.]+)') or string.match(log, 'request_time:([%d%.]+)')
+            if rt then return tostring(tonumber(rt) * 1000) end
+            return nil
+          end)()
+          or string.match(log, 'executed in (%d+%.?%d*) ms')
+        if duration_match then
+          record["duration_ms"] = tonumber(duration_match)
+        end
+
+        -- 서비스명(app 라벨)
+        local app = record["kubernetes"] and record["kubernetes"]["labels"] and record["kubernetes"]["labels"]["app"]
+        if app then
+          record["service"] = app
+        end
+
+        -- 클러스터 식별자 추가 (다른 클러스터에서 수집된 로그임을 표시)
+        record["source_cluster"] = os.getenv("CLUSTER_NAME") or "external"
+        record["env"] = "external"
+
+        return 2, ts, record
+      end
+
+  # 최소 정제: annotations 제거
+  recordModifier:
+    enabled: true
+    remove:
+      - kubernetes.annotations
+
+# 외부 클러스터의 Loki로 로그 전송
+output:
+  stdout:
+    enabled: false
+    match: kube.*
+  loki:
+    host: 192.168.1.147  # onprem Loki gateway(LoadBalancer, MetalLB 할당 IP)
+    port: 3100           # Loki gateway Service port
+    match: kube.*
+    # (선택) Loki push API 경로 (기본값: /loki/api/v1/push)
+    uri: /loki/api/v1/push
+    # (선택) HTTPS/TLS 사용 (EKS LoadBalancer/NLB에서 TLS 종료 시 true 권장)
+    tls: false
+    tlsVerify: true
+    # (선택) Loki gateway에 BasicAuth를 붙인 경우
+    httpUser: ""
+    httpPassword: ""
+    # (선택) 멀티테넌시 사용 시 tenant_id (X-Scope-OrgID)
+    tenantID: ""
+    labels:
+      - job=fluent-bit-external
+      - namespace=$kubernetes['namespace_name']
+      - pod=$kubernetes['pod_name']
+      - service=$service
+      - level=$level
+      - source_cluster=$source_cluster
+      - env=external
+    removeKeys:
+      - kubernetes
+      - stream
+      - time
+    compress: gzip
+    # (권장) Auto_Kubernetes_Labels를 켜면 라벨이 과도하게 늘어 비용/성능에 불리할 수 있음
+    autoKubernetesLabels: ""

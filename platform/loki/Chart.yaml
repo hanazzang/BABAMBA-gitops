@@ -1,0 +1,7 @@
+apiVersion: v2
+name: loki
+description: Loki is a horizontally-scalable, highly-available log aggregation system
+type: application
+version: 0.1.0
+appVersion: "2.9.2"
+

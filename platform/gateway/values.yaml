@@ -14,15 +14,34 @@ gateway:
             matchLabels:
               gateway: user
 
+    - name: https
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: user
+      tls:
+        mode: Terminate
+        secretName: api-yong-tls   # gateway ns에 Secret 필요 (공통)
+
 envoyProxy:
   name: envoy-gw-infra
   namespace: gateway
+  deploymentName: envoy-gw-infra
   replicas: 2
+
   service:
-    type: LoadBalancer
-    loadBalancerIP: 192.168.1.199
+    # ✅ 환경별(clusters)에서만 설정하도록 비워둠
+    type: null
+    loadBalancerIP: null
+    annotations: null
+
   podLabels:
     app: envoy-gw-dataplane
+
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
@@ -30,3 +49,50 @@ envoyProxy:
       labelSelector:
         matchLabels:
           app.kubernetes.io/component: proxy
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 20
+  cpu:
+    # HPA(metrics-server) 기준: requests 대비 평균 CPU 사용률(%)
+    averageUtilization: 85
+  memory:
+    # HPA(metrics-server) 기준: requests 대비 평균 Memory 사용률(%)
+    averageUtilization: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+
+monitoring:
+  prometheusReleaseLabel: ""
+  podMonitor:
+    enabled: false
+    path: /stats/prometheus
+    interval: 15s
+    scrapeTimeout: 10s
+    targetPort: 19000
+
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  triggers: []

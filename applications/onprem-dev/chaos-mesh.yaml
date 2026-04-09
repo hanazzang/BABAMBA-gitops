@@ -12,20 +12,44 @@ spec:
     helm:
       values: |
         controllerManager:
-            nodeSelector:
-              node-role.kubernetes.io/control-plane: "" # 마스터 노드에 배치
-            tolerations:
-              - key: "node-role.kubernetes.io/control-plane"
-                operator: "Exists"
-                effect: "NoSchedule"
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: ""
+          tolerations:
+            - key: "node-role.kubernetes.io/control-plane"
+              operator: "Exists"
+              effect: "NoSchedule"
         chaosDaemon:
-          runtime: containerd # 사용하는 런타임에 맞게 수정 (containerd/docker)
+          runtime: containerd
           socketPath: /run/containerd/containerd.sock
         dashboard:
           enabled: true
+        # [중요] cert-manager 미사용 시 자체 인증서 사용 명시 (선택사항이나 명시 권장)
+        webhook:
+          certManager:
+            enabled: false 
   destination:
     server: https://kubernetes.default.svc
     namespace: chaos-mesh
+  
+  # --------------------------------------------------------
+  # [핵심 수정 사항] CA Bundle 변경사항 무시 설정
+  # --------------------------------------------------------
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      name: chaos-mesh-mutation
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+        - /webhooks/1/clientConfig/caBundle
+        - /webhooks/2/clientConfig/caBundle
+        - /webhooks/3/clientConfig/caBundle
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: chaos-mesh-validation
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+  # --------------------------------------------------------
+
   syncPolicy:
     automated:
       prune: true
